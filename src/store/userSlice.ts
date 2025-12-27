@@ -5,7 +5,9 @@ type User = {
   name: string;
   email: string;
   role: "ADMIN" | "GENERAL";
+  profilePic?: string;
 };
+
 
 type UserState = {
   user: User | null;

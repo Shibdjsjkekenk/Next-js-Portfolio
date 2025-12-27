@@ -8,10 +8,10 @@ export async function GET() {
   try {
     await connectDB();
 
-    const cookieStore = cookies();      // ✅ FIX
+    const cookieStore = cookies(); 
     const token = (await cookieStore).get("token")?.value;
 
-    if (!token) {
+  if (!token) {
       return NextResponse.json(
         { message: "Unauthorized", success: false },
         { status: 401 }

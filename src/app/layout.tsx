@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify"; 
+import { ToastContainer } from "react-toastify";
+import ReduxProvider from "@/store/ReduxProvider";
+import CurrentUser from "@/components/admin-view/CurrentUser";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,14 +30,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+
+        {/* Redux + Current User Init */}
+        <ReduxProvider>
+          <CurrentUser />
+          {children}
+        </ReduxProvider>
+
+        {/* Toast */}
         <ToastContainer
           position="top-right"
-          autoClose={3000}
+          autoClose={2000}
+          hideProgressBar={false}
           newestOnTop
           closeOnClick
           pauseOnHover
           draggable
+          theme="light"
         />
       </body>
     </html>
