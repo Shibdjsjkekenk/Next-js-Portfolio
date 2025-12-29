@@ -8,9 +8,16 @@ export default function useLogout() {
   const dispatch = useDispatch();
 
   const logout = async () => {
-    await api.post("/api/auth/logout");
+    try {
+      // clear cookies on server
+      await api.post("/api/auth/logout");
+    } catch {
+      // ignore api failure (still logout client-side)
+    }
+    // clear redux state
     dispatch(clearUser());
-    window.location.replace("/login");
+    // REMOVE ADMIN PAGE FROM HISTORY (MOST IMPORTANT)
+    window.location.replace("/login?reason=logout");
   };
 
   return logout;

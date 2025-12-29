@@ -1,22 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaEye } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import SummaryApi from "@/common/SummaryApi";
 import loginIcons from "@/assets/signin.gif";
 import ROLE from "@/common/role";
+import { toast } from "react-toastify";
+import { useSearchParams } from "next/navigation";
+
 
 export default function LoginPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const searchParams = useSearchParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,19 +32,21 @@ export default function LoginPage() {
       const response = await api({
         url: SummaryApi.signIn.url,
         method: SummaryApi.signIn.method,
-        data: {
-          email,
-          password,
-        },
+        data: { email, password },
+        withCredentials: true,
       });
 
       if (response.data?.success) {
-        const role = response.data?.user?.role;
+        // 🔥 clear ?reason from URL
+        window.history.replaceState({}, "", "/login");
 
+        localStorage.setItem("loginToast", "Login successful 🎉");
+
+        const role = response.data?.user?.role;
         if (role === ROLE.ADMIN) {
-          router.push("/admin-panel");
+          window.location.href = "/admin-panel/all-users";
         } else {
-          router.push("/");
+          window.location.href = "/";
         }
       }
 
@@ -52,10 +59,29 @@ export default function LoginPage() {
     }
   };
 
+useEffect(() => {
+  const reason = searchParams.get("reason");
+
+  if (reason === "logout") {
+    toast.success("Logged out successfully 👋");
+
+    // 🔥 URL CLEAN (IMPORTANT)
+    window.history.replaceState({}, "", "/login");
+  }
+
+  if (reason === "unauthorized") {
+    toast.error("You don’t have access to this page ❌");
+
+    // 🔥 URL CLEAN
+    window.history.replaceState({}, "", "/login");
+  }
+}, [searchParams]);
+
+
+
   return (
     <section id="login">
       <div className="container mx-auto p-4">
-
         <div className="bg-slate-100 p-5 w-full max-w-sm mx-auto mt-20 mb-16 rounded-xl login-shadow">
 
           {/* Icon */}
@@ -73,7 +99,6 @@ export default function LoginPage() {
             autoComplete="off"
             className="pt-6 flex flex-col gap-4"
           >
-
             {/* Email */}
             <div>
               <label className="font-medium">Email :</label>
@@ -81,7 +106,6 @@ export default function LoginPage() {
                 <input
                   type="email"
                   placeholder="Enter email"
-                  autoComplete="off"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -95,7 +119,7 @@ export default function LoginPage() {
               <label className="font-medium">Password :</label>
               <div className="bg-white mt-2 p-2 flex items-center rounded-[11px]">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} // 🔥 TOGGLE
                   placeholder="Enter password"
                   autoComplete="new-password"
                   value={password}
@@ -104,9 +128,12 @@ export default function LoginPage() {
                   className="w-full bg-transparent outline-none"
                 />
 
-                {/* UI same rakha – functionality baad me add kar sakte ho */}
-                <span className="text-xl text-gray-600 cursor-pointer">
-                  <FaEye />
+                {/* 👁️ TOGGLE ICON */}
+                <span
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="text-xl text-gray-600 cursor-pointer ml-2"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </span>
               </div>
 
@@ -118,7 +145,7 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            {/* Error Message */}
+            {/* Error */}
             {error && (
               <p className="text-red-600 text-sm text-center">{error}</p>
             )}
@@ -133,7 +160,6 @@ export default function LoginPage() {
                 {loading ? "Logging in..." : "Login"}
               </button>
             </div>
-
           </form>
 
           {/* Footer */}
@@ -147,7 +173,6 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
-
       </div>
     </section>
   );

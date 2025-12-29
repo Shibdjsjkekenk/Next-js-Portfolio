@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import os from "os";
-import axios from "axios";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import { signToken } from "@/lib/jwt";
@@ -35,7 +34,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // login tracking (same as MERN)
+    // 🔹 LOGIN TRACKING
     user.loginCount += 1;
     user.logins.push({
       deviceName: os.hostname(),
@@ -48,41 +47,35 @@ export async function POST(req: Request) {
     });
     await user.save();
 
-    // 🔐 JWT
+    // 🔐 JWT TOKEN
     const token = signToken({
       id: user._id,
       email: user.email,
       role: user.role,
     });
 
+    //  SERVER SIDE REDIRECT (IMPORTANT)
     const res = NextResponse.json({
       success: true,
-      message: "Login successful",
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
         role: user.role,
       },
     });
 
-    // 🍪 TOKEN COOKIE
     res.cookies.set("token", token, {
       httpOnly: true,
+      path: "/",
       maxAge: 60 * 60 * 24,
-      sameSite: "strict",
-      path: "/",              // 🔥 ADD THIS
     });
 
-    // 🍪 ROLE COOKIE
     res.cookies.set("role", user.role, {
       httpOnly: true,
+      path: "/",
       maxAge: 60 * 60 * 24,
-      sameSite: "strict",
-      path: "/",              // 🔥 ADD THIS
     });
 
     return res;
+
   } catch (err: any) {
     return NextResponse.json(
       { message: err.message || "Server error" },

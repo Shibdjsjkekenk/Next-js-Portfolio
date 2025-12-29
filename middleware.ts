@@ -5,7 +5,6 @@ import ROLE from "@/common/role";
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
   const role = request.cookies.get("role")?.value;
-
   const { pathname } = request.nextUrl;
 
   /* -------------------- API ROUTES -------------------- */
@@ -14,28 +13,38 @@ export function middleware(request: NextRequest) {
   }
 
   /* -------------------- PUBLIC ROUTES -------------------- */
-  const publicRoutes = [
-    "/login",
-    "/sign-up",
-    "/forgot-password",
-  ];
+  const publicRoutes = ["/login", "/sign-up", "/forgot-password"];
 
-  if (publicRoutes.includes(pathname)) {
+  if (publicRoutes.some((route) => pathname.startsWith(route))) {
+    if (token) {
+      if (role === ROLE.ADMIN) {
+        return NextResponse.redirect(
+          new URL("/admin-panel", request.url)
+        );
+      }
+      return NextResponse.redirect(new URL("/", request.url));
+    }
     return NextResponse.next();
   }
 
   /* -------------------- ADMIN PANEL (STRICT) -------------------- */
-  if (pathname === "/admin-panel" || pathname.startsWith("/admin-panel/")) {
-    // ❌ Not logged in OR not admin → login
+  if (pathname.startsWith("/admin-panel")) {
     if (!token || role !== ROLE.ADMIN) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      const loginUrl = new URL("/login", request.url);
+
+      // 🔥 PASS REASON FOR TOAST
+      loginUrl.searchParams.set("reason", "unauthorized");
+
+      return NextResponse.redirect(loginUrl);
     }
     return NextResponse.next();
   }
 
   /* -------------------- OTHER PROTECTED ROUTES -------------------- */
   if (!token) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("reason", "unauthorized");
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
@@ -44,9 +53,7 @@ export function middleware(request: NextRequest) {
 /* -------------------- MATCHER -------------------- */
 export const config = {
   matcher: [
-    "/admin-panel",
     "/admin-panel/:path*",
     "/profile/:path*",
-    "/", // optional: home protection if needed
   ],
 };
