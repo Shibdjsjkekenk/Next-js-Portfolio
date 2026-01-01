@@ -52,7 +52,7 @@ export default function Sidebar({
     ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
     md:translate-x-0
     ${isOpen ? "md:w-60" : "md:w-16"}
-    w-75
+    w-68
   `}
     >
       {/* ===== TOP BAR (DESKTOP) ===== */}
@@ -230,12 +230,12 @@ function MenuItem({
   href={href}
   onClick={onClick}
   className={`
-    flex items-center gap-2
+    flex items-center gap-4
     h-10 md:h-11
     mb-[2px] md:mb-1
     px-3
     rounded-md
-    text-[13px] md:text-[15px]
+    text-[16px] md:text-[15px]
     leading-none
     text-white transition
     ${active ? "bg-red-500" : "hover:bg-[#5BB3CB]"}
