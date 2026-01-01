@@ -52,7 +52,7 @@ export default function Sidebar({
     ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
     md:translate-x-0
     ${isOpen ? "md:w-60" : "md:w-16"}
-    w-64
+    w-75
   `}
     >
       {/* ===== TOP BAR (DESKTOP) ===== */}
@@ -98,10 +98,12 @@ export default function Sidebar({
       </div>
 
       {/* ===== MENU ===== */}
-      <nav className="
-  flex-1 grid gap-1 text-sm overflow-y-auto min-h-0
+<nav className="
+  flex-1 flex flex-col
+  text-sm overflow-y-auto min-h-0
   px-2 py-2 md:p-3
 ">
+
         <MenuItem
           icon={<MdOutlineDashboardCustomize />}
           label="Dashboard"
@@ -224,16 +226,32 @@ function MenuItem({
   onClick?: () => void;
 }) {
   return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className={`flex items-center gap-3 px-3 py-2 rounded-[10px]
-        text-[16px] text-white transition
-        ${active ? "bg-red-500" : "hover:bg-[#5BB3CB]"}
-      `}
-    >
-      <span className="text-[18px]">{icon}</span>
-      {isOpen && <span className="font-medium">{label}</span>}
+<Link
+  href={href}
+  onClick={onClick}
+  className={`
+    flex items-center gap-2
+    h-10 md:h-11
+    mb-[2px] md:mb-1
+    px-3
+    rounded-md
+    text-[13px] md:text-[15px]
+    leading-none
+    text-white transition
+    ${active ? "bg-red-500" : "hover:bg-[#5BB3CB]"}
+  `}
+>
+
+      <span className="text-[15px] md:text-[17px] leading-none shrink-0">
+        {icon}
+      </span>
+
+      {isOpen && (
+        <span className="font-medium leading-none">
+          {label}
+        </span>
+      )}
     </Link>
   );
 }
+

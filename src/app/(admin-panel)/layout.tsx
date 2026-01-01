@@ -92,7 +92,7 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="h-screen overflow-hidden bg-gray-100">
       {/* ================= MOBILE TOP BAR ================= */}
       <header
         className="md:hidden fixed top-0 left-0 right-0 h-14
@@ -120,7 +120,7 @@ export default function DashboardLayout({
         />
       )}
 
-      <div className="flex pt-14 md:pt-0">
+      <div className="flex pt-14 md:pt-0 h-full">
         <Sidebar
           user={user}
           isOpen={isOpen}
@@ -135,7 +135,7 @@ export default function DashboardLayout({
           className="
     flex-1 px-4 py-3 bg-[#f9f9010f]
     min-h-0
-    h-[calc(100vh-3.5rem)] md:h-auto
+    h-full
     overflow-y-auto
   "
         >
