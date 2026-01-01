@@ -48,7 +48,7 @@ export default function Sidebar({
     fixed md:static z-50 transition-transform duration-300
     left-0
     top-14 md:top-0
-    h-[calc(100vh-3.5rem)] md:h-screen
+    h-[calc(100svh-3.5rem)] md:h-screen
     ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
     md:translate-x-0
     ${isOpen ? "md:w-60" : "md:w-16"}
@@ -98,7 +98,10 @@ export default function Sidebar({
       </div>
 
       {/* ===== MENU ===== */}
-      <nav className="flex-1 p-3 grid gap-1 text-sm overflow-y-auto min-h-0">
+      <nav className="
+  flex-1 grid gap-1 text-sm overflow-y-auto min-h-0
+  px-2 py-2 md:p-3
+">
         <MenuItem
           icon={<MdOutlineDashboardCustomize />}
           label="Dashboard"
@@ -187,12 +190,13 @@ export default function Sidebar({
         </div>
 
         {/* FOOTER */}
-        <div className="border-t border-white/30 py-2">
+        <div className="border-t border-white/30 py-1 md:py-2">
           <Marquee
-            speed={40}
+            speed={35}
             gradient={false}
-            className="text-xs text-white opacity-80"
+            className="text-[10px] md:text-xs text-white opacity-80 leading-none"
           >
+
             <span className="mr-16">Copyright © 2025, Tiwari&apos;s</span>
             <span className="mr-16">Copyright © 2025, Tiwari&apos;s</span>
           </Marquee>
