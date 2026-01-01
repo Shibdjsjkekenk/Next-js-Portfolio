@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import useLogout from "@/hooks/useLogout";
 import Sidebar from "@/components/admin-view/Sidebar";
+import { usePathname } from "next/navigation";
 
 export default function DashboardLayout({
   children,
@@ -18,10 +19,11 @@ export default function DashboardLayout({
   const [isOpen, setIsOpen] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const logout = useLogout();
+  const pathname = usePathname();
 
   const { user, loading } = useSelector((state: RootState) => state.user);
 
-  /* ADMIN GUARD */
+  /* ================= ADMIN GUARD ================= */
   useEffect(() => {
     if (loading) return;
     if (!user || user.role !== "ADMIN") {
@@ -29,7 +31,7 @@ export default function DashboardLayout({
     }
   }, [user, loading]);
 
-  /* LOGIN TOAST */
+  /* ================= LOGIN TOAST ================= */
   useEffect(() => {
     const msg = localStorage.getItem("loginToast");
     if (msg) {
@@ -38,7 +40,25 @@ export default function DashboardLayout({
     }
   }, []);
 
-  /* LOGOUT (AS IT IS) */
+  /* ================= MOBILE BODY SCROLL LOCK ================= */
+  useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileOpen]);
+
+  /* ================= AUTO CLOSE SIDEBAR ON ROUTE CHANGE ================= */
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [pathname]);
+
+  /* ================= LOGOUT ================= */
   const handleLogout = () => {
     toast.info(
       <div>
@@ -73,17 +93,26 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* MOBILE TOP BAR */}
-      <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-[#04728f] text-white flex items-center gap-3 px-4 z-50 shadow">
+      {/* ================= MOBILE TOP BAR ================= */}
+      <header
+        className="md:hidden fixed top-0 left-0 right-0 h-14
+                   bg-[#04728f] text-white flex items-center
+                   gap-3 px-4 z-50 shadow"
+      >
         <button
-          onClick={() => setIsMobileOpen((p) => !p)}
+          onClick={() => setIsMobileOpen(p => !p)}
           className="p-2 rounded bg-white/20"
         >
           <GrUnorderedList />
         </button>
-        <Image src={logo} alt="logo" className="w-28 h-8 object-contain" />
+        <Image
+          src={logo}
+          alt="logo"
+          className="w-28 h-8 object-contain"
+        />
       </header>
 
+      {/* ================= MOBILE OVERLAY ================= */}
       {isMobileOpen && (
         <div
           onClick={() => setIsMobileOpen(false)}
@@ -101,8 +130,17 @@ export default function DashboardLayout({
           onLogout={handleLogout}
         />
 
-        {/* RIGHT SIDE CONTENT */}
-        <main className="flex-1 px-4 py-3 bg-[#f9f9010f]">{children}</main>
+        {/* ================= CONTENT ================= */}
+        <main
+          className="
+    flex-1 px-4 py-3 bg-[#f9f9010f]
+    min-h-0
+    h-[calc(100vh-3.5rem)] md:h-auto
+    overflow-y-auto
+  "
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ import { RiTimelineView } from "react-icons/ri";
 import { FaRegCircleUser } from "react-icons/fa6";
 import { GrUnorderedList } from "react-icons/gr";
 import { BiLogOut } from "react-icons/bi";
+import { IoClose } from "react-icons/io5"; // ✅ ADD
 import Marquee from "react-fast-marquee";
 import logo from "@/assets/logo-white.png";
 import type { RootState } from "@/store/store";
@@ -38,20 +39,23 @@ export default function Sidebar({
   setIsMobileOpen,
   onLogout,
 }: SidebarProps) {
-  const pathname = usePathname(); // ✅ CURRENT ROUTE
+  const pathname = usePathname();
 
   return (
     <aside
       className={`
-        bg-[#04728f] min-h-screen flex flex-col customShadow
-        fixed md:static z-50 transition-all duration-300
-        ${isMobileOpen ? "left-0" : "-left-full"}
-        md:left-0
-        ${isOpen ? "md:w-60" : "md:w-16"}
-        w-60
-      `}
+    bg-[#04728f] flex flex-col customShadow
+    fixed md:static z-50 transition-transform duration-300
+    left-0
+    top-14 md:top-0
+    h-[calc(100vh-3.5rem)] md:h-screen
+    ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
+    md:translate-x-0
+    ${isOpen ? "md:w-60" : "md:w-16"}
+    w-64
+  `}
     >
-      {/* ===== TOP BAR ===== */}
+      {/* ===== TOP BAR (DESKTOP) ===== */}
       <div className="hidden md:flex h-14 px-3 items-center gap-3 border-b border-white/30">
         <button
           onClick={() => setIsOpen(prev => !prev)}
@@ -62,13 +66,17 @@ export default function Sidebar({
 
         {isOpen && (
           <Link href="/admin-panel">
-            <Image src={logo} alt="logo" className="w-32 h-10 object-contain" />
+            <Image
+              src={logo}
+              alt="logo"
+              className="w-32 h-10 object-contain"
+            />
           </Link>
         )}
       </div>
 
       {/* ===== PROFILE ===== */}
-      <div className="py-2 px-3 flex items-center gap-3 border-b border-white/30">
+      <div className="py-3 px-3 flex items-center gap-3 border-b border-white/30">
         {user?.profilePic ? (
           <img
             src={user.profilePic}
@@ -90,7 +98,7 @@ export default function Sidebar({
       </div>
 
       {/* ===== MENU ===== */}
-      <nav className="flex-1 p-3 grid text-sm gap-1">
+      <nav className="flex-1 p-3 grid gap-1 text-sm overflow-y-auto min-h-0">
         <MenuItem
           icon={<MdOutlineDashboardCustomize />}
           label="Dashboard"
@@ -164,25 +172,33 @@ export default function Sidebar({
         />
       </nav>
 
-      {/* ===== LOGOUT ===== */}
-      <div className="px-3 pb-2">
-        <div
-          onClick={onLogout}
-          className="flex items-center gap-3 px-3 py-2 rounded-[10px]
-                     text-white text-[16px] bg-[#5bb3cb] cursor-pointer"
-        >
-          <BiLogOut size={20} />
-          {isOpen && <span className="font-medium">Logout</span>}
+      {/* ===== BOTTOM SECTION ===== */}
+      <div className="mt-auto">
+        {/* LOGOUT */}
+        <div className="px-3 pb-3">
+          <div
+            onClick={onLogout}
+            className="flex items-center gap-3 px-3 py-2 rounded-[10px]
+                 text-white text-[16px] bg-[#5bb3cb] cursor-pointer"
+          >
+            <BiLogOut size={20} />
+            {isOpen && <span className="font-medium">Logout</span>}
+          </div>
+        </div>
+
+        {/* FOOTER */}
+        <div className="border-t border-white/30 py-2">
+          <Marquee
+            speed={40}
+            gradient={false}
+            className="text-xs text-white opacity-80"
+          >
+            <span className="mr-16">Copyright © 2025, Tiwari&apos;s</span>
+            <span className="mr-16">Copyright © 2025, Tiwari&apos;s</span>
+          </Marquee>
         </div>
       </div>
 
-      {/* ===== FOOTER ===== */}
-      <div className="border-t border-white/30 py-2">
-        <Marquee speed={40} gradient={false} className="text-xs text-white opacity-80">
-          <span className="mr-16">Copyright © 2025, Tiwari&apos;s</span>
-          <span className="mr-16">Copyright © 2025, Tiwari&apos;s</span>
-        </Marquee>
-      </div>
     </aside>
   );
 }

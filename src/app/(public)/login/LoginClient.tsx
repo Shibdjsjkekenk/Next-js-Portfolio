@@ -104,7 +104,7 @@ export default function LoginClient() {
                             <label className="font-medium">Password :</label>
                             <div className="bg-white mt-2 p-2 flex items-center rounded-[11px]">
                                 <input
-                                    type={showPassword ? "text" : "password"} // 🔥 TOGGLE
+                                    type={showPassword ? "text" : "password"} 
                                     placeholder="Enter password"
                                     autoComplete="new-password"
                                     value={password}
