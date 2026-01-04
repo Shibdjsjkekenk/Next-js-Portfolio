@@ -19,15 +19,16 @@ const SummaryApi = {
     method: "get",
   },
 
+  update_user_role: {
+    url: "/api/admin/update-user",
+    method: "put",
+  },
+
   delete_user: {
-    url: "/api/admin/user", 
+    url: "/api/admin/delete-user",
     method: "delete",
   },
 
-  update_user: {
-    url: "/api/admin/user", 
-    method: "put",
-  },
 };
 
 export default SummaryApi;

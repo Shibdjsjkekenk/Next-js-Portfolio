@@ -13,18 +13,72 @@ import {
 import type { RootState, AppDispatch } from "@/store/store";
 import Pagination from "@/components/admin-view/Pagination";
 import { FaUsers } from "react-icons/fa";
-
+import ChangeUserRoleModal from "@/components/admin-view/ChangeUserRoleModal";
+import { removeAllUser } from "@/store/allUsersSlice";
 
 const ITEMS_PER_PAGE = 5;
 
 export default function AllUsersPage() {
   const dispatch = useDispatch<AppDispatch>();
+  const [selectedUser, setSelectedUser] = useState<any>(null);
 
   const { list: users, loading, fetchedOnce } = useSelector(
     (state: RootState) => state.allUsers
   );
 
   const [currentPage, setCurrentPage] = useState(1);
+
+  const handleDeleteUser = (userId: string) => {
+    toast(
+      ({ closeToast }) => (
+        <div>
+          <p className="text-sm font-medium mb-3">
+            Are you sure you want to delete this user?
+          </p>
+
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => closeToast()}
+              className="px-3 py-1 text-sm rounded-md border bg-white hover:bg-gray-100"
+            >
+              No
+            </button>
+
+            <button
+              onClick={async () => {
+                try {
+                  const res = await api({
+                    url: SummaryApi.delete_user.url,
+                    method: SummaryApi.delete_user.method,
+                    data: { userId },
+                    withCredentials: true,
+                  });
+
+                  if (res.data?.success) {
+                    dispatch(removeAllUser(userId));
+                    toast.success("User deleted successfully");
+                  }
+                } catch (err: any) {
+                  toast.error(
+                    err.response?.data?.message || "Failed to delete user"
+                  );
+                } finally {
+                  closeToast();
+                }
+              }}
+              className="px-3 py-1 text-sm rounded-md bg-red-600 text-white hover:bg-red-700"
+            >
+              Yes, Delete
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        closeOnClick: false,
+        autoClose: false,
+      }
+    );
+  };
 
   /* ================= FETCH USERS ================= */
   useEffect(() => {
@@ -100,7 +154,18 @@ export default function AllUsersPage() {
           loading={loading}
           fetchedOnce={fetchedOnce}
           startIndex={startIndex}
+          onEdit={(user) => setSelectedUser(user)}
+          onDelete={handleDeleteUser}
         />
+
+        {selectedUser && (
+          <ChangeUserRoleModal
+            user={selectedUser}
+            onClose={() => setSelectedUser(null)}
+          />
+        )}
+
+
       </div>
 
       {/* PAGINATION */}
