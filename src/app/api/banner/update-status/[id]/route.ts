@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Banner from "@/models/Banner";
 
-
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
         await connectDB();
+
+        const { id } = await context.params;
 
         const { isActive } = await req.json();
 
@@ -17,7 +18,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         }
 
         const banner = await Banner.findByIdAndUpdate(
-            params.id,
+            id,
             { isActive },
             { new: true }
         );
@@ -37,7 +38,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     } catch (error: any) {
         return NextResponse.json(
-            { success: false, message: "Error updating status", error: error.message },
+            {
+                success: false,
+                message: "Error updating status",
+                error: error.message,
+            },
             { status: 500 }
         );
     }
