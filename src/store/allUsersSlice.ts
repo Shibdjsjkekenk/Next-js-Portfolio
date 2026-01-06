@@ -11,13 +11,13 @@ export type AllUser = {
 
 type AllUsersState = {
   list: AllUser[];
-  loading: boolean;        // sirf table loading ke liye
-  fetchedOnce: boolean;   // navigation vs hard refresh
+  loading: boolean;     
+  fetchedOnce: boolean;  
 };
 
 const initialState: AllUsersState = {
   list: [],
-  loading: true,          // hard refresh par true
+  loading: true,        
   fetchedOnce: false,
 };
 

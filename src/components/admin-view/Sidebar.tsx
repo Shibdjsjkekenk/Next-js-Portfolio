@@ -16,7 +16,7 @@ import { RiTimelineView } from "react-icons/ri";
 import { FaRegCircleUser } from "react-icons/fa6";
 import { GrUnorderedList } from "react-icons/gr";
 import { BiLogOut } from "react-icons/bi";
-import { IoClose } from "react-icons/io5"; 
+import { IoClose } from "react-icons/io5";
 import Marquee from "react-fast-marquee";
 import logo from "@/assets/logo-white.png";
 import type { RootState } from "@/store/store";
@@ -98,7 +98,7 @@ export default function Sidebar({
       </div>
 
       {/* ===== MENU ===== */}
-<nav className="
+      <nav className="
   flex-1 flex flex-col
   text-sm overflow-y-auto min-h-0
   px-2 py-2 md:p-3
@@ -119,6 +119,15 @@ export default function Sidebar({
           href="/admin-panel/all-users"
           isOpen={isOpen}
           active={pathname.startsWith("/admin-panel/all-users")}
+          onClick={() => setIsMobileOpen(false)}
+        />
+
+        <MenuItem
+          icon={<MdOutlineDashboard />}
+          label="Banner"
+          href="/admin-panel/banner"
+          isOpen={isOpen}
+          active={pathname.startsWith("/admin-panel/banner")}
           onClick={() => setIsMobileOpen(false)}
         />
 
@@ -146,15 +155,6 @@ export default function Sidebar({
           href="/admin-panel/about-us"
           isOpen={isOpen}
           active={pathname.startsWith("/admin-panel/about-us")}
-          onClick={() => setIsMobileOpen(false)}
-        />
-
-        <MenuItem
-          icon={<MdOutlineDashboard />}
-          label="Banner"
-          href="/admin-panel/banner"
-          isOpen={isOpen}
-          active={pathname.startsWith("/admin-panel/banner")}
           onClick={() => setIsMobileOpen(false)}
         />
 
@@ -226,10 +226,10 @@ function MenuItem({
   onClick?: () => void;
 }) {
   return (
-<Link
-  href={href}
-  onClick={onClick}
-  className={`
+    <Link
+      href={href}
+      onClick={onClick}
+      className={`
     flex items-center gap-4
     h-10 md:h-11
     mb-[2px] md:mb-1
@@ -240,7 +240,7 @@ function MenuItem({
     text-white transition
     ${active ? "bg-red-500" : "hover:bg-[#5BB3CB]"}
   `}
->
+    >
 
       <span className="text-[15px] md:text-[17px] leading-none shrink-0">
         {icon}

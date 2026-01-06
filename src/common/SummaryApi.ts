@@ -29,6 +29,35 @@ const SummaryApi = {
     method: "delete",
   },
 
+  create_banner: {
+    url: "/api/banner/create",
+    method: "post",
+  },
+
+  get_all_banners: {
+    url: "/api/banner/get-all",
+    method: "get",
+  },
+
+  get_banner_by_id: (id: string) => ({
+    url: `/api/banner/get/${id}`,
+    method: "get",
+  }),
+
+  update_banner: (id: string) => ({
+    url: `/api/banner/update/${id}`,
+    method: "put",
+  }),
+
+  delete_banner: (id: string) => ({
+    url: `/api/banner/delete/${id}`,
+    method: "delete",
+  }),
+
+  update_banner_status: (id: string) => ({
+    url: `/api/banner/update-status/${id}`,
+    method: "patch",
+  }),
 };
 
 export default SummaryApi;
