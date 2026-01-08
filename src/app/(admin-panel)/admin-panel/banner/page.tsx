@@ -1,191 +1,140 @@
 "use client";
 
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { FaEye, FaEdit, FaTrash, FaImage } from "react-icons/fa";
-import api from "@/lib/axios";
-import SummaryApi from "@/common/SummaryApi";
-import { toast } from "react-toastify";
 import Table from "@/common/Table";
-import {
-    setBanners,
-    setBannersLoading,
-} from "@/store/bannerSlice";
-import type { RootState, AppDispatch } from "@/store/store";
+import ViewBannerModal from "@/components/admin-view/ViewBannerModal";
+import { useBanner } from "@/hooks/useBanner";
 
 export default function BannerPage() {
-    const dispatch = useDispatch<AppDispatch>();
+  const {
+    list: banners,
+    loading,
+    fetchedOnce,
+    getBannerById,
+    selectedBanner,
+    setSelectedBanner,
+    deleteBannerById,
+  } = useBanner();
 
-    const { list: banners, loading, fetchedOnce } = useSelector(
-        (state: RootState) => state.banner
-    );
+  const handleView = async (id: string) => {
+    await getBannerById(id);
+  };
 
-    /* ================= FETCH BANNERS ================= */
-    useEffect(() => {
-        if (!fetchedOnce) {
-            dispatch(setBannersLoading());
+  return (
+    <div className="space-y-4">
 
-            api({
-                url: SummaryApi.get_all_banners.url,
-                method: SummaryApi.get_all_banners.method,
-            })
-                .then((res) => {
-                    if (res.data?.success) {
-                        dispatch(setBanners(res.data.data));
-                    } else {
-                        dispatch(setBanners([]));
-                    }
-                })
-                .catch(() => {
-                    toast.error("Failed to fetch banners");
-                    dispatch(setBanners([]));
-                });
-        }
-    }, [dispatch, fetchedOnce]);
+      {/* HEADER */}
+      <div className="bg-white rounded-xl py-3 px-5 shadow">
+        <h1 className="flex items-center gap-2 font-bold text-gray-800 text-base sm:text-2xl">
+          <FaImage className="text-[#6A38C2]" />
+          Banners
+          <span className="text-xs sm:text-sm text-gray-500">
+            ( Manage website banners )
+          </span>
+        </h1>
+      </div>
 
-    return (
-        <div className="space-y-4">
+      {/* TABLE */}
+      <div className="bg-white rounded-xl shadow overflow-hidden">
 
-            {/* PAGE HEADER */}
+        {loading && banners.length === 0 ? (
+          <Table headers={["No", "Image", "Title", "Paragraph", "Status", "Action"]}>
+            {[1].map((_, index) => (   // 🔥 1 skeleton row
+              <tr key={index} className="animate-pulse">
 
+                <td className="p-2 border">
+                  <div className="h-4 w-6 bg-gray-200 rounded" />
+                </td>
 
-            <div className="bg-white rounded-xl py-3 px-5 shadow">
-                <h1
-                    className="
-      font-bold text-gray-800
-      flex items-center gap-2
-      whitespace-nowrap
-      text-base sm:text-2xl
-    "
-                >
-                    {/* ICON */}
-                    <FaImage className="text-[#6A38C2] text-sm sm:text-xl shrink-0" />
+                <td className="p-2 border">
+                  <div className="w-16 h-10 bg-gray-200 rounded" />
+                </td>
 
-                    {/* TITLE */}
-                    <span>Banners</span>
+                <td className="p-2 border">
+                  <div className="h-4 w-40 bg-gray-200 rounded" />
+                </td>
 
-                    {/* SUB TEXT */}
-                    <span
-                        className="
-        text-xs sm:text-sm
-        text-gray-500
-        truncate
-        max-w-[200px] sm:max-w-none
-      "
+                <td className="p-2 border">
+                  <div className="h-4 w-full max-w-[260px] bg-gray-200 rounded" />
+                </td>
+
+                <td className="p-2 border">
+                  <div className="h-6 w-16 bg-gray-200 rounded-full" />
+                </td>
+
+                <td className="p-2 border">
+                  <div className="flex justify-center gap-2">
+                    <div className="h-8 w-8 bg-gray-200 rounded-full" />
+                    <div className="h-8 w-8 bg-gray-200 rounded-full" />
+                    <div className="h-8 w-8 bg-gray-200 rounded-full" />
+                  </div>
+                </td>
+
+              </tr>
+            ))}
+          </Table>
+        ) : (
+          <Table headers={["No", "Image", "Title", "Paragraph", "Status", "Action"]}>
+            {banners.map((banner, index) => (
+              <tr key={banner._id}>
+                <td className="p-2 border">{index + 1}</td>
+                <td className="p-2 border">
+                  {banner.image ? (
+                    <img
+                      src={banner.image}
+                      className="w-16 h-10 object-cover rounded"
+                    />
+                  ) : "—"}
+                </td>
+                <td className="p-2 border">{banner.title}</td>
+                <td className="p-2 border truncate max-w-[250px]">
+                  {banner.paragraph}
+                </td>
+                <td className="p-2 border">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${banner.isActive
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                      }`}
+                  >
+                    {banner.isActive ? "Active" : "Inactive"}
+                  </span>
+                </td>
+                      <td className="p-2 border">
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      title="View"
+                      onClick={() => handleView(banner._id)}
+                      className="p-2 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
                     >
-                        ( Manage website banners )
-                    </span>
-                </h1>
-            </div>
+                      <FaEye />
+                    </button>
 
+                    <button className="p-2 rounded-full bg-green-100 text-green-700 hover:bg-green-200">
+                      <FaEdit />
+                    </button>
 
-            {/* TABLE */}
-            <div className="bg-white rounded-xl shadow overflow-hidden">
-
-                {/* TABLE LOADING */}
-                {loading && !fetchedOnce ? (
-                    <div className="p-6 animate-pulse">
-                        <div className="h-6 bg-gray-200 rounded w-1/3 mb-4" />
-                        <div className="h-40 bg-gray-200 rounded" />
-                    </div>
-                ) : (
-                    <Table
-                        headers={[
-                            "No",
-                            "Image",
-                            "Title",
-                            "Paragraph",
-                            "Status",
-                            "Action",
-                        ]}
+                    <button
+                      onClick={() => deleteBannerById(banner._id)}
+                      className="p-2 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
                     >
-                        {banners.map((banner, index) => (
-                            <tr
-                                key={banner._id}
-                                className="hover:bg-gray-50 transition"
-                            >
-                                {/* NO */}
-                                <td className="p-2 whitespace-nowrap border">
-                                    {index + 1}
-                                </td>
+                      <FaTrash />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </Table>
+        )}
+      </div>
 
-                                {/* IMAGE */}
-                                <td className="p-2 whitespace-nowrap border">
-                                    {banner.image ? (
-                                        <img
-                                            src={banner.image}
-                                            alt="Banner"
-                                            className="w-16 h-10 object-cover rounded-md border"
-                                        />
-                                    ) : (
-                                        <span className="text-gray-400">—</span>
-                                    )}
-                                </td>
-
-                                {/* TITLE */}
-                                <td className="p-2 whitespace-nowrap border font-medium">
-                                    {banner.title}
-                                </td>
-
-                                {/* PARAGRAPH */}
-                                <td className="p-2 whitespace-nowrap border max-w-[300px] truncate">
-                                    {banner.paragraph}
-                                </td>
-
-                                {/* STATUS */}
-                                <td className="p-2 whitespace-nowrap border">
-                                    <span
-                                        className={`px-3 py-1 rounded-full text-xs font-semibold
-                      ${banner.isActive
-                                                ? "bg-green-100 text-green-700"
-                                                : "bg-red-100 text-red-700"
-                                            }`}
-                                    >
-                                        {banner.isActive ? "Active" : "Inactive"}
-                                    </span>
-                                </td>
-
-                                {/* ACTION */}
-                                <td className="p-2 whitespace-nowrap border">
-                                    <div className="flex items-center gap-2 justify-center">
-                                        <button
-                                            title="View"
-                                            className="p-2 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
-                                        >
-                                            <FaEye size={14} />
-                                        </button>
-
-                                        <button
-                                            title="Edit"
-                                            className="p-2 rounded-full bg-green-100 text-green-700 hover:bg-green-200"
-                                        >
-                                            <FaEdit size={14} />
-                                        </button>
-
-                                        <button
-                                            title="Delete"
-                                            className="p-2 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
-                                        >
-                                            <FaTrash size={14} />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-
-                        {banners.length === 0 && (
-                            <tr>
-                                <td
-                                    colSpan={6}
-                                    className="p-4 text-center text-gray-500 border"
-                                >
-                                    No banners found
-                                </td>
-                            </tr>
-                        )}
-                    </Table>
-                )}
-            </div>
-        </div>
-    );
+      {/* VIEW MODAL */}
+      {selectedBanner && (
+        <ViewBannerModal
+          banner={selectedBanner}
+          onClose={() => setSelectedBanner(null)}
+        />
+      )}
+    </div>
+  );
 }
