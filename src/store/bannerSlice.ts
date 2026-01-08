@@ -16,16 +16,18 @@ export type Banner = {
 
 type BannerState = {
   list: Banner[];
-  loading: boolean;       
-  fetchedOnce: boolean;  
+  loading: boolean;
+  fetchedOnce: boolean;
+  activeBannerId: string | null; // 🔥 VIEW MODAL CONTROL
 };
 
 /* ================= INITIAL STATE ================= */
 
 const initialState: BannerState = {
   list: [],
-  loading: true,          // hard refresh pe true
+  loading: true,
   fetchedOnce: false,
+  activeBannerId: null,
 };
 
 /* ================= SLICE ================= */
@@ -34,45 +36,41 @@ const bannerSlice = createSlice({
   name: "banner",
   initialState,
   reducers: {
-    /* SET ALL BANNERS */
     setBanners: (state, action: PayloadAction<Banner[]>) => {
       state.list = action.payload;
       state.loading = false;
       state.fetchedOnce = true;
     },
 
-    /* LOADING (hard refresh only) */
     setBannersLoading: (state) => {
       state.loading = true;
     },
 
-    /* CLEAR (logout etc.) */
     clearBanners: (state) => {
       state.list = [];
       state.loading = false;
       state.fetchedOnce = false;
+      state.activeBannerId = null;
     },
 
-    /* REMOVE SINGLE BANNER */
     removeBanner: (state, action: PayloadAction<string>) => {
-      state.list = state.list.filter(
-        banner => banner._id !== action.payload
-      );
+      state.list = state.list.filter(b => b._id !== action.payload);
     },
 
-    /* UPDATE SINGLE BANNER (edit / status toggle) */
     updateBanner: (state, action: PayloadAction<Banner>) => {
-      const index = state.list.findIndex(
-        banner => banner._id === action.payload._id
-      );
+      const index = state.list.findIndex(b => b._id === action.payload._id);
       if (index !== -1) {
         state.list[index] = action.payload;
       }
     },
 
-    /* ADD BANNER (create) */
     addBanner: (state, action: PayloadAction<Banner>) => {
-      state.list.unshift(action.payload); // latest on top
+      state.list.unshift(action.payload);
+    },
+
+    /* 🔥 VIEW MODAL ACTIONS */
+    setActiveBanner: (state, action: PayloadAction<string | null>) => {
+      state.activeBannerId = action.payload;
     },
   },
 });
@@ -84,6 +82,7 @@ export const {
   removeBanner,
   updateBanner,
   addBanner,
+  setActiveBanner,
 } = bannerSlice.actions;
 
 export default bannerSlice.reducer;

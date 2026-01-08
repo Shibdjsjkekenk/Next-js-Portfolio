@@ -4,22 +4,23 @@ import { FaEye, FaEdit, FaTrash, FaImage } from "react-icons/fa";
 import Table from "@/common/Table";
 import ViewBannerModal from "@/components/admin-view/ViewBannerModal";
 import { useBanner } from "@/hooks/useBanner";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
 
 export default function BannerPage() {
   const {
     list: banners,
     loading,
-    fetchedOnce,
-    getBannerById,
-    selectedBanner,
-    setSelectedBanner,
+    activeBannerId,
+    openBanner,
+    closeBanner,
     deleteBannerById,
   } = useBanner();
 
-  const handleView = (banner: any) => {
-    setSelectedBanner(banner);
-    getBannerById(banner._id); // background enrich
-  };
+  const activeBanner = useSelector((state: RootState) =>
+    state.banner.list.find(b => b._id === activeBannerId)
+  );
+
   return (
     <div className="space-y-4">
 
@@ -39,7 +40,7 @@ export default function BannerPage() {
 
         {loading && banners.length === 0 ? (
           <Table headers={["No", "Image", "Title", "Paragraph", "Status", "Action"]}>
-            {[1].map((_, index) => (   // 🔥 1 skeleton row
+            {[1].map((_, index) => (
               <tr key={index} className="animate-pulse">
 
                 <td className="p-2 border">
@@ -78,6 +79,7 @@ export default function BannerPage() {
             {banners.map((banner, index) => (
               <tr key={banner._id}>
                 <td className="p-2 border">{index + 1}</td>
+
                 <td className="p-2 border">
                   {banner.image ? (
                     <img
@@ -86,25 +88,29 @@ export default function BannerPage() {
                     />
                   ) : "—"}
                 </td>
+
                 <td className="p-2 border">{banner.title}</td>
+
                 <td className="p-2 border truncate max-w-[250px]">
                   {banner.paragraph}
                 </td>
+
                 <td className="p-2 border">
                   <span
-                    className={`px-2 py-1 rounded-full text-xs ${banner.isActive
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                      }`}
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      banner.isActive
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
                   >
                     {banner.isActive ? "Active" : "Inactive"}
                   </span>
                 </td>
+
                 <td className="p-2 border">
                   <div className="flex gap-2 justify-center">
                     <button
-                      title="View"
-                      onClick={() => handleView(banner)}
+                      onClick={() => openBanner(banner._id)}
                       className="p-2 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
                     >
                       <FaEye />
@@ -129,10 +135,10 @@ export default function BannerPage() {
       </div>
 
       {/* VIEW MODAL */}
-      {selectedBanner && (
+      {activeBanner && (
         <ViewBannerModal
-          banner={selectedBanner}
-          onClose={() => setSelectedBanner(null)}
+          banner={activeBanner}
+          onClose={closeBanner}
         />
       )}
     </div>
