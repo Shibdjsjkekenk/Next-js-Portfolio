@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import api from "@/lib/axios";
 import SummaryApi from "@/common/SummaryApi";
 import { toast } from "react-toastify";
+import type { Banner } from "@/store/bannerSlice";
 
 import {
   setBanners,
@@ -20,7 +21,7 @@ export function useBanner() {
   const bannerState = useSelector((state: RootState) => state.banner);
 
   // 🔹 Single banner (view/edit)
-  const [selectedBanner, setSelectedBanner] = useState<any>(null);
+const [selectedBanner, setSelectedBanner] = useState<Banner | null>(null);
 
   /* ================= GET ALL BANNERS ================= */
   useEffect(() => {
@@ -44,17 +45,19 @@ export function useBanner() {
 
   /* ================= GET BANNER BY ID ================= */
   const getBannerById = async (id: string) => {
-    try {
-      const res = await api(
-        SummaryApi.get_banner_by_id(id)
+  try {
+    const res = await api(SummaryApi.get_banner_by_id(id));
+    if (res.data?.success) {
+      setSelectedBanner(prev =>
+        prev
+          ? { ...prev, ...res.data.data } // merge
+          : res.data.data                 // first time set
       );
-      if (res.data?.success) {
-        setSelectedBanner(res.data.data);
-      }
-    } catch {
-      toast.error("Failed to load banner");
     }
-  };
+  } catch {
+    toast.error("Failed to load banner");
+  }
+};
 
   /* ================= DELETE BANNER ================= */
   const deleteBannerById = async (id: string) => {
