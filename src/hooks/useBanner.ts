@@ -20,7 +20,7 @@ export function useBanner() {
   const dispatch = useDispatch<AppDispatch>();
   const bannerState = useSelector((state: RootState) => state.banner);
 
-  /* ================= GET ALL BANNERS ================= */
+  // Get All
   useEffect(() => {
     if (!bannerState.fetchedOnce) {
       dispatch(setBannersLoading());
@@ -40,7 +40,7 @@ export function useBanner() {
     }
   }, [dispatch, bannerState.fetchedOnce]);
 
-  /* ================= VIEW ================= */
+  // View
   const openBanner = (id: string) => {
     dispatch(setActiveBanner(id));
   };
@@ -49,7 +49,7 @@ export function useBanner() {
     dispatch(setActiveBanner(null));
   };
 
-  /* ================= OPTIONAL REFRESH ================= */
+  // Optional Refresh
   const refreshBannerById = async (id: string) => {
     try {
       const res = await api(SummaryApi.get_banner_by_id(id));
@@ -61,20 +61,24 @@ export function useBanner() {
     }
   };
 
-  /* ================= DELETE ================= */
-  const deleteBannerById = async (id: string) => {
+  // Delete
+  const deleteBannerById = async (id: string): Promise<boolean> => {
     try {
       const res = await api(SummaryApi.delete_banner(id));
+
       if (res.data?.success) {
         dispatch(removeBanner(id));
-        toast.success("Banner deleted");
+        return true;
       }
+
+      return false;
     } catch {
-      toast.error("Failed to delete banner");
+      return false;
     }
   };
 
-  /* ================= UPDATE ================= */
+
+  // Update
   const updateBannerById = async (id: string, payload: any) => {
     try {
       const res = await api({
@@ -90,7 +94,7 @@ export function useBanner() {
     }
   };
 
-  /* ================= CREATE ================= */
+  // Create
   const createBanner = async (payload: any) => {
     try {
       const res = await api({

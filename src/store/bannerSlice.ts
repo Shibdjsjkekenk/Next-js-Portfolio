@@ -68,7 +68,7 @@ const bannerSlice = createSlice({
       state.list.unshift(action.payload);
     },
 
-    /* 🔥 VIEW MODAL ACTIONS */
+    /* VIEW MODAL ACTIONS */
     setActiveBanner: (state, action: PayloadAction<string | null>) => {
       state.activeBannerId = action.payload;
     },

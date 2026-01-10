@@ -2,18 +2,27 @@
 
 import { FaTimes, FaImage } from "react-icons/fa";
 
-export default function ViewBannerModal({
-  banner,
-  onClose,
-}: {
-  banner: any;
+type Props = {
+  banner: {
+    title: string;
+    paragraph: string;
+    italicTitle?: string;
+    image?: string;
+    isActive: boolean;
+  };
   onClose: () => void;
-}) {
+};
+
+export default function ViewBannerModal({ banner, onClose }: Props) {
+  const hasImage =
+    typeof banner.image === "string" &&
+    banner.image.startsWith("data:image");
+
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-2 sm:p-6">
       <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl max-h-[90vh] flex flex-col">
 
-        {/* STICKY HEADER */}
+        {/* HEADER */}
         <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 border-b bg-white rounded-t-2xl">
           <h2 className="flex items-center gap-2 font-semibold text-gray-800">
             <FaImage className="text-[#6A38C2]" />
@@ -69,9 +78,10 @@ export default function ViewBannerModal({
 
             {/* RIGHT */}
             <div className="flex items-center justify-center">
-              {banner.image ? (
+              {hasImage ? (
                 <img
                   src={banner.image}
+                  alt="Banner"
                   className="w-full max-h-[260px] object-cover rounded-xl border"
                 />
               ) : (
