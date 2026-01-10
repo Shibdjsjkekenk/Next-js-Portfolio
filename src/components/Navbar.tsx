@@ -35,7 +35,7 @@ const Navbar = () => {
               </span>
             </div>
 
-            <Link href="/contact" className="font-bold text-[17px] hover:text-red-600">
+            <Link href="/contact" className="font-bold text-[16px] hover:text-red-600">
               Contact Us
             </Link>
           </div>
