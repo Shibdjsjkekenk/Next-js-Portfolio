@@ -115,10 +115,10 @@ const HeroSection: React.FC = () => {
     activeBanner.italicTitle ??
     "Turning ideas into impactful digital solutions.";
 
-  /* ================= UI ================= */
+
   return (
     <div className="flex items-center justify-center max-w-full bg-[#f6f6f6de] relative z-10 mt-16">
-      <div className="flex flex-col md:flex-row items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col md:flex-row items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
         {/* LEFT */}
         <motion.div
           className="w-full md:w-1/2"
@@ -182,7 +182,7 @@ const HeroSection: React.FC = () => {
 
         {/* RIGHT */}
         <div
-          className="w-full md:w-1/2 flex items-center justify-center p-4"
+          className="w-full md:w-1/2 flex items-center justify-center"
           style={{ backgroundImage: `url(${NoBg.src})` }}
         >
           <div className="bounce-custom">
@@ -191,7 +191,7 @@ const HeroSection: React.FC = () => {
               alt="Dynamic Banner"
               width={500}
               height={500}
-              className="rounded-md md:ml-[78px]"
+              className="rounded-md md:ml-[20px] w-full"
               priority
             />
           </div>

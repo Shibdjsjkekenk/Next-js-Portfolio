@@ -58,6 +58,37 @@ const SummaryApi = {
     url: `/api/banner/update-status/${id}`,
     method: "patch",
   }),
+
+  // About us
+  create_about: {
+    url: "/api/about/create",
+    method: "post",
+  },
+
+  get_all_about: {
+    url: "/api/about/get-all",
+    method: "get",
+  },
+
+  get_about_by_id: (id: string) => ({
+    url: `/api/about/get/${id}`,
+    method: "get",
+  }),
+
+  update_about: (id: string) => ({
+    url: `/api/about/update/${id}`,
+    method: "put",
+  }),
+
+  update_about_status: (id: string) => ({
+    url: `/api/about/update-status/${id}`,
+    method: "patch",
+  }),
+
+  delete_about: (id: string) => ({
+    url: `/api/about/delete/${id}`,
+    method: "delete",
+  }),
 };
 
 export default SummaryApi;

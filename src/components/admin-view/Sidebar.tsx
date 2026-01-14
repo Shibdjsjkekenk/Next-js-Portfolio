@@ -58,7 +58,7 @@ export default function Sidebar({
       {/* ===== TOP BAR (DESKTOP) ===== */}
       <div className="hidden md:flex h-14 px-3 items-center gap-3 border-b border-white/30">
         <button
-          onClick={() => setIsOpen(prev => !prev)}
+          onClick={() => setIsOpen((prev) => !prev)}
           className="p-2 rounded bg-white/20 text-white"
         >
           <GrUnorderedList />
@@ -66,11 +66,7 @@ export default function Sidebar({
 
         {isOpen && (
           <Link href="/admin-panel">
-            <Image
-              src={logo}
-              alt="logo"
-              className="w-32 h-10 object-contain"
-            />
+            <Image src={logo} alt="logo" className="w-32 h-10 object-contain" />
           </Link>
         )}
       </div>
@@ -98,12 +94,13 @@ export default function Sidebar({
       </div>
 
       {/* ===== MENU ===== */}
-      <nav className="
+      <nav
+        className="
   flex-1 flex flex-col
   text-sm overflow-y-auto min-h-0
   px-2 py-2 md:p-3
-">
-
+"
+      >
         <MenuItem
           icon={<MdOutlineDashboardCustomize />}
           label="Dashboard"
@@ -132,6 +129,15 @@ export default function Sidebar({
         />
 
         <MenuItem
+          icon={<BsInfoCircle />}
+          label="About Us"
+          href="/admin-panel/about-us"
+          isOpen={isOpen}
+          active={pathname.startsWith("/admin-panel/about-us")}
+          onClick={() => setIsMobileOpen(false)}
+        />
+
+        <MenuItem
           icon={<GoProjectRoadmap />}
           label="Exp. Project"
           href="/admin-panel/exp-project"
@@ -146,15 +152,6 @@ export default function Sidebar({
           href="/admin-panel/relevant-project"
           isOpen={isOpen}
           active={pathname.startsWith("/admin-panel/relevant-project")}
-          onClick={() => setIsMobileOpen(false)}
-        />
-
-        <MenuItem
-          icon={<BsInfoCircle />}
-          label="About Us"
-          href="/admin-panel/about-us"
-          isOpen={isOpen}
-          active={pathname.startsWith("/admin-panel/about-us")}
           onClick={() => setIsMobileOpen(false)}
         />
 
@@ -198,13 +195,11 @@ export default function Sidebar({
             gradient={false}
             className="text-[10px] md:text-xs text-white opacity-80 leading-none"
           >
-
             <span className="mr-16">Copyright © 2025, Tiwari&apos;s</span>
             <span className="mr-16">Copyright © 2025, Tiwari&apos;s</span>
           </Marquee>
         </div>
       </div>
-
     </aside>
   );
 }
@@ -241,17 +236,11 @@ function MenuItem({
     ${active ? "bg-red-500" : "hover:bg-[#5BB3CB]"}
   `}
     >
-
       <span className="text-[15px] md:text-[17px] leading-none shrink-0">
         {icon}
       </span>
 
-      {isOpen && (
-        <span className="font-medium leading-none">
-          {label}
-        </span>
-      )}
+      {isOpen && <span className="font-medium leading-none">{label}</span>}
     </Link>
   );
 }
-
