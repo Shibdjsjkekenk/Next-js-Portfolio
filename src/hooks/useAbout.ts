@@ -6,13 +6,17 @@ import { toast } from "react-toastify";
 import api from "@/lib/axios";
 import SummaryApi from "@/common/SummaryApi";
 
-import {
-  addAbout,
-  setAbouts,
-  setAboutsLoading,
-} from "@/store/aboutSlice";
+import { addAbout, setAbouts, setAboutsLoading } from "@/store/aboutSlice";
 
 import type { RootState, AppDispatch } from "@/store/store";
+
+/* ================= TYPES ================= */
+type CreateAboutPayload = {
+  content: string;
+  image?: string | null;
+  resume?: string | null;
+  isActive: boolean;
+};
 
 export function useAbout() {
   const dispatch = useDispatch<AppDispatch>();
@@ -39,7 +43,7 @@ export function useAbout() {
   }, [dispatch, aboutState.fetchedOnce]);
 
   /* ================= CREATE ABOUT ================= */
-  const createAbout = async (payload: { content: string }) => {
+  const createAbout = async (payload: CreateAboutPayload) => {
     try {
       const res = await api({
         ...SummaryApi.create_about,
@@ -54,7 +58,6 @@ export function useAbout() {
 
       toast.error(res.data?.message || "Failed to create About Us");
       return false;
-
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message || "Failed to create About Us"
@@ -64,7 +67,7 @@ export function useAbout() {
   };
 
   return {
-    ...aboutState,   // list, loading, fetchedOnce, activeAboutId
+    ...aboutState, // list, loading, fetchedOnce, activeAboutId
     createAbout,
   };
 }
