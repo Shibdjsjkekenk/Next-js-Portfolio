@@ -160,21 +160,35 @@ const HeroSection: React.FC = () => {
             </h1>
 
             {/* SOCIAL */}
+      {/* SOCIAL ICONS */}
             <div className="mt-6 flex space-x-4">
-              <a href="https://www.facebook.com/" target="_blank">
-                <FaFacebookF className="icon-style text-blue-600" />
+              <a href="https://www.facebook.com/shubhanshu.tiwari.167" target="_blank"
+                className="w-10 h-10 border border-gray-300 p-1 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                <FaFacebookF className="text-blue-600" />
               </a>
-              <a href="https://www.instagram.com/" target="_blank">
-                <FaInstagram className="icon-style text-pink-500" />
+
+              <a href="https://www.instagram.com/phenomenalllt?igsh=MWtxM3dqMmg2bzl0cg=="
+                target="_blank"
+                className="w-10 h-10 border border-gray-300 p-1 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                <FaInstagram className="text-pink-500" />
               </a>
-              <a href="https://github.com/" target="_blank">
-                <FaGithub className="icon-style text-gray-800" />
+
+              <a href="https://github.com/Shibdjsjkekenk"
+                target="_blank"
+                className="w-10 h-10 border border-gray-300 p-1 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                <FaGithub className="text-gray-800" />
               </a>
-              <a href="https://www.linkedin.com/" target="_blank">
-                <FaLinkedinIn className="icon-style text-blue-700" />
+
+              <a href="https://www.linkedin.com/in/tiwari-shubhanshu-93bb95267?trk=contact-info"
+                target="_blank"
+                className="w-10 h-10 border border-gray-300 p-1 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                <FaLinkedinIn className="text-blue-700" />
               </a>
-              <a href="https://www.shubhanshutiwari.com" target="_blank">
-                <FaGlobe className="icon-style text-green-500" />
+
+              <a href="https://www.shubhanshutiwari.com"
+                target="_blank"
+                className="w-10 h-10 border border-gray-300 p-1 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                <FaGlobe className="text-green-500" />
               </a>
             </div>
           </div>

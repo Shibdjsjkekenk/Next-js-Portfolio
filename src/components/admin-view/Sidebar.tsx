@@ -65,7 +65,7 @@ export default function Sidebar({
         </button>
 
         {isOpen && (
-          <Link href="/admin-panel">
+          <Link href="/">
             <Image src={logo} alt="logo" className="w-32 h-10 object-contain" />
           </Link>
         )}

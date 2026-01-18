@@ -51,9 +51,7 @@ type Props = {
 export default function RichTextEditor({ value, onChange }: Props) {
   const editor = useEditor({
     extensions: [
-      // <-- Bracket यहां से शुरू होता है
       StarterKit.configure({
-        heading: false,
         bulletList: false,
         orderedList: false,
         blockquote: false,
@@ -87,6 +85,12 @@ export default function RichTextEditor({ value, onChange }: Props) {
       attributes: {
         class: "focus:outline-none min-h-[320px] px-4 py-3 tiptap-editor",
       },
+      transformPastedHTML(html) {
+        return html
+          .replace(/style="[^"]*"/g, "")
+          .replace(/<span[^>]*>/g, "")
+          .replace(/<\/span>/g, "");
+      },
     },
     onUpdate({ editor }) {
       onChange(editor.getHTML());
@@ -94,10 +98,13 @@ export default function RichTextEditor({ value, onChange }: Props) {
   });
 
   useEffect(() => {
-    if (editor && value) {
-      editor.commands.setContent(value);
+    if (!editor) return;
+
+    // sirf tab set karo jab editor empty ho
+    if (editor.isEmpty && value) {
+      editor.commands.setContent(value, false as any);
     }
-  }, [value, editor]);
+  }, [editor]);
 
   if (!editor) return null;
 

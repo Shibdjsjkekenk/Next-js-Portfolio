@@ -12,7 +12,6 @@ export default function AboutViewModal({ about, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
       <div className="bg-white w-full max-w-5xl rounded-xl shadow flex flex-col">
-
         {/* ================= HEADER ================= */}
         <div className="px-6 py-4 border-b flex justify-between items-center">
           <h2 className="text-lg font-bold">About Us Preview</h2>
@@ -23,7 +22,6 @@ export default function AboutViewModal({ about, onClose }: Props) {
 
         {/* ================= BODY ================= */}
         <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-
           {/* ================= LEFT – IMAGE ================= */}
           <div className="md:col-span-1 flex justify-center items-start">
             {about.image ? (
@@ -33,20 +31,17 @@ export default function AboutViewModal({ about, onClose }: Props) {
                 className="max-h-[380px] w-auto object-contain"
               />
             ) : (
-              <span className="text-gray-400 text-sm">
-                No image available
-              </span>
+              <span className="text-gray-400 text-sm">No image available</span>
             )}
           </div>
 
           {/* ================= RIGHT – CONTENT + PDF ================= */}
           <div className="md:col-span-2 flex flex-col">
-
             {/* CONTENT (NORMAL FLOW) */}
-        <div
-  className="tiptap-editor"
-  dangerouslySetInnerHTML={{ __html: about.content }}
-/>
+            <div
+              className="tiptap-editor"
+              dangerouslySetInnerHTML={{ __html: about.content }}
+            />
 
             {/* PDF JUST AFTER CONTENT */}
             {about.resume && (
@@ -62,7 +57,6 @@ export default function AboutViewModal({ about, onClose }: Props) {
               </div>
             )}
           </div>
-
         </div>
       </div>
     </div>
