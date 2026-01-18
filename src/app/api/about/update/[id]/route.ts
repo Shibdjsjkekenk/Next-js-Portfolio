@@ -12,7 +12,7 @@ export async function PUT(
     // DB connect
     await connectDB();
 
-    // ✅ async params unwrap
+    //  async params unwrap
     const { id } = await context.params;
 
     // request body
@@ -32,7 +32,7 @@ export async function PUT(
       );
     }
 
-    /* 🔥 REDIS CACHE INVALIDATE */
+    /*  REDIS CACHE INVALIDATE */
     await redis.del(CACHE_KEYS.ABOUT_ALL);
     await redis.del(CACHE_KEYS.ABOUT_BY_ID(id));
 

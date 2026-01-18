@@ -11,15 +11,72 @@ import {
 } from "react-icons/fa";
 import Table from "@/common/Table";
 import AboutFormModal from "@/components/admin-view/AboutFormModal";
+import AboutViewModal from "@/components/admin-view/AboutViewModal";
 import { useAbout } from "@/hooks/useAbout";
+import { useDispatch } from "react-redux";
+import { setActiveAbout } from "@/store/aboutSlice";
+import { toast } from "react-toastify";
+import type { About } from "@/store/aboutSlice";
 
 export default function AboutUsPage() {
-  const { list: abouts, loading } = useAbout();
-  const [showCreate, setShowCreate] = useState(false);
+  const { list: abouts, loading, deleteAboutById } = useAbout();
+  const dispatch = useDispatch();
+
+  const [showModal, setShowModal] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  // ✅ VIEW MODAL KE LIYE – DIRECT OBJECT
+  const [viewAbout, setViewAbout] = useState<About | null>(null);
+
   const toggleContent = (id: string) => {
-    setExpandedId(prev => (prev === id ? null : id));
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
+
+  const openCreate = () => {
+    dispatch(setActiveAbout(null));
+    setShowModal(true);
+  };
+
+  const openEdit = (id: string) => {
+    dispatch(setActiveAbout(id));
+    setShowModal(true);
+  };
+
+  const handleDelete = (id: string) => {
+    toast(
+      ({ closeToast }) => (
+        <div className="space-y-3">
+          <p className="text-sm font-medium">
+            Are you sure you want to delete this About Us content?
+          </p>
+
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={closeToast}
+              className="px-3 py-1 border rounded text-sm"
+            >
+              Cancel
+            </button>
+
+            <button
+              onClick={async () => {
+                await deleteAboutById(id);
+                closeToast();
+              }}
+              className="px-3 py-1 bg-red-600 text-white rounded text-sm"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        position: "top-right",
+        autoClose: false,
+        closeOnClick: false,
+        closeButton: false,
+      }
+    );
   };
 
   return (
@@ -35,7 +92,7 @@ export default function AboutUsPage() {
         </h1>
 
         <button
-          onClick={() => setShowCreate(true)}
+          onClick={openCreate}
           className="ml-auto px-4 py-2 text-sm rounded-md bg-[#6A38C2] text-white flex items-center gap-2"
         >
           <FaPlus />
@@ -50,37 +107,31 @@ export default function AboutUsPage() {
             Loading About Us content...
           </div>
         ) : (
-          <Table headers={["No", "Image", "Content", "PDF", "Status", "Action"]}>
+          <Table
+            headers={["No", "Image", "Content", "PDF", "Status", "Action"]}
+          >
             {abouts.map((about, index) => (
               <tr key={about._id} className="align-middle">
-                {/* NO */}
                 <td className="p-2 border text-center">{index + 1}</td>
 
-                {/* IMAGE */}
-                <td className="p-2 border">
-                  <div className="flex items-center justify-center h-full">
-                    {about.image ? (
-                      <img
-                        src={about.image}
-                        className="w-16 h-10 object-cover rounded"
-                      />
-                    ) : (
-                      "—"
-                    )}
-                  </div>
+                <td className="p-2 border text-center">
+                  {about.image ? (
+                    <img
+                      src={about.image}
+                      className="w-16 h-10 object-cover rounded mx-auto"
+                    />
+                  ) : (
+                    "—"
+                  )}
                 </td>
 
-                {/* CONTENT */}
                 <td className="p-2 border max-w-[420px]">
                   <div
-                    className={`text-sm leading-relaxed ${
+                    className={`text-sm ${
                       expandedId === about._id ? "" : "content-clamp"
                     }`}
-                    dangerouslySetInnerHTML={{
-                      __html: about.content,
-                    }}
+                    dangerouslySetInnerHTML={{ __html: about.content }}
                   />
-
                   <button
                     onClick={() => toggleContent(about._id)}
                     className="text-xs text-blue-600 mt-1"
@@ -89,49 +140,55 @@ export default function AboutUsPage() {
                   </button>
                 </td>
 
-                {/* PDF */}
-                <td className="p-2 border">
-                  <div className="flex items-center justify-center h-full">
-                    {about.resume ? (
-                      <a
-                        href={about.resume}
-                        target="_blank"
-                        className="inline-flex items-center gap-1 text-red-600 text-sm"
-                      >
-                        <FaFilePdf />
-                        View
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </div>
-                </td>
-
-                {/* STATUS */}
-                <td className="p-2 border">
-                  <div className="flex items-center justify-center h-full">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        about.isActive
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
+                <td className="p-2 border text-center">
+                  {about.resume ? (
+                    <a
+                      href={about.resume}
+                      target="_blank"
+                      className="inline-flex items-center gap-1 text-red-600"
                     >
-                      {about.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </div>
+                      <FaFilePdf /> View
+                    </a>
+                  ) : (
+                    "—"
+                  )}
                 </td>
 
-                {/* ACTION */}
-                <td className="p-2 border">
-                  <div className="flex items-center justify-center gap-2 h-full">
-                    <button className="p-2 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200">
+                <td className="p-2 border text-center">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      about.isActive
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {about.isActive ? "Active" : "Inactive"}
+                  </span>
+                </td>
+
+                <td className="p-2 border text-center">
+                  <div className="flex justify-center gap-2">
+                    {/* 👁️ VIEW */}
+                    <button
+                      onClick={() => setViewAbout(about)}
+                      className="p-2 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
+                    >
                       <FaEye />
                     </button>
-                    <button className="p-2 rounded-full bg-green-100 text-green-700 hover:bg-green-200">
+
+                    {/* ✏️ EDIT */}
+                    <button
+                      onClick={() => openEdit(about._id)}
+                      className="p-2 rounded-full bg-green-100 text-green-700"
+                    >
                       <FaEdit />
                     </button>
-                    <button className="p-2 rounded-full bg-red-100 text-red-700 hover:bg-red-200">
+
+                    {/* 🗑️ DELETE */}
+                    <button
+                      onClick={() => handleDelete(about._id)}
+                      className="p-2 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
+                    >
                       <FaTrash />
                     </button>
                   </div>
@@ -142,9 +199,14 @@ export default function AboutUsPage() {
         )}
       </div>
 
-      {/* ================= MODAL ================= */}
-      {showCreate && (
-        <AboutFormModal onClose={() => setShowCreate(false)} />
+      {/* ================= MODALS ================= */}
+      {showModal && <AboutFormModal onClose={() => setShowModal(false)} />}
+
+      {viewAbout && (
+        <AboutViewModal
+          about={viewAbout}
+          onClose={() => setViewAbout(null)}
+        />
       )}
 
       {/* ================= STYLES ================= */}

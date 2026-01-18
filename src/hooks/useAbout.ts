@@ -6,7 +6,13 @@ import { toast } from "react-toastify";
 import api from "@/lib/axios";
 import SummaryApi from "@/common/SummaryApi";
 
-import { addAbout, setAbouts, setAboutsLoading } from "@/store/aboutSlice";
+import {
+  addAbout,
+  setAbouts,
+  setAboutsLoading,
+  updateAbout,
+  removeAbout,
+} from "@/store/aboutSlice";
 
 import type { RootState, AppDispatch } from "@/store/store";
 
@@ -22,7 +28,7 @@ export function useAbout() {
   const dispatch = useDispatch<AppDispatch>();
   const aboutState = useSelector((state: RootState) => state.about);
 
-  /* ================= GET ALL ABOUT ================= */
+  //  Get All
   useEffect(() => {
     if (!aboutState.fetchedOnce) {
       dispatch(setAboutsLoading());
@@ -42,7 +48,7 @@ export function useAbout() {
     }
   }, [dispatch, aboutState.fetchedOnce]);
 
-  /* ================= CREATE ABOUT ================= */
+  //  Create
   const createAbout = async (payload: CreateAboutPayload) => {
     try {
       const res = await api({
@@ -66,8 +72,54 @@ export function useAbout() {
     }
   };
 
+  //  Update
+  const updateAboutById = async (id: string, payload: CreateAboutPayload) => {
+    try {
+      const res = await api({
+        ...SummaryApi.update_about(id),
+        data: payload,
+      });
+
+      if (res.data?.success) {
+        dispatch(updateAbout(res.data.data));
+        toast.success("About Us updated successfully");
+        return true;
+      }
+
+      return false;
+    } catch {
+      toast.error("Failed to update About Us");
+      return false;
+    }
+  };
+
+  //  Delete
+  const deleteAboutById = async (id: string) => {
+    try {
+      const res = await api({
+        ...SummaryApi.delete_about(id),
+      });
+
+      if (res.data?.success) {
+        dispatch(removeAbout(id));
+        toast.success("About Us deleted successfully");
+        return true;
+      }
+
+      toast.error(res.data?.message || "Failed to delete About Us");
+      return false;
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Failed to delete About Us"
+      );
+      return false;
+    }
+  };
+
   return {
     ...aboutState, // list, loading, fetchedOnce, activeAboutId
     createAbout,
+    updateAboutById,
+    deleteAboutById,
   };
 }

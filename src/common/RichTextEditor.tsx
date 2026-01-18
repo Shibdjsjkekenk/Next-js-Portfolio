@@ -2,7 +2,7 @@
 
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-
+import { useEffect } from "react";
 import Bold from "@tiptap/extension-bold";
 import Italic from "@tiptap/extension-italic";
 import Underline from "@tiptap/extension-underline";
@@ -20,11 +20,8 @@ import Highlight from "@tiptap/extension-highlight";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
-
-// आपके custom extensions
 import { LineHeight } from "@/extensions/lineHeight";
 import { FontSize } from "@/extensions/fontSize";
-// अगर आपने 'fontWeight.ts' फाइल बनाई है, तो नीचे वाली लाइन को uncomment करें
 import { FontWeight } from "@/extensions/fontWeight";
 
 import {
@@ -95,6 +92,12 @@ export default function RichTextEditor({ value, onChange }: Props) {
       onChange(editor.getHTML());
     },
   });
+
+  useEffect(() => {
+    if (editor && value) {
+      editor.commands.setContent(value);
+    }
+  }, [value, editor]);
 
   if (!editor) return null;
 
@@ -299,21 +302,21 @@ export default function RichTextEditor({ value, onChange }: Props) {
         >
           <FaEraser />
         </button>
-             <button
+        <button
           type="button"
           className={btn(editor.isActive("highlight"))}
           onClick={() => editor.chain().focus().toggleHighlight().run()}
         >
           <FaHighlighter />
         </button>
-           <button
+        <button
           type="button"
           className={btn(editor.isActive("blockquote"))}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
         >
           <FaQuoteRight />
         </button>
-           <button
+        <button
           type="button"
           className={btn(editor.isActive("link"))}
           onClick={() => {
@@ -326,7 +329,6 @@ export default function RichTextEditor({ value, onChange }: Props) {
       </div>
 
       <EditorContent editor={editor} />
-
     </div>
   );
 }
