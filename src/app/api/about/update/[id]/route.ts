@@ -3,27 +3,23 @@ import { connectDB } from "@/lib/db";
 import AboutUs from "@/models/AboutUs";
 import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
+import { revalidatePath } from "next/cache";
 
 export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    // DB connect
     await connectDB();
 
-    //  async params unwrap
+    // 🔥 MUST await params
     const { id } = await context.params;
 
-    // request body
     const body = await req.json();
 
-    // update
-    const about = await AboutUs.findByIdAndUpdate(
-      id,
-      body,
-      { new: true }
-    );
+    const about = await AboutUs.findByIdAndUpdate(id, body, {
+      new: true,
+    });
 
     if (!about) {
       return NextResponse.json(
@@ -32,16 +28,19 @@ export async function PUT(
       );
     }
 
-    /*  REDIS CACHE INVALIDATE */
+    // 🔥 CLEAR REDIS CACHE
     await redis.del(CACHE_KEYS.ABOUT_ALL);
     await redis.del(CACHE_KEYS.ABOUT_BY_ID(id));
+
+    // 🔥 REVALIDATE SSR
+    revalidatePath("/");
+    revalidatePath("/about");
 
     return NextResponse.json({
       success: true,
       message: "About Us updated successfully",
       data: about,
     });
-
   } catch (error: any) {
     return NextResponse.json(
       {
