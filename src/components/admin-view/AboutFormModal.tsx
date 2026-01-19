@@ -5,28 +5,32 @@ import dynamic from "next/dynamic";
 import { FaTrash, FaUpload, FaFilePdf } from "react-icons/fa";
 import { useAbout } from "@/hooks/useAbout";
 import fileToBase64 from "@/utils/fileToBase64";
-import { useRouter } from "next/navigation";
 
-const RichTextEditor = dynamic(() => import("@/common/RichTextEditor"), {
-  ssr: false,
-});
+const RichTextEditor = dynamic(
+  () => import("@/common/RichTextEditor"),
+  { ssr: false }
+);
 
 type Props = {
   onClose: () => void;
 };
 
 export default function AboutFormModal({ onClose }: Props) {
-  const { list, activeAboutId, createAbout, updateAboutById } = useAbout();
+  const {
+    list,
+    activeAboutId,
+    createAbout,
+    updateAboutById,
+  } = useAbout();
 
   const isEdit = Boolean(activeAboutId);
-  const activeAbout = list.find((a) => a._id === activeAboutId);
+  const activeAbout = list.find(a => a._id === activeAboutId);
 
   const [content, setContent] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const [pdf, setPdf] = useState<{ name: string; data: string } | null>(null);
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   /* PREFILL IN EDIT MODE */
   useEffect(() => {
@@ -36,7 +40,7 @@ export default function AboutFormModal({ onClose }: Props) {
       setPdf(
         activeAbout.resume
           ? { name: "Existing PDF", data: activeAbout.resume }
-          : null,
+          : null
       );
       setIsActive(activeAbout.isActive);
     }
@@ -59,11 +63,7 @@ export default function AboutFormModal({ onClose }: Props) {
       : await createAbout(payload);
 
     setLoading(false);
-
-    if (success) {
-      router.refresh();
-      onClose();
-    }
+    if (success) onClose();
   };
 
   return (
@@ -88,7 +88,7 @@ export default function AboutFormModal({ onClose }: Props) {
                 hidden
                 type="file"
                 accept="image/*"
-                onChange={(e) =>
+                onChange={e =>
                   e.target.files &&
                   fileToBase64(e.target.files[0]).then(setImage)
                 }
@@ -115,10 +115,10 @@ export default function AboutFormModal({ onClose }: Props) {
                 hidden
                 type="file"
                 accept="application/pdf"
-                onChange={(e) =>
+                onChange={e =>
                   e.target.files &&
-                  fileToBase64(e.target.files[0]).then((base64) =>
-                    setPdf({ name: e.target.files![0].name, data: base64 }),
+                  fileToBase64(e.target.files[0]).then(base64 =>
+                    setPdf({ name: e.target.files![0].name, data: base64 })
                   )
                 }
               />
@@ -136,7 +136,7 @@ export default function AboutFormModal({ onClose }: Props) {
             <input
               type="checkbox"
               checked={isActive}
-              onChange={(e) => setIsActive(e.target.checked)}
+              onChange={e => setIsActive(e.target.checked)}
             />
             {isActive ? "Active" : "Inactive"}
           </label>
