@@ -180,13 +180,10 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
           style={{ backgroundImage: `url(${NoBg.src})` }}
         >
           <div className="bounce-custom">
-            <Image
-              src={banner.image || No1}
+            <img
+              src={banner.image || No1.src}
               alt="Dynamic Banner"
-              width={500}
-              height={500}
               className="rounded-md md:ml-[20px] w-full"
-              priority
             />
           </div>
         </div>
