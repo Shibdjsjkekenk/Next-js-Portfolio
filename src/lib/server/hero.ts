@@ -1,45 +1,26 @@
-// src/lib/server/hero.ts
-import SummaryApi from "@/common/SummaryApi";
-
-function getBaseUrl() {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-}
+import { connectDB } from "@/lib/db";
+import Banner from "@/models/Banner";
+import redis from "@/lib/redis";
+import { CACHE_KEYS } from "@/lib/cacheKeys";
 
 export async function getActiveBanner() {
   try {
-    const res = await fetch(
-      getBaseUrl() + SummaryApi.get_all_banners.url,
-      {
-        method: "GET",
-        cache: "no-store",
-      }
-    );
-
-    if (!res.ok) {
-      console.error("Banner API failed", res.status);
-      return null;
+    // 1️⃣ Redis first
+    const cached = await redis.get(CACHE_KEYS.BANNERS_ALL);
+    if (cached) {
+      const list = JSON.parse(cached);
+      return list.find((b: any) => b.isActive) ?? list[0] ?? null;
     }
 
-    const json = await res.json();
+    // 2️⃣ DB fallback
+    await connectDB();
+    const banners = await Banner.find().sort({ createdAt: -1 });
 
-    const list = json?.data;
+    if (!banners.length) return null;
 
-    if (!Array.isArray(list) || list.length === 0) {
-      return null;
-    }
-
-    // 🔥 ONLY isActive MATTERS
-    const activeBanner = list.find(
-      (b: any) => b.isActive === true
-    );
-
-    // fallback safety
-    return activeBanner ?? list[0];
-  } catch (err) {
-    console.error("Banner fetch crashed", err);
+    return banners.find(b => b.isActive) ?? banners[0];
+  } catch (e) {
+    console.error("Hero fetch failed", e);
     return null;
   }
 }
