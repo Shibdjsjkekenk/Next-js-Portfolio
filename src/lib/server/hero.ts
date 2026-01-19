@@ -1,4 +1,4 @@
-// src/lib/server/hero.ts  (or hero.s.ts)
+// src/lib/server/hero.ts (or hero.s.ts)
 import SummaryApi from "@/common/SummaryApi";
 
 function getBaseUrl() {
@@ -20,26 +20,27 @@ export async function getActiveBanner() {
       }
     );
 
-    // 🔑 NEVER THROW
     if (!res.ok) {
-      console.error("❌ Banner API failed:", res.status);
+      console.error("❌ Banner API failed", res.status);
       return null;
     }
 
     const json = await res.json();
 
+    // ✅ handle correct response shape
     const list = Array.isArray(json)
       ? json
-      : json?.data;
+      : json.data;
 
-    if (!Array.isArray(list)) {
-      console.error("❌ Banner response invalid:", json);
+    if (!Array.isArray(list) || list.length === 0) {
+      console.error("❌ No banners found", json);
       return null;
     }
 
-    return list.find((b: any) => b.isActive) ?? null;
+    // 🔥 FIRST BANNER AS HERO
+    return list[0];
   } catch (err) {
-    console.error("❌ Banner fetch crashed:", err);
-    return null; // 🔑 ABSOLUTELY CRITICAL
+    console.error("❌ Banner fetch crashed", err);
+    return null;
   }
 }
