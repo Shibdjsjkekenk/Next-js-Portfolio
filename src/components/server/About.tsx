@@ -1,7 +1,13 @@
-import AboutSection from "@/components/client-view/AboutSection";
-import { getAbout } from "@/lib/server/about";
+import HeroClient from "@/components/client-view/HeroClient";
+import { getActiveBanner } from "@/lib/server/hero";
 
-export default async function About() {
-  const about = await getAbout();
-  return <AboutSection about={about} />;
+export default async function Hero() {
+  const banner = await getActiveBanner();
+
+  if (!banner) {
+    console.log("❌ Banner is null");
+    return null;
+  }
+
+  return <HeroClient banner={banner} />;
 }
