@@ -1,29 +1,34 @@
-
-import SummaryApi from "@/common/SummaryApi";
-
-function getBaseUrl() {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-}
+import { connectDB } from "@/lib/db";
+import AboutUs from "@/models/AboutUs";
+import redis from "@/lib/redis";
+import { CACHE_KEYS } from "@/lib/cacheKeys";
 
 export async function getAbout() {
-  const baseUrl = getBaseUrl();
+  try {
+    /* ---------- 1️⃣ REDIS FIRST ---------- */
+    const cached = await redis.get(CACHE_KEYS.ABOUT_ALL);
+    if (cached) {
+      const list = JSON.parse(cached);
+      return list?.[0] ?? null;
+    }
 
-  const res = await fetch(baseUrl + SummaryApi.get_all_about.url, {
-    method: SummaryApi.get_all_about.method,
-    cache: "no-store",
-  });
+    /* ---------- 2️⃣ DB FALLBACK ---------- */
+    await connectDB();
+    const abouts = await AboutUs.find().sort({ createdAt: -1 });
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch About data");
+    if (!abouts.length) return null;
+
+    /* ---------- 3️⃣ CACHE IT ---------- */
+    await redis.set(
+      CACHE_KEYS.ABOUT_ALL,
+      JSON.stringify(abouts),
+      "EX",
+      60 * 10 // 10 min (adjust if needed)
+    );
+
+    return abouts[0];
+  } catch (error) {
+    console.error("❌ About fetch failed:", error);
+    return null;
   }
-
-  const json = await res.json();
-  const list = Array.isArray(json)
-    ? json
-    : json.data;
-
-  return list?.[0] ?? null;
 }

@@ -5,14 +5,14 @@ import { CACHE_KEYS } from "@/lib/cacheKeys";
 
 export async function getActiveBanner() {
   try {
-    // 1️⃣ Redis first
+    // Redis first
     const cached = await redis.get(CACHE_KEYS.BANNERS_ALL);
     if (cached) {
       const list = JSON.parse(cached);
       return list.find((b: any) => b.isActive) ?? list[0] ?? null;
     }
 
-    // 2️⃣ DB fallback
+    //  DB fallback
     await connectDB();
     const banners = await Banner.find().sort({ createdAt: -1 });
 
