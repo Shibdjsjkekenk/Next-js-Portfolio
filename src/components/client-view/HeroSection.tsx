@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, ReactNode } from "react";
+import React, { ReactNode, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Typewriter from "typewriter-effect";
 import Image from "next/image";
@@ -15,57 +15,23 @@ import {
   FaGlobe,
 } from "react-icons/fa";
 
-import { useBanner } from "@/hooks/useBanner";
 import type { Banner } from "@/store/bannerSlice";
 
-const HeroSection: React.FC = () => {
-  const { list: bannerList, loading } = useBanner();
+type Props = {
+  banner: Banner | null;
+};
 
-  const [activeBanner, setActiveBanner] = useState<Banner | null>(null);
+const HeroSection: React.FC<Props> = ({ banner }) => {
   const [typewriterKey, setTypewriterKey] = useState<number>(0);
 
   /* ================= EFFECT ================= */
   useEffect(() => {
-    if (bannerList && bannerList.length > 0) {
-      const active = bannerList.find((banner) => banner.isActive);
-      setActiveBanner(active ?? null);
+    if (banner) {
       setTypewriterKey((prev) => prev + 1);
     }
-  }, [bannerList]);
+  }, [banner]);
 
-  /* ================= LOADER ================= */
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center max-w-full relative z-10 mt-20 px-4">
-        <div className="flex flex-col md:flex-row items-center max-w-7xl w-full gap-10 animate-pulse">
-          {/* LEFT */}
-          <div className="w-full md:w-1/2 space-y-5">
-            <div className="w-[30%] md:w-[20%] h-10 bg-gray-300 rounded-full" />
-            <div className="h-10 w-[70%] bg-gray-300 rounded-md" />
-            <div className="h-10 w-[50%] bg-gray-300 rounded-md" />
-            <div className="space-y-2">
-              <div className="h-4 w-full bg-gray-300 rounded" />
-              <div className="h-4 w-[90%] bg-gray-300 rounded" />
-              <div className="h-4 w-[80%] bg-gray-300 rounded" />
-            </div>
-            <div className="h-6 w-[60%] bg-gray-300 rounded" />
-            <div className="flex gap-4 mt-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="w-10 h-10 bg-gray-300 rounded-full" />
-              ))}
-            </div>
-          </div>
-
-          {/* RIGHT */}
-          <div className="w-full md:w-1/2 flex justify-center p-4">
-            <div className="w-[300px] md:w-[420px] h-[320px] md:h-[420px] bg-gray-300 rounded-md" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!activeBanner) {
+  if (!banner) {
     return (
       <div className="text-center py-10 text-gray-500 font-medium">
         No active banner found.
@@ -74,8 +40,8 @@ const HeroSection: React.FC = () => {
   }
 
   /* ================= HELPERS ================= */
-  const splitTitle = activeBanner.title
-    ? activeBanner.title.split(" ")
+  const splitTitle = banner.title
+    ? banner.title.split(" ")
     : ["I", "am", "Shubhanshu", "Tiwari"];
 
   const iamPart = splitTitle.slice(0, 2).join(" ");
@@ -112,13 +78,13 @@ const HeroSection: React.FC = () => {
   };
 
   const typewriterText =
-    activeBanner.italicTitle ??
+    banner.italicTitle ??
     "Turning ideas into impactful digital solutions.";
-
 
   return (
     <div className="flex items-center justify-center max-w-full bg-[#f6f6f6de] relative z-10 mt-16">
       <div className="flex flex-col md:flex-row items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+
         {/* LEFT */}
         <motion.div
           className="w-full md:w-1/2"
@@ -140,7 +106,7 @@ const HeroSection: React.FC = () => {
 
             <h4 className="text-[18px] lg:text-[21px] font-medium text-gray-700">
               {renderParagraph(
-                activeBanner.paragraph ??
+                banner.paragraph ??
                   "Crafting seamless web experiences with 2.5 years+ of professional expertise in modern web development."
               )}
             </h4>
@@ -159,34 +125,29 @@ const HeroSection: React.FC = () => {
               />
             </h1>
 
-            {/* SOCIAL */}
-      {/* SOCIAL ICONS */}
+            {/* SOCIAL ICONS */}
             <div className="mt-6 flex space-x-4">
               <a href="https://www.facebook.com/shubhanshu.tiwari.167" target="_blank"
                 className="w-10 h-10 border border-gray-300 p-1 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                 <FaFacebookF className="text-blue-600" />
               </a>
 
-              <a href="https://www.instagram.com/phenomenalllt?igsh=MWtxM3dqMmg2bzl0cg=="
-                target="_blank"
+              <a href="https://www.instagram.com/phenomenalllt?igsh=MWtxM3dqMmg2bzl0cg==" target="_blank"
                 className="w-10 h-10 border border-gray-300 p-1 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                 <FaInstagram className="text-pink-500" />
               </a>
 
-              <a href="https://github.com/Shibdjsjkekenk"
-                target="_blank"
+              <a href="https://github.com/Shibdjsjkekenk" target="_blank"
                 className="w-10 h-10 border border-gray-300 p-1 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                 <FaGithub className="text-gray-800" />
               </a>
 
-              <a href="https://www.linkedin.com/in/tiwari-shubhanshu-93bb95267?trk=contact-info"
-                target="_blank"
+              <a href="https://www.linkedin.com/in/tiwari-shubhanshu-93bb95267?trk=contact-info" target="_blank"
                 className="w-10 h-10 border border-gray-300 p-1 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                 <FaLinkedinIn className="text-blue-700" />
               </a>
 
-              <a href="https://www.shubhanshutiwari.com"
-                target="_blank"
+              <a href="https://www.shubhanshutiwari.com" target="_blank"
                 className="w-10 h-10 border border-gray-300 p-1 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                 <FaGlobe className="text-green-500" />
               </a>
@@ -201,7 +162,7 @@ const HeroSection: React.FC = () => {
         >
           <div className="bounce-custom">
             <Image
-              src={activeBanner.image || No1}
+              src={banner.image || No1}
               alt="Dynamic Banner"
               width={500}
               height={500}
