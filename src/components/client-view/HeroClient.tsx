@@ -21,7 +21,7 @@ type Props = {
   banner: Banner | null;
 };
 
-const HeroSection: React.FC<Props> = ({ banner }) => {
+const HeroClient: React.FC<Props> = ({ banner }) => {
   const [typewriterKey, setTypewriterKey] = useState<number>(0);
 
   /* ================= EFFECT ================= */
@@ -176,4 +176,4 @@ const HeroSection: React.FC<Props> = ({ banner }) => {
   );
 };
 
-export default HeroSection;
+export default HeroClient;
