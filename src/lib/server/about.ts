@@ -1,3 +1,4 @@
+
 import SummaryApi from "@/common/SummaryApi";
 
 function getBaseUrl() {
@@ -7,36 +8,22 @@ function getBaseUrl() {
   return process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 }
 
-export async function getActiveBanner() {
-  try {
-    const baseUrl = getBaseUrl();
+export async function getAbout() {
+  const baseUrl = getBaseUrl();
 
-    const res = await fetch(
-      baseUrl + SummaryApi.get_all_banners.url,
-      {
-        method: "GET",
-        cache: "no-store",
-      }
-    );
+  const res = await fetch(baseUrl + SummaryApi.get_all_about.url, {
+    method: SummaryApi.get_all_about.method,
+    cache: "no-store",
+  });
 
-    if (!res.ok) {
-      console.error("Banner API failed", res.status);
-      return null;
-    }
-
-    const json = await res.json();
-
-    // 🔥 YOUR API SHAPE
-    const list = json?.data;
-
-    if (!Array.isArray(list) || list.length === 0) {
-      return null;
-    }
-
-    // FIRST banner
-    return list[0];
-  } catch (err) {
-    console.error("Banner fetch crashed", err);
-    return null;
+  if (!res.ok) {
+    throw new Error("Failed to fetch About data");
   }
+
+  const json = await res.json();
+  const list = Array.isArray(json)
+    ? json
+    : json.data;
+
+  return list?.[0] ?? null;
 }
