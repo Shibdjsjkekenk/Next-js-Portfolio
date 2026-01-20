@@ -29,6 +29,7 @@ const SummaryApi = {
     method: "delete",
   },
 
+  // About us
   create_banner: {
     url: "/api/banner/create",
     method: "post",
@@ -87,6 +88,42 @@ const SummaryApi = {
 
   delete_about: (id: string) => ({
     url: `/api/about/delete/${id}`,
+    method: "delete",
+  }),
+
+  // Timeline
+  create_timeline: {
+    url: "/api/timeline/create",
+    method: "post",
+  },
+
+  get_all_timeline: {
+    url: "/api/timeline/get-all",
+    method: "get",
+  },
+
+  get_timeline_by_id: (id: string) => ({
+    url: `/api/timeline/get/${id}`,
+    method: "get",
+  }),
+
+  get_timeline_by_category: (category: string) => ({
+    url: `/api/timeline/get-by-category/${category}`,
+    method: "get",
+  }),
+
+  update_timeline: (id: string) => ({
+    url: `/api/timeline/update/${id}`,
+    method: "put",
+  }),
+
+  update_timeline_status: (id: string) => ({
+    url: `/api/timeline/update-status/${id}`,
+    method: "patch",
+  }),
+
+  delete_timeline: (id: string) => ({
+    url: `/api/timeline/delete/${id}`,
     method: "delete",
   }),
 };

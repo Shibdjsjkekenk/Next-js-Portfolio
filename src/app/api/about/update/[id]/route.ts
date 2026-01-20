@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 
 export async function PUT(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
     await connectDB();
@@ -24,15 +24,15 @@ export async function PUT(
     if (!about) {
       return NextResponse.json(
         { success: false, message: "About Us not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    // 🔥 CLEAR REDIS CACHE
+    // CLEAR REDIS CACHE
     await redis.del(CACHE_KEYS.ABOUT_ALL);
     await redis.del(CACHE_KEYS.ABOUT_BY_ID(id));
 
-    // 🔥 REVALIDATE SSR
+    // REVALIDATE SSR
     revalidatePath("/");
     revalidatePath("/about");
 
@@ -48,7 +48,7 @@ export async function PUT(
         message: "Error updating About Us",
         error: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
