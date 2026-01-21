@@ -3,6 +3,7 @@ import userReducer from "./userSlice";
 import allUsersReducer from "./allUsersSlice";
 import bannerReducer from "./bannerSlice";
 import aboutReducer from "./aboutSlice"
+import timelineReducer from "./timelineSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     allUsers: allUsersReducer,
     banner: bannerReducer,
     about: aboutReducer,
+    timeline: timelineReducer,
   },
 });
 

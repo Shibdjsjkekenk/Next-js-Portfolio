@@ -46,9 +46,10 @@ import {
 type Props = {
   value: string;
   onChange: (html: string) => void;
+  minHeight?: string;
 };
 
-export default function RichTextEditor({ value, onChange }: Props) {
+export default function RichTextEditor({ value, onChange, minHeight }: Props) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -83,8 +84,15 @@ export default function RichTextEditor({ value, onChange }: Props) {
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: "focus:outline-none min-h-[320px] px-4 py-3 tiptap-editor",
+        class: [
+          "focus:outline-none",
+          "px-4",
+          "py-3",
+          "tiptap-editor",
+          minHeight ?? "min-h-[320px]",
+        ].join(" "),
       },
+
       transformPastedHTML(html) {
         return html
           .replace(/style="[^"]*"/g, "")
@@ -92,6 +100,7 @@ export default function RichTextEditor({ value, onChange }: Props) {
           .replace(/<\/span>/g, "");
       },
     },
+
     onUpdate({ editor }) {
       onChange(editor.getHTML());
     },
@@ -100,19 +109,25 @@ export default function RichTextEditor({ value, onChange }: Props) {
   useEffect(() => {
     if (!editor) return;
 
-    // sirf tab set karo jab editor empty ho
-    if (editor.isEmpty && value) {
+    // when parent clears content → clear editor
+    if (!value) {
+      editor.commands.clearContent();
+      return;
+    }
+
+    // when value comes from edit mode / outside
+    if (editor.getHTML() !== value) {
       editor.commands.setContent(value, false as any);
     }
-  }, [editor]);
+  }, [value, editor]);
+
 
   if (!editor) return null;
 
   const btn = (active = false) =>
-    `px-2 py-1.5 text-sm rounded-md border transition ${
-      active
-        ? "bg-[#6A38C2] text-white border-[#6A38C2]"
-        : "bg-white hover:bg-gray-100"
+    `px-2 py-1.5 text-sm rounded-md border transition ${active
+      ? "bg-[#6A38C2] text-white border-[#6A38C2]"
+      : "bg-white hover:bg-gray-100"
     }`;
 
   // Handlers (बिना .focus() के ताकि continuous typing हो सके)

@@ -6,7 +6,6 @@ const TimelineSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      lowercase: true,
     },
     content: {
       type: String, // FULL RICH TEXT HTML

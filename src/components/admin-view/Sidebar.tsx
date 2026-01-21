@@ -138,6 +138,15 @@ export default function Sidebar({
         />
 
         <MenuItem
+          icon={<RiTimelineView />}
+          label="Timeline"
+          href="/admin-panel/timeline"
+          isOpen={isOpen}
+          active={pathname.startsWith("/admin-panel/timeline")}
+          onClick={() => setIsMobileOpen(false)}
+        />
+
+        <MenuItem
           icon={<GoProjectRoadmap />}
           label="Exp. Project"
           href="/admin-panel/exp-project"
@@ -152,15 +161,6 @@ export default function Sidebar({
           href="/admin-panel/relevant-project"
           isOpen={isOpen}
           active={pathname.startsWith("/admin-panel/relevant-project")}
-          onClick={() => setIsMobileOpen(false)}
-        />
-
-        <MenuItem
-          icon={<RiTimelineView />}
-          label="Timeline"
-          href="/admin-panel/timeline"
-          isOpen={isOpen}
-          active={pathname.startsWith("/admin-panel/timeline")}
           onClick={() => setIsMobileOpen(false)}
         />
 
@@ -193,7 +193,7 @@ export default function Sidebar({
           <Marquee
             speed={35}
             gradient={false}
-            className="text-[10px] md:text-xs text-white opacity-80 leading-none"
+            className="text-[10px] md:text-xs text-white opacity-80"
           >
             <span className="mr-16">Copyright © 2025, Tiwari&apos;s</span>
             <span className="mr-16">Copyright © 2025, Tiwari&apos;s</span>

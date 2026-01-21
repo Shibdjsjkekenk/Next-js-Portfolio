@@ -10,5 +10,6 @@ export const CACHE_KEYS = {
   ABOUT_BY_ID: (id: string) => `portfolio:about:${id}`,
 
   TIMELINE_ALL: "timeline:all",
+  TIMELINE_BY_ID: (id: string) => `timeline:${id}`,
   TIMELINE_BY_CATEGORY: (cat: string) => `timeline:category:${cat}`,
 };
