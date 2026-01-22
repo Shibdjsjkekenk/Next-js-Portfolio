@@ -63,9 +63,9 @@ export default function TimelineSection({
 }) {
   return (
     <section className="py-5 bg-white">
-      <div className="max-w-7xl mx-auto px-1">
+      <div className="max-w-7xl mx-auto px-2">
         <VerticalTimeline lineColor="#d1d5db">
-          {list.map(item => {
+          {list.map((item) => {
             const key = normalize(item.category);
             const icon = iconMap[key] ?? <FaStream />;
             const bg = colorMap[key] ?? "#6A38C2";
@@ -79,10 +79,13 @@ export default function TimelineSection({
                   color: "#fff",
                   boxShadow: "0 0 0 4px #fff",
                 }}
+                /*  ONLY CHANGE IS HERE */
                 date={
-                  <span className="text-xl font-bold text-black">
-                    {item.category}
-                  </span>
+                  <div className="category-top">
+                    <span className="text-xl font-bold text-black">
+                      {item.category}
+                    </span>
+                  </div>
                 }
                 contentStyle={{
                   background: "#F3F4F6",

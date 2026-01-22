@@ -112,6 +112,11 @@ const SummaryApi = {
     method: "get",
   }),
 
+  update_timeline_order: {
+    url: "/api/timeline/update-order",
+    method: "put",
+  },
+
   update_timeline: (id: string) => ({
     url: `/api/timeline/update/${id}`,
     method: "put",

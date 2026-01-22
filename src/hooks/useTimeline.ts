@@ -143,15 +143,56 @@ export function useTimeline() {
     }
   };
 
+
+/* ================= REORDER (DRAG & DROP) ================= */
+const reorderTimeline = async (
+  activeId: string,
+  overId: string
+) => {
+  try {
+    const oldIndex = list.findIndex(i => i._id === activeId);
+    const newIndex = list.findIndex(i => i._id === overId);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    //  reorder locally
+    const newList = [...list];
+    const [movedItem] = newList.splice(oldIndex, 1);
+    newList.splice(newIndex, 0, movedItem);
+
+    //  instant UI update
+    dispatch(setTimelines(newList));
+
+    //  backend order save
+    const orders = newList.map((item, index) => ({
+      id: item._id,
+      order: index,
+    }));
+
+    await fetch(SummaryApi.update_timeline_order.url, {
+      method: SummaryApi.update_timeline_order.method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orders }),
+    });
+
+    toast.success("Timeline order updated");
+  } catch (err) {
+    toast.error("Order update failed");
+  }
+};
+
+
   return {
     list,
     loading,
     activeTimelineId,
+
     getAllTimelines,
     createTimeline,
     getTimelineById,
     updateTimelineById,
     deleteTimelineById,
+    reorderTimeline,
     setActiveTimeline: (id: string | null) =>
       dispatch(setActiveTimeline(id)),
   };

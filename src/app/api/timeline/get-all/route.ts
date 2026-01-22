@@ -18,9 +18,9 @@ export async function GET() {
 
     await connectDB();
 
-    const timelines = await Timeline.find({ isActive: true }).sort({
-      createdAt: 1, 
-    });
+    const timelines = await Timeline.find({ isActive: true })
+      .sort({ order: 1 })
+      .lean();
 
     await redis.set(
       CACHE_KEYS.TIMELINE_ALL,

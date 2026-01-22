@@ -17,7 +17,7 @@ const Navbar = () => {
   return (
     <>
       {/* ================= TOP NAVBAR ================= */}
-      <nav className="fixed top-0 left-0 w-full z-50 bg-gradient-to-b from-white to-[#e6e6f3]">
+      <nav className="fixed top-0 left-0 w-full z-50 bg-gradient-to-b from-white to-[#e6e6f3d9]">
         <div className="max-w-7xl mx-auto px-4 h-16 relative flex items-center sm:px-6 lg:px-8">
           {/* LEFT - LOGO */}
           <div className="flex-shrink-0">

@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
       content,
       order: order ?? 0,
       isActive: isActive ?? true,
+      
     });
 
     await redis.del(CACHE_KEYS.TIMELINE_ALL);
