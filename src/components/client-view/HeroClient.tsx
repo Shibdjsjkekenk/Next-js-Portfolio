@@ -93,7 +93,7 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
     hidden: {},
     show: {
       transition: {
-        delayChildren: 0.25,  
+        delayChildren: 0.25,
         staggerChildren: 0.35,
       },
     },
@@ -116,7 +116,14 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
 
   return (
     <div className="flex items-center justify-center max-w-full bg-[#f6f6f6de] relative z-10 mt-16">
-      <div className="flex flex-col md:flex-row items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+      <div
+        className="
+    flex flex-col md:flex-row items-center
+    max-w-7xl mx-auto
+    px-4 sm:px-6 lg:px-10 xl:px-16
+    pt-5
+  "
+      >
         {/* LEFT */}
         <motion.div
           className="w-full md:w-1/2"

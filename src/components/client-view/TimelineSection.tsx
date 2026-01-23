@@ -62,8 +62,8 @@ export default function TimelineSection({
   list: Timeline[];
 }) {
   return (
-    <section className="py-5 bg-white">
-      <div className="max-w-7xl mx-auto px-2">
+    <section className="">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-10 xl:px-16">
         <VerticalTimeline lineColor="#d1d5db">
           {list.map((item) => {
             const key = normalize(item.category);

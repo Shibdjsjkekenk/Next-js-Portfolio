@@ -912,8 +912,13 @@ select {
     width: 38px;
     height: 38px;
   }
-  .category-top{
+
+  .category-top {
     margin-top: 13px !important;
   }
 }
 
+.skill-shadow {
+  box-shadow: rgba(17, 17, 26, 0.1) 0px 0px 16px;
+  ;
+}
