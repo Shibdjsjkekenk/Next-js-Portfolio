@@ -94,7 +94,7 @@ useSkill({
           className="w-full lg:w-1/2 lg:h-screen flex flex-col justify-center"
         >
           <div className="pb-4">
-            <span className="px-4 py-2  rounded-full bg-[rgba(226,229,235,0.72)] text-[#F83002] text-[16px] abt font-extrabold text-center w-[20%] hurry-up">
+            <span className="px-5 py-2  rounded-full bg-[rgba(226,229,235,0.72)] text-[#F83002] text-[18px] abt font-extrabold text-center w-[20%] hurry-up">
               My <span className="text-[#6A38C2]">Skill</span>
             </span>
           </div>
@@ -137,7 +137,7 @@ useSkill({
               key={index}
               className="
                 skill-card skill-shadow
-                bg-white border rounded-2xl 
+                bg-white  rounded-2xl 
                 p-3 sm:p-5
                 text-center transition
               "

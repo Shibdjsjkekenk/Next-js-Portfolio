@@ -115,7 +115,7 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
   };
 
   return (
-    <div className="flex items-center justify-center max-w-full bg-[#f6f6f6de] relative z-10 mt-16">
+    <div className="flex items-center justify-center max-w-full relative z-10 mt-16">
       <div
         className="
     flex flex-col md:flex-row items-center
@@ -135,11 +135,23 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
 
             {/* HELLO */}
             <motion.div variants={itemVariants}>
-              <div className="bg-[rgba(226,229,235,0.72)] w-[30%] md:w-[20%] rounded-full px-4 py-1">
-                <span className="text-xl md:text-2xl font-bold gradient-background">
-                  Hello,
-                </span>
-              </div>
+             <div
+  className="
+    w-[30%] md:w-[20%]
+    rounded-full
+    px-5 py-1.5
+ hurry-up
+    relative
+  "
+>
+  {/* Top highlight */}
+  <div className="absolute inset-0 rounded-full bg-white/30 pointer-events-none" />
+
+  <span className="relative text-xl md:text-2xl font-bold gradient-background">
+    Hello,
+  </span>
+</div>
+
             </motion.div>
 
             {/* NAME */}

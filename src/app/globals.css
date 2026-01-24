@@ -304,8 +304,7 @@ code {
 }
 
 .hurry-up {
-  box-shadow: rgb(50 50 93 / 0%) 0px 30px 60px -12px inset, rgb(0 0 0 / 35%) -5px 16px 31px -17px inset;
-
+  box-shadow: rgba(255, 255, 255, 0) 0px 30px 60px -12px inset, rgb(0, 0, 0) -5px 16px 31px -17px inset;
 }
 
 .social:hover {
@@ -920,5 +919,5 @@ select {
 
 .skill-shadow {
   box-shadow: rgba(17, 17, 26, 0.1) 0px 0px 16px;
-  ;
+  border: 1px solid #b7bdc9;
 }

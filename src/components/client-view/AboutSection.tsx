@@ -67,7 +67,7 @@ export default function AboutSection({ about }: { about: About | null }) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 6 },
-    })
+    }),
   );
 
   /* DRAG END */
@@ -87,18 +87,15 @@ export default function AboutSection({ about }: { about: About | null }) {
   };
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext
-          items={order}
-          strategy={horizontalListSortingStrategy}
-        >
-          <div
-            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">            {order.map((item) =>
+        <SortableContext items={order} strategy={horizontalListSortingStrategy}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+            {order.map((item) =>
               item === "image" ? (
                 <SortableItem key="image" id="image">
                   <div className="flex justify-center">
@@ -116,7 +113,7 @@ export default function AboutSection({ about }: { about: About | null }) {
                   <div>
                     {/* TAG */}
                     <div className="pb-4">
-                      <span className="px-4 py-2  rounded-full bg-[rgba(226,229,235,0.72)] text-[#F83002] text-[16px] abt font-extrabold text-center w-[20%] hurry-up">
+                      <span className="px-4 py-2  rounded-full bg-[rgba(226,229,235,0.72)] text-[#F83002] text-[18px] abt font-extrabold text-center w-[20%] hurry-up">
                         About <span className="text-[#6A38C2]">Us</span>
                       </span>
                     </div>
@@ -165,7 +162,7 @@ export default function AboutSection({ about }: { about: About | null }) {
                     )}
                   </div>
                 </SortableItem>
-              )
+              ),
             )}
           </div>
         </SortableContext>
