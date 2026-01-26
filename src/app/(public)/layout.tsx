@@ -1,4 +1,5 @@
-import Navbar from "@/components/Navbar";
+import Footer from "@/components/client-view/Footer";
+import Navbar from "@/components/client-view/Navbar";
 
 export default function PublicLayout({
   children,
@@ -9,6 +10,7 @@ export default function PublicLayout({
     <>
       <Navbar />
       {children}
+      <Footer/>
     </>
   );
 }

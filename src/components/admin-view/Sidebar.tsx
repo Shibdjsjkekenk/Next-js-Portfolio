@@ -148,19 +148,10 @@ export default function Sidebar({
 
         <MenuItem
           icon={<GoProjectRoadmap />}
-          label="Exp. Project"
-          href="/admin-panel/exp-project"
+          label="Projects"
+          href="/admin-panel/projects"
           isOpen={isOpen}
-          active={pathname.startsWith("/admin-panel/exp-project")}
-          onClick={() => setIsMobileOpen(false)}
-        />
-
-        <MenuItem
-          icon={<FaProjectDiagram />}
-          label="Relevant Project"
-          href="/admin-panel/relevant-project"
-          isOpen={isOpen}
-          active={pathname.startsWith("/admin-panel/relevant-project")}
+          active={pathname.startsWith("/admin-panel/projects")}
           onClick={() => setIsMobileOpen(false)}
         />
 

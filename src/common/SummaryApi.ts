@@ -131,6 +131,43 @@ const SummaryApi = {
     url: `/api/timeline/delete/${id}`,
     method: "delete",
   }),
+
+
+  // Projects
+  create_project: {
+    url: "/api/projects/create",
+    method: "post",
+  },
+
+  get_all_projects: {
+    url: "/api/projects/get-all",
+    method: "get",
+  },
+
+  get_project_by_id: (id: string) => ({
+    url: `/api/projects/get?id=${id}`,
+    method: "get",
+  }),
+
+  update_project_order: {
+    url: "/api/projects/update-order",
+    method: "patch",
+  },
+
+  update_project: {
+    url: "/api/projects/update",
+    method: "put",
+  },
+
+  update_project_status: {
+    url: "/api/projects/update-status",
+    method: "patch",
+  },
+
+  delete_project: {
+    url: "/api/projects/delete",
+    method: "delete",
+  },
 };
 
 export default SummaryApi;

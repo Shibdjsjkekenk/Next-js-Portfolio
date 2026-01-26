@@ -78,47 +78,48 @@ const SkillSection: React.FC = () => {
   const rightRef = useRef<HTMLDivElement>(null);
 
   /* ONLY CHANGE: GSAP logic moved to hook */
-useSkill({
-  sectionRef,
-  leftRef,
-  rightRef,
-});
+  useSkill({
+    sectionRef,
+    leftRef,
+    rightRef,
+  });
 
   return (
     <section ref={sectionRef} className="">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 flex flex-col lg:flex-row gap-2">
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 flex flex-col lg:flex-row gap-2 relative">
         {/* ---------- LEFT CONTENT ---------- */}
-        <div
-          ref={leftRef}
-          className="w-full lg:w-1/2 lg:h-screen flex flex-col justify-center"
-        >
-          <div className="pb-4">
-            <span className="px-5 py-2  rounded-full bg-[rgba(226,229,235,0.72)] text-[#F83002] text-[18px] abt font-extrabold text-center w-[20%] hurry-up">
-              My <span className="text-[#6A38C2]">Skill</span>
-            </span>
+        <div className="w-full lg:w-1/2">
+          <div
+            ref={leftRef}
+            className="min-h-screen flex flex-col justify-center"
+          >
+            <div className="pb-4">
+              <span className="px-5 py-2  rounded-full bg-[rgba(226,229,235,0.72)] text-[#F83002] text-[18px] abt font-extrabold text-center w-[20%] hurry-up">
+                My <span className="text-[#6A38C2]">Skill</span>
+              </span>
+            </div>
+
+            <h2 className="text-3xl lg:text-3xl font-bold text-gray-900 mb-5 leading-tight">
+              My Experts Areas Where I Gained Skill
+            </h2>
+
+            <p className="text-black max-w-lg mb-4 text-justify">
+              I specialize in building modern, scalable and high-performance web
+              applications using cutting-edge frontend and backend technologies.
+            </p>
+
+            <p className="text-black max-w-lg mb-4 text-justify">
+              Over time, I have worked on real-world projects that required
+              clean architecture, reusable components, secure APIs, and smooth
+              user experiences across devices.
+            </p>
+
+            <p className="text-black max-w-lg text-justify">
+              My approach focuses on performance, maintainability, and
+              future-ready solutions that align with business goals and user
+              needs.
+            </p>
           </div>
-
-          <h2 className="text-3xl lg:text-3xl font-bold text-gray-900 mb-5 leading-tight">
-            My Experts Areas Where I Gained Skill
-          </h2>
-
-          <p className="text-black max-w-lg mb-4 text-justify">
-            I specialize in building modern, scalable and high-performance web
-            applications using cutting-edge frontend and backend technologies.
-          </p>
-
-          <p className="text-black max-w-lg mb-4 text-justify">
-            Over time, I have worked on real-world projects that required clean
-            architecture, reusable components, secure APIs, and smooth user
-            experiences across devices.
-          </p>
-
-          <p className="text-black max-w-lg text-justify">
-            My approach focuses on performance, maintainability, and
-            future-ready solutions that align with business goals and user
-            needs.
-          </p>
         </div>
 
         {/* ---------- RIGHT SECTION ---------- */}
@@ -126,7 +127,7 @@ useSkill({
           ref={rightRef}
           className="
             w-full lg:w-1/2
-            py-8 lg:py-32
+            py-0 lg:py-18
             grid
             grid-cols-3
             gap-4 sm:gap-6
@@ -161,7 +162,6 @@ useSkill({
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );

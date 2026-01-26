@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-/* ================= TYPES ================= */
+// Types
 
 export type Timeline = {
   _id: string;
@@ -11,16 +11,16 @@ export type Timeline = {
   createdAt: string;
 };
 
-/* ================= STATE ================= */
+// state
 
 type TimelineState = {
   list: Timeline[];
   loading: boolean;
-  fetchedOnce: boolean;        // 🔥 navigation pe dobara fetch na ho
+  fetchedOnce: boolean;        // navigation pe dobara fetch na ho
   activeTimelineId: string | null; // edit / view ke liye
 };
 
-/* ================= INITIAL STATE ================= */
+// initial state
 
 const initialState: TimelineState = {
   list: [],
@@ -29,7 +29,7 @@ const initialState: TimelineState = {
   activeTimelineId: null,
 };
 
-/* ================= SLICE ================= */
+// slice
 
 const timelineSlice = createSlice({
   name: "timeline",
@@ -44,7 +44,7 @@ const timelineSlice = createSlice({
 
     /* LOADING (navigation-safe) */
     setTimelinesLoading: (state) => {
-      // ❌ unnecessary loading avoid
+      // unnecessary loading avoid
       if (!state.fetchedOnce) {
         state.loading = true;
       }
@@ -103,7 +103,7 @@ const timelineSlice = createSlice({
   },
 });
 
-/* ================= EXPORTS ================= */
+// export
 
 export const {
   setTimelines,

@@ -22,21 +22,29 @@ export const useSkill = ({
 
     const mm = gsap.matchMedia();
 
-    /* ---------- LEFT PIN ---------- */
+    /* ================= LEFT PIN (FINAL SAFE VERSION) ================= */
     mm.add("(min-width: 1024px)", () => {
       ScrollTrigger.create({
         trigger: sectionRef.current!,
         start: "top top",
-        end: () => `+=${rightRef.current!.scrollHeight}`,
+
+        // ✅ FINAL FIX — pin ends when section ends
+        end: "bottom bottom",
+
         pin: leftRef.current!,
-        scrub: true,
+        pinSpacing: true,
+        scrub: true,          // SAME smooth behavior as before
         anticipatePin: 1,
       });
     });
 
-    /* ---------- FAST GLOW / BLING ---------- */
+    /* ================= CARD GLOW (UNCHANGED, STABLE) ================= */
     const cards = gsap.utils.toArray<HTMLDivElement>(".skill-card");
-    const tl = gsap.timeline({ repeat: -1 });
+
+    const tl = gsap.timeline({
+      repeat: -1,
+      defaults: { ease: "power3.out" },
+    });
 
     cards.forEach((card) => {
       tl.to(card, {
@@ -44,23 +52,21 @@ export const useSkill = ({
         boxShadow:
           "0 0 0 1px rgba(239,68,68,0.5), 0 0 18px rgba(239,68,68,0.35)",
         duration: 0.25,
-        ease: "power3.out",
       }).to(
         card,
         {
           borderColor: "#E5E7EB",
           boxShadow: "none",
-          duration: 0.2,
-          ease: "power2.in",
+          duration: 0.25,
         },
-        "+=0.15"
+        "+=0.2"
       );
     });
 
     return () => {
       tl.kill();
       mm.revert();
-      ScrollTrigger.getAll().forEach(t => t.kill());
+      ScrollTrigger.getAll().forEach((t) => t.kill());
     };
-  }, [sectionRef, leftRef, rightRef]);
+  }, []);
 };
