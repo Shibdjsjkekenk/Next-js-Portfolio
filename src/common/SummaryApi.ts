@@ -135,37 +135,37 @@ const SummaryApi = {
 
   // Projects
   create_project: {
-    url: "/api/projects/create",
+    url: "/api/project/create",
     method: "post",
   },
 
   get_all_projects: {
-    url: "/api/projects/get-all",
+    url: "/api/project/get-all",
     method: "get",
   },
 
   get_project_by_id: (id: string) => ({
-    url: `/api/projects/get?id=${id}`,
+    url: `/api/project/get?id=${id}`,
     method: "get",
   }),
 
   update_project_order: {
-    url: "/api/projects/update-order",
+    url: "/api/project/update-order",
     method: "patch",
   },
 
   update_project: {
-    url: "/api/projects/update",
+    url: "/api/project/update",
     method: "put",
   },
 
   update_project_status: {
-    url: "/api/projects/update-status",
+    url: "/api/project/update-status",
     method: "patch",
   },
 
   delete_project: {
-    url: "/api/projects/delete",
+    url: "/api/project/delete",
     method: "delete",
   },
 };

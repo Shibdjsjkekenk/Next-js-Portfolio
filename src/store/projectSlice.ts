@@ -21,8 +21,9 @@ export type Project = {
 type ProjectState = {
   list: Project[];
   loading: boolean;
-  fetchedOnce: boolean;        // navigation pe dobara fetch na ho
-  activeProjectId: string | null; // edit / view ke liye
+  fetchedOnce: boolean;          // navigation pe dobara fetch na ho
+  activeProjectId: string | null; // ✏️ EDIT ONLY
+  viewProjectId: string | null;   // 👁️ VIEW ONLY
 };
 
 /* =====================
@@ -34,6 +35,7 @@ const initialState: ProjectState = {
   loading: true,
   fetchedOnce: false,
   activeProjectId: null,
+  viewProjectId: null,
 };
 
 /* =====================
@@ -53,7 +55,6 @@ const projectSlice = createSlice({
 
     /* LOADING (navigation-safe) */
     setProjectsLoading: (state) => {
-      // route change pe unnecessary loader avoid
       if (!state.fetchedOnce) {
         state.loading = true;
       }
@@ -65,6 +66,7 @@ const projectSlice = createSlice({
       state.loading = false;
       state.fetchedOnce = false;
       state.activeProjectId = null;
+      state.viewProjectId = null;
     },
 
     /* ADD */
@@ -89,7 +91,7 @@ const projectSlice = createSlice({
       );
     },
 
-    /* STATUS TOGGLE (helper) */
+    /* STATUS TOGGLE */
     updateProjectStatus: (
       state,
       action: PayloadAction<{ id: string; isActive: boolean }>
@@ -102,12 +104,20 @@ const projectSlice = createSlice({
       }
     },
 
-    /* VIEW / EDIT CONTROL */
+    /* ✏️ EDIT CONTROL */
     setActiveProject: (
       state,
       action: PayloadAction<string | null>
     ) => {
       state.activeProjectId = action.payload;
+    },
+
+    /* 👁️ VIEW CONTROL */
+    setViewProject: (
+      state,
+      action: PayloadAction<string | null>
+    ) => {
+      state.viewProjectId = action.payload;
     },
   },
 });
@@ -125,6 +135,7 @@ export const {
   removeProject,
   updateProjectStatus,
   setActiveProject,
+  setViewProject,      // 👈 NEW
 } = projectSlice.actions;
 
 export default projectSlice.reducer;
