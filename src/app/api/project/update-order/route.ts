@@ -3,35 +3,42 @@ import { connectDB } from "@/lib/db";
 import Project from "@/models/Project";
 import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
+import { revalidatePath } from "next/cache";
 
-export async function PATCH(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   try {
-    await connectDB();
     const { items } = await req.json();
-    // items = [{ id, order }]
 
-    const bulkOps = items.map((item: any) => ({
+    if (!items || items.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "No items to reorder" },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+
+    const bulk = items.map((item: any) => ({
       updateOne: {
         filter: { _id: item.id },
         update: { order: item.order },
       },
     }));
 
-    await Project.bulkWrite(bulkOps);
+    await Project.bulkWrite(bulk);
 
     await redis.del(CACHE_KEYS.PROJECT_ALL);
+
+    revalidatePath("/");
+    revalidatePath("/admin/projects");
 
     return NextResponse.json({
       success: true,
       message: "Project order updated",
     });
-  } catch (error: any) {
+  } catch (err: any) {
     return NextResponse.json(
-      {
-        success: false,
-        message: "Error updating project order",
-        error: error.message,
-      },
+      { success: false, message: err.message },
       { status: 500 }
     );
   }

@@ -12,7 +12,7 @@ import {
   removeProject,
   updateProjectStatus,
   setActiveProject,
-  setViewProject,          // 👁️ NEW
+  setViewProject,
 } from "@/store/projectSlice";
 
 export function useProjects() {
@@ -23,7 +23,7 @@ export function useProjects() {
     loading,
     fetchedOnce,
     activeProjectId,
-    viewProjectId,          // 👁️ NEW
+    viewProjectId,
   } = useSelector((state: RootState) => state.projects);
 
   /* ================= GET ALL ================= */
@@ -160,21 +160,46 @@ export function useProjects() {
     try {
       const oldIndex = list.findIndex(p => p._id === activeId);
       const newIndex = list.findIndex(p => p._id === overId);
+
       if (oldIndex === -1 || newIndex === -1) return;
 
-      const newList = [...list];
-      const [moved] = newList.splice(oldIndex, 1);
-      newList.splice(newIndex, 0, moved);
+      // FULL LIST reorder
+      const reordered = [...list];
+      const [moved] = reordered.splice(oldIndex, 1);
+      reordered.splice(newIndex, 0, moved);
 
-      dispatch(setProjects(newList));
+      // NORMALIZE ORDER
+      const normalized = reordered.map((p, index) => ({
+        ...p,
+        order: index,
+      }));
 
-      const items = newList.map((p, i) => ({ id: p._id, order: i }));
+      // Update redux immediately (optimistic UI)
+      dispatch(setProjects(normalized));
 
-      await fetch(SummaryApi.update_project_order.url, {
-        method: SummaryApi.update_project_order.method,
-        headers: { "Content-Type": "application/json" },
+      // ✅ ONLY SEND id + order to backend
+      const items = normalized.map(p => ({
+        id: p._id,
+        order: p.order,
+      }));
+
+      const res = await fetch(SummaryApi.update_project_order.url, {
+        method: SummaryApi.update_project_order.method, // PUT
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ items }),
       });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      const json = await res.json();
+
+      if (!json?.success) {
+        throw new Error(json?.message || "Order update failed");
+      }
 
       toast.success("Project order updated");
     } catch {
@@ -186,12 +211,12 @@ export function useProjects() {
     list,
     loading,
 
-    /* ✏️ EDIT */
+    /*  EDIT */
     activeProjectId,
     setActiveProject: (id: string | null) =>
       dispatch(setActiveProject(id)),
 
-    /* 👁️ VIEW */
+    /*  VIEW */
     viewProjectId,
     setViewProject: (id: string | null) =>
       dispatch(setViewProject(id)),

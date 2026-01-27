@@ -18,7 +18,9 @@ export async function GET() {
     }
 
     await connectDB();
-    const projects = await Project.find().sort({ order: 1 });
+
+    const projects = await Project.find()
+      .sort({ order: 1, createdAt: 1 });
 
     await redis.set(
       CACHE_KEYS.PROJECT_ALL,

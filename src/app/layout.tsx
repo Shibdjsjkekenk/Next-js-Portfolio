@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import ReduxProvider from "@/store/ReduxProvider";
 import CurrentUser from "@/components/admin-view/CurrentUser";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const mono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
@@ -29,9 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen w-full relative bg-white overflow-x-hidden`}
+        className={`${inter.variable} ${mono.variable} min-h-screen w-full relative bg-white overflow-x-hidden`}
       >
-        {/* 🔹 PatternCraft / Funsel Background */}
+        {/* Background */}
         <div
           className="fixed inset-0 -z-10"
           style={{
@@ -45,23 +45,12 @@ export default function RootLayout({
           }}
         />
 
-        {/* Redux + Current User Init */}
         <ReduxProvider>
           <CurrentUser />
           {children}
         </ReduxProvider>
 
-        {/* Toast */}
-        <ToastContainer
-          position="top-right"
-          autoClose={2000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          pauseOnHover
-          draggable
-          theme="light"
-        />
+        <ToastContainer position="top-right" autoClose={2000} theme="light" />
       </body>
     </html>
   );

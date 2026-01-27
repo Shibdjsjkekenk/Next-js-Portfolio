@@ -5,13 +5,75 @@ import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Table from "@/common/Table";
 import Pagination from "@/components/admin-view/Pagination";
-import { useProjects } from "@/hooks/useProjects";
 import ProjectCardView from "@/components/admin-view/ProjectCardView";
+import { useProjects } from "@/hooks/useProjects";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 
+/* ================= DND ================= */
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  defaultAnimateLayoutChanges,
+} from "@dnd-kit/sortable";
+
+import { CSS } from "@dnd-kit/utilities";
+
+/* ================= CONSTANT ================= */
 const ITEMS_PER_PAGE = 5;
 
+/* ================= SORTABLE ROW ================= */
+function SortableRow({
+  id,
+  children,
+}: {
+  id: string;
+  children: React.ReactNode;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id,
+    animateLayoutChanges: (args) =>
+      defaultAnimateLayoutChanges({ ...args, wasDragging: true }),
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: transition ?? "transform 250ms cubic-bezier(0.22,1,0.36,1)",
+    opacity: isDragging ? 0.3 : 1,
+  };
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="cursor-grab active:cursor-grabbing"
+    >
+      {children}
+    </tr>
+  );
+}
+
+/* ================= MAIN ================= */
 export default function ProjectCardPreview() {
   const {
     list: projects,
@@ -21,12 +83,17 @@ export default function ProjectCardPreview() {
     setActiveProject,
     setViewProject,
     toggleProjectStatus,
+    reorderProjects,
   } = useProjects();
 
-  /* PAGINATION STATE */
+  /* PAGINATION */
   const [currentPage, setCurrentPage] = useState(1);
+
+  /* VIEW MODAL */
   const viewProject = useSelector((state: RootState) =>
-    state.projects.list.find((p) => p._id === state.projects.viewProjectId),
+    state.projects.list.find(
+      (p) => p._id === state.projects.viewProjectId
+    )
   );
 
   /* FETCH ONCE */
@@ -44,10 +111,16 @@ export default function ProjectCardPreview() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedProjects = projects.slice(
     startIndex,
-    startIndex + ITEMS_PER_PAGE,
+    startIndex + ITEMS_PER_PAGE
   );
 
-  /* DELETE CONFIRM */
+  /* DND SENSORS */
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 5 } })
+  );
+
+  /* DELETE */
   const handleDelete = (id: string) => {
     toast.warn(
       ({ closeToast }) => (
@@ -57,10 +130,7 @@ export default function ProjectCardPreview() {
           </p>
 
           <div className="flex justify-end gap-2">
-            <button
-              onClick={closeToast}
-              className="px-3 py-1 text-sm rounded border"
-            >
+            <button onClick={closeToast} className="px-3 py-1 border rounded">
               Cancel
             </button>
 
@@ -69,135 +139,122 @@ export default function ProjectCardPreview() {
                 await deleteProjectById(id);
                 closeToast();
               }}
-              className="px-3 py-1 text-sm rounded bg-red-600 text-white hover:bg-red-700"
+              className="px-3 py-1 bg-red-600 text-white rounded"
             >
               Delete
             </button>
           </div>
         </div>
       ),
-      { autoClose: false, closeOnClick: false },
+      { autoClose: false, closeOnClick: false }
     );
+  };
+
+  /* DRAG END */
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    reorderProjects(active.id.toString(), over.id.toString());
   };
 
   return (
     <div className="space-y-4">
-      {/* TABLE */}
       <div className="bg-white rounded-xl shadow overflow-hidden">
-        {/* SKELETON */}
         {loading && projects.length === 0 ? (
           <Table headers={["No", "Image", "Link", "Status", "Action"]}>
-            {[1, 2, 3].map((_, index) => (
-              <tr key={index} className="animate-pulse">
-                <td className="p-2 border">
-                  <div className="h-4 w-6 bg-gray-200 rounded" />
-                </td>
-                <td className="p-2 border">
-                  <div className="w-16 h-10 bg-gray-200 rounded" />
-                </td>
-                <td className="p-2 border">
-                  <div className="h-4 w-40 bg-gray-200 rounded" />
-                </td>
-                <td className="p-2 border">
-                  <div className="h-6 w-16 bg-gray-200 rounded-full" />
-                </td>
-                <td className="p-2 border">
-                  <div className="flex gap-2 justify-center">
-                    <div className="h-8 w-8 bg-gray-200 rounded-full" />
-                    <div className="h-8 w-8 bg-gray-200 rounded-full" />
-                    <div className="h-8 w-8 bg-gray-200 rounded-full" />
-                  </div>
-                </td>
+            {[1, 2, 3].map((i) => (
+              <tr key={i} className="animate-pulse">
+                <td className="p-2 border"><div className="h-4 w-6 bg-gray-200 rounded" /></td>
+                <td className="p-2 border"><div className="w-16 h-10 bg-gray-200 rounded" /></td>
+                <td className="p-2 border"><div className="h-4 w-40 bg-gray-200 rounded" /></td>
+                <td className="p-2 border"><div className="h-6 w-16 bg-gray-200 rounded-full" /></td>
+                <td className="p-2 border"><div className="h-8 w-8 bg-gray-200 rounded-full" /></td>
               </tr>
             ))}
           </Table>
         ) : (
-          <Table headers={["No", "Image", "Link", "Status", "Action"]}>
-            {paginatedProjects.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="p-4 text-center text-gray-500">
-                  No projects found
-                </td>
-              </tr>
-            ) : (
-              paginatedProjects.map((project, index) => (
-                <tr key={project._id} className="whitespace-nowrap">
-                  {/* SR NO (GLOBAL INDEX) */}
-                  <td className="p-2 border">{startIndex + index + 1}</td>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            {/* 🔥 FULL LIST HERE */}
+            <SortableContext
+              items={projects.map((p) => p._id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <Table headers={["No", "Image", "Link", "Status", "Action"]}>
+                {paginatedProjects.map((project, index) => (
+                  <SortableRow key={project._id} id={project._id}>
+                    <td className="p-2 border">{startIndex + index + 1}</td>
 
-                  {/* IMAGE */}
-                  <td className="p-2 border">
-                    {project.projectImage ? (
-                      <img
-                        src={project.projectImage}
-                        className="w-16 h-10 object-cover rounded"
-                      />
-                    ) : (
-                      "—"
-                    )}
-                  </td>
+                    <td className="p-2 border">
+                      {project.projectImage ? (
+                        <img
+                          src={project.projectImage}
+                          className="w-16 h-10 object-cover rounded"
+                        />
+                      ) : "—"}
+                    </td>
 
-                  {/* LINK */}
-                  <td className="p-2 border max-w-[250px] truncate">
-                    <a
-                      href={project.projectLink}
-                      target="_blank"
-                      className="text-blue-600 hover:underline text-sm"
-                    >
-                      {project.projectLink}
-                    </a>
-                  </td>
+                    <td className="p-2 border truncate max-w-[250px]">
+                      <a
+                        href={project.projectLink}
+                        target="_blank"
+                        className="text-blue-600 hover:underline text-sm"
+                      >
+                        {project.projectLink}
+                      </a>
+                    </td>
 
-                  {/* STATUS */}
-                  <td className="p-2 border">
-                    <span
-                      onClick={() =>
-                        toggleProjectStatus(project._id, !project.isActive)
-                      }
-                      className={`cursor-pointer px-2 py-1 rounded-full text-xs
-                        ${
+                    <td className="p-2 border">
+                      <span
+                        onClick={() =>
+                          toggleProjectStatus(project._id, !project.isActive)
+                        }
+                        className={`cursor-pointer px-2 py-1 rounded-full text-xs ${
                           project.isActive
                             ? "bg-green-100 text-green-700"
                             : "bg-red-100 text-red-700"
                         }`}
-                    >
-                      {project.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-
-                  {/* ACTIONS */}
-                  <td className="p-2 border">
-                    <div className="flex gap-2 justify-center">
-                      <button
-                        onClick={() => setViewProject(project._id)}
-                        className="p-1 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
                       >
-                        <FaEye size={14} />
-                      </button>
+                        {project.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </td>
 
-                      <button
-                        onClick={() => setActiveProject(project._id)}
-                        className="p-1 rounded-full bg-green-100 text-green-700 hover:bg-green-200"
-                      >
-                        <FaEdit size={13} />
-                      </button>
+                    <td className="p-2 border">
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          onClick={() => setViewProject(project._id)}
+                          className="p-1 rounded-full bg-blue-100 text-blue-700"
+                        >
+                          <FaEye size={14} />
+                        </button>
 
-                      <button
-                        onClick={() => handleDelete(project._id)}
-                        className="p-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
-                      >
-                        <FaTrash size={13} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </Table>
+                        <button
+                          onClick={() => setActiveProject(project._id)}
+                          className="p-1 rounded-full bg-green-100 text-green-700"
+                        >
+                          <FaEdit size={13} />
+                        </button>
+
+                        <button
+                          onClick={() => handleDelete(project._id)}
+                          className="p-1 rounded-full bg-red-100 text-red-700"
+                        >
+                          <FaTrash size={13} />
+                        </button>
+                      </div>
+                    </td>
+                  </SortableRow>
+                ))}
+              </Table>
+            </SortableContext>
+          </DndContext>
         )}
       </div>
 
-      {/* PAGINATION */}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}

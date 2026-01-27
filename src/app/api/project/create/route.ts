@@ -18,11 +18,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const lastProject = await Project.findOne().sort({ order: -1 });
+
     const project = await Project.create({
       content,
       projectImage,
       projectLink,
-      order: order ?? 0,
+      order: lastProject ? lastProject.order + 1 : 0,
       isActive: isActive ?? true,
     });
 

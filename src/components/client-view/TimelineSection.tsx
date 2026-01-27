@@ -1,20 +1,9 @@
 "use client";
 
 import {
-  VerticalTimeline,
-  VerticalTimelineElement,
-} from "react-vertical-timeline-component";
-import "react-vertical-timeline-component/style.min.css";
-
-import {
   FaGraduationCap,
   FaCertificate,
   FaTools,
-  FaPaintBrush,
-  FaStream,
-  FaBriefcase,
-  FaRocket,
-  FaCode,
 } from "react-icons/fa";
 
 type Timeline = {
@@ -26,84 +15,87 @@ type Timeline = {
 const iconMap: Record<string, React.ReactNode> = {
   education: <FaGraduationCap />,
   certification: <FaCertificate />,
-  certificate: <FaCertificate />,
-  activity: <FaTools />,
-  extraactivities: <FaTools />,
-  hobby: <FaPaintBrush />,
-  hobbies: <FaPaintBrush />,
-  work: <FaBriefcase />,
-  experience: <FaBriefcase />,
-  project: <FaCode />,
-  projects: <FaCode />,
-  deployment: <FaRocket />,
+  "extra activities": <FaTools />,
 };
 
 const colorMap: Record<string, string> = {
-  education: "#3b82f6",
-  certification: "#10b981",
-  certificate: "#10b981",
-  activity: "#f97316",
-  extraactivities: "#f97316",
-  hobby: "#ef4444",
-  hobbies: "#ef4444",
-  work: "#6366f1",
-  experience: "#6366f1",
-  project: "#0ea5e9",
-  projects: "#0ea5e9",
-  deployment: "#a855f7",
+  education: "bg-blue-500",
+  certification: "bg-green-500",
+  "extra activities": "bg-orange-500",
 };
 
 const normalize = (v: string) =>
-  v.toLowerCase().replace(/\s+/g, "");
+  v.toLowerCase().trim();
 
-export default function TimelineSection({
-  list,
-}: {
-  list: Timeline[];
-}) {
+export default function TimelineSection({ list }: { list: Timeline[] }) {
   return (
-    <section className="">
-      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-10 xl:px-16">
-        <VerticalTimeline lineColor="#d1d5db">
-          {list.map((item) => {
+    <section className="py-20">
+      <div className="max-w-6xl mx-auto px-4 relative">
+
+        {/* CENTER LINE */}
+        <div className="absolute left-1/2 top-0 h-full w-[2px] bg-gray-300 -translate-x-1/2 hidden md:block" />
+
+        <div className="space-y-24">
+          {list.map((item, index) => {
             const key = normalize(item.category);
-            const icon = iconMap[key] ?? <FaStream />;
-            const bg = colorMap[key] ?? "#6A38C2";
+            const icon = iconMap[key];
+            const color = colorMap[key] ?? "bg-gray-500";
+
+            const isLeftCard = index % 2 === 0;
 
             return (
-              <VerticalTimelineElement
+              <div
                 key={item._id}
-                icon={icon}
-                iconStyle={{
-                  background: bg,
-                  color: "#fff",
-                  boxShadow: "0 0 0 4px #fff",
-                }}
-                /*  ONLY CHANGE IS HERE */
-                date={
-                  <div className="category-top">
-                    <span className="text-xl font-bold text-black">
+                className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-8"
+              >
+                {/* LEFT SIDE */}
+                <div className="flex justify-end">
+                  {isLeftCard ? (
+                    <div className="bg-gray-100 p-5 rounded-xl shadow max-w-md">
+                      <div
+                        className="tiptap-editor"
+                        dangerouslySetInnerHTML={{
+                          __html: item.content,
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <span className="font-semibold text-gray-800">
                       {item.category}
                     </span>
+                  )}
+                </div>
+
+                {/* CENTER ICON */}
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`h-12 w-12 rounded-full flex items-center justify-center text-white shadow ${color}`}
+                  >
+                    {icon}
                   </div>
-                }
-                contentStyle={{
-                  background: "#F3F4F6",
-                  borderRadius: "12px",
-                  padding: "20px 20px",
-                }}
-                contentArrowStyle={{
-                  borderRight: "7px solid #F3F4F6",
-                }}
-              >
-                <div
-                  className="tiptap-editor"
-                  dangerouslySetInnerHTML={{ __html: item.content }}
-                />
-              </VerticalTimelineElement>
+                </div>
+
+                {/* RIGHT SIDE */}
+                <div className="flex justify-start">
+                  {!isLeftCard ? (
+                    <div className="bg-gray-100 p-5 rounded-xl shadow max-w-md">
+                      <div
+                        className="tiptap-editor"
+                        dangerouslySetInnerHTML={{
+                          __html: item.content,
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <span className="font-semibold text-gray-800">
+                      {item.category}
+                    </span>
+                  )}
+                </div>
+              </div>
             );
           })}
-        </VerticalTimeline>
+        </div>
       </div>
     </section>
   );

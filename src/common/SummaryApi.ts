@@ -151,7 +151,7 @@ const SummaryApi = {
 
   update_project_order: {
     url: "/api/project/update-order",
-    method: "patch",
+    method: "put",
   },
 
   update_project: {
