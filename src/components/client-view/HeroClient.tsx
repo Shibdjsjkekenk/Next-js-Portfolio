@@ -3,8 +3,6 @@
 import React, { ReactNode, useState, useEffect, useRef } from "react";
 import { motion, type Variants } from "framer-motion";
 import Typewriter from "typewriter-effect";
-import No1 from "@/assets/no-1.webp";
-import NoBg from "@/assets/no-bg.webp";
 import { useHero } from "@/hooks/gsap/useHero";
 import {
   FaFacebookF,
@@ -37,8 +35,6 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
       setTypewriterKey((prev) => prev + 1);
     }
   }, [banner]);
-
-
 
   if (!banner) {
     return (
@@ -135,22 +131,22 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
 
             {/* HELLO */}
             <motion.div variants={itemVariants}>
-             <div
-  className="
+              <div
+                className="
     w-[30%] md:w-[20%]
     rounded-full
     px-5 py-1.5
  hurry-up
     relative
   "
->
-  {/* Top highlight */}
-  <div className="absolute inset-0 rounded-full bg-white/30 pointer-events-none" />
+              >
+                {/* Top highlight */}
+                <div className="absolute inset-0 rounded-full bg-white/30 pointer-events-none" />
 
-  <span className="relative text-xl md:text-2xl font-bold gradient-background">
-    Hello,
-  </span>
-</div>
+                <span className="relative text-xl md:text-2xl font-bold gradient-background">
+                  Hello,
+                </span>
+              </div>
 
             </motion.div>
 
@@ -237,11 +233,11 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
         {/* RIGHT */}
         <div
           className="w-full md:w-1/2 flex items-center justify-center"
-          style={{ backgroundImage: `url(${NoBg.src})` }}
+          style={{ backgroundImage: "url('/assets/no-bg.webp')" }}
         >
           <div className="bounce-custom">
             <img
-              src={banner.image || No1.src}
+              src={banner.image}
               alt="Dynamic Banner"
               className="rounded-md md:ml-[20px] w-full"
             />

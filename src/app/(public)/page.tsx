@@ -1,9 +1,11 @@
 import Hero from "@/components/server/Hero";
 import About from "@/components/server/About";
 import Timeline from "@/components/server/Timeline";
-import SkillSection from "@/components/client-view/SkillSection";
-import ProjectsPage from "@/components/server/projects";
 import CategoryCarousel from "@/components/client-view/CategoryCarousel";
+import SkillSection from "@/components/client-view/SkillSection";
+import Projects from "@/components/server/projects";
+import MyExpertise from "@/components/client-view/MyExpertise";
+
 
 export default function Home() {
   return (
@@ -13,7 +15,8 @@ export default function Home() {
       <Timeline />
       <CategoryCarousel />
       <SkillSection />
-      <ProjectsPage />
+      <Projects />
+      <MyExpertise/>
     </>
   );
 }

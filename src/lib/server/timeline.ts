@@ -15,14 +15,9 @@ export async function getActiveTimelines() {
     //  DB
     await connectDB();
 
-const timelines = await Timeline.find({
-  $or: [
-    { isActive: true },
-    { isActive: { $exists: false } }
-  ],
-})
-.sort({ order: 1, createdAt: -1 })
-.lean();
+    const timelines = await Timeline.find({ isActive: true })
+      .sort({ order: 1, createdAt: -1 })
+      .lean(); // IMPORTANT (JSON-safe)
 
     if (!timelines.length) return [];
 

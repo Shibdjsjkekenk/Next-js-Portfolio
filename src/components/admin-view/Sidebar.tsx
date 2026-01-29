@@ -18,7 +18,6 @@ import { GrUnorderedList } from "react-icons/gr";
 import { BiLogOut } from "react-icons/bi";
 import { IoClose } from "react-icons/io5";
 import Marquee from "react-fast-marquee";
-import logo from "@/assets/logo-white.png";
 import type { RootState } from "@/store/store";
 
 /* ================= PROPS ================= */
@@ -66,7 +65,7 @@ export default function Sidebar({
 
         {isOpen && (
           <Link href="/">
-            <Image src={logo} alt="logo" className="w-32 h-10 object-contain" />
+            <Image src="/assets/logo-white.png" width={110} height={70} alt="logo" className="" />
           </Link>
         )}
       </div>

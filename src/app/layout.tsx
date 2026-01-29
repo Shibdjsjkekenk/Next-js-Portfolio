@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import ReduxProvider from "@/store/ReduxProvider";
 import CurrentUser from "@/components/admin-view/CurrentUser";
+import SmoothScroll from "@/common/SmoothScroll";
 
-const inter = Inter({
-  variable: "--font-inter",
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const mono = JetBrains_Mono({
-  variable: "--font-mono",
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -29,9 +30,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${mono.variable} min-h-screen w-full relative bg-white overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen w-full relative bg-white overflow-x-hidden`}
       >
-        {/* Background */}
+        {/* PatternCraft / Funsel Background */}
         <div
           className="fixed inset-0 -z-10"
           style={{
@@ -45,12 +46,25 @@ export default function RootLayout({
           }}
         />
 
+        {/* Redux + Current User Init */}
         <ReduxProvider>
-          <CurrentUser />
-          {children}
+          <SmoothScroll>
+            <CurrentUser />
+            {children}
+          </SmoothScroll>
         </ReduxProvider>
 
-        <ToastContainer position="top-right" autoClose={2000} theme="light" />
+        {/* Toast */}
+        <ToastContainer
+          position="top-right"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnHover
+          draggable
+          theme="light"
+        />
       </body>
     </html>
   );

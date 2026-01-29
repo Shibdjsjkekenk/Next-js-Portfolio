@@ -7,7 +7,6 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/axios";
 import SummaryApi from "@/common/SummaryApi";
-import loginIcons from "@/assets/signin.gif";
 import ROLE from "@/common/role";
 import { toast } from "react-toastify";
 
@@ -72,8 +71,10 @@ export default function LoginClient() {
                     {/* Icon */}
                     <div className="w-20 h-20 mx-auto mb-4">
                         <Image
-                            src={loginIcons}
+                            src="/assets/signin.gif"
                             alt="login icon"
+                            width={80}
+                            height={80}
                             className="w-full h-full object-contain"
                         />
                     </div>
@@ -104,7 +105,7 @@ export default function LoginClient() {
                             <label className="font-medium">Password :</label>
                             <div className="bg-white mt-2 p-2 flex items-center rounded-[11px]">
                                 <input
-                                    type={showPassword ? "text" : "password"} 
+                                    type={showPassword ? "text" : "password"}
                                     placeholder="Enter password"
                                     autoComplete="new-password"
                                     value={password}

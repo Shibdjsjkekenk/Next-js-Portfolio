@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { GrUnorderedList } from "react-icons/gr";
 import { toast } from "react-toastify";
-import logo from "@/assets/logo-white.png";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import useLogout from "@/hooks/useLogout";
@@ -106,9 +105,11 @@ export default function DashboardLayout({
           <GrUnorderedList />
         </button>
         <Image
-          src={logo}
+          src="/assets/logo-white.png"
           alt="logo"
-          className="w-28 h-8 object-contain"
+          width={28}
+          height={8}
+          className="object-contain"
         />
       </header>
 

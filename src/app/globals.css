@@ -921,3 +921,13 @@ select {
   box-shadow: rgba(17, 17, 26, 0.1) 0px 0px 16px;
   border: 1px solid #b7bdc9;
 }
+
+/* category corosol */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

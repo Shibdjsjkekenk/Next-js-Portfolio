@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import logo from "@/assets/logo.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +21,13 @@ const Navbar = () => {
           {/* LEFT - LOGO */}
           <div className="flex-shrink-0">
             <Link href="/">
-              <Image src={logo} alt="logo" className="w-36 h-12" />
+              <Image
+                src="/assets/logo.png"
+                alt="logo"
+                width={144}
+                height={48}
+                priority
+              />
             </Link>
           </div>
 
@@ -31,9 +36,13 @@ const Navbar = () => {
               Home
             </Link>
 
+            <Link href="/" className="font-bold hover:text-red-600 text-[17px]">
+              About Us
+            </Link>
+
             <div className="relative">
               <Link href="#services" className="font-bold hover:text-red-600 text-[17px]">
-                Services
+                My Expertise
               </Link>
               <span className="absolute -top-3 -right-4 bg-red-600 text-white text-[10px] px-2 rounded-full">
                 New
@@ -96,7 +105,8 @@ const Navbar = () => {
             >
               {[
                 { name: "Home", href: "/" },
-                { name: "Services", href: "#services" },
+                { name: "About Us", href: "/" },
+                { name: "My Expertise", href: "#services" },
                 { name: "Contact Us", href: "/contact" },
               ].map((item) => (
                 <motion.div

@@ -73,7 +73,7 @@ const ProjectsSlider = ({ list }: Props) => {
           {list.map((project) => (
             <div
               key={project._id}
-              className="bg-white shadow-md rounded-xl overflow-hidden"
+              className="bg-gradient-to-r from-[#F0F8FF] to-[#fefcf0] shadow-md rounded-xl overflow-hidden"
             >
               <img
                 src={project.projectImage}
@@ -83,7 +83,7 @@ const ProjectsSlider = ({ list }: Props) => {
 
               <div className="p-4">
                 <div
-                  className="tiptap-editor text-sm text-gray-700 mb-4 text-justify"
+                  className="tiptap-editor"
                   dangerouslySetInnerHTML={{ __html: project.content }}
                 />
 
@@ -114,7 +114,7 @@ const ProjectsSlider = ({ list }: Props) => {
               <div
                 key={project._id}
                 className="min-w-[320px] max-w-[320px]
-                           bg-white shadow-md rounded-xl
+                           bg-gradient-to-r from-[#F0F8FF] to-[#fefcf0] shadow-md rounded-xl
                            overflow-hidden flex flex-col"
               >
                 <img
@@ -125,7 +125,7 @@ const ProjectsSlider = ({ list }: Props) => {
 
                 <div className="p-4 flex flex-col justify-between flex-1">
                   <div
-                    className="tiptap-editor text-justify"
+                    className="tiptap-editor"
                     dangerouslySetInnerHTML={{ __html: project.content }}
                   />
 
