@@ -168,6 +168,38 @@ const SummaryApi = {
     url: "/api/project/delete",
     method: "delete",
   },
+
+  
+  // Experience
+  create_experience: {
+    url: "/api/experience/create",
+    method: "post",
+  },
+
+  get_all_experience: {
+    url: "/api/experience/get-all",
+    method: "get",
+  },
+
+  get_experience_by_id: (id: string) => ({
+    url: `/api/experience/get/${id}`,
+    method: "get",
+  }),
+
+  update_experience: (id: string) => ({
+    url: `/api/experience/update/${id}`,
+    method: "put",
+  }),
+
+  update_experience_status: (id: string) => ({
+    url: `/api/experience/update-status/${id}`,
+    method: "patch",
+  }),
+
+  delete_experience: (id: string) => ({
+    url: `/api/experience/delete/${id}`,
+    method: "delete",
+  }),
 };
 
 export default SummaryApi;

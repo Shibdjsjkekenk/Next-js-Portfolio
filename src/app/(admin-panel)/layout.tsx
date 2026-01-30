@@ -22,7 +22,7 @@ export default function DashboardLayout({
 
   const { user, loading } = useSelector((state: RootState) => state.user);
 
-  /* ================= ADMIN GUARD ================= */
+  //  Admin guard
   useEffect(() => {
     if (loading) return;
     if (!user || user.role !== "ADMIN") {
@@ -30,7 +30,7 @@ export default function DashboardLayout({
     }
   }, [user, loading]);
 
-  /* ================= LOGIN TOAST ================= */
+  //  Login toast
   useEffect(() => {
     const msg = localStorage.getItem("loginToast");
     if (msg) {
@@ -39,25 +39,26 @@ export default function DashboardLayout({
     }
   }, []);
 
-  /* ================= MOBILE BODY SCROLL LOCK ================= */
+  //  mobile body scroll lock
   useEffect(() => {
     if (isMobileOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflowY = "hidden";
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflowY = "auto";
     }
 
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflowY = "auto";
     };
   }, [isMobileOpen]);
 
-  /* ================= AUTO CLOSE SIDEBAR ON ROUTE CHANGE ================= */
+
+  //  autoclose side bar on route change
   useEffect(() => {
     setIsMobileOpen(false);
   }, [pathname]);
 
-  /* ================= LOGOUT ================= */
+  //  Logout
   const handleLogout = () => {
     toast.info(
       <div>
@@ -91,8 +92,8 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-100">
-      {/* ================= MOBILE TOP BAR ================= */}
+    <div className="min-h-screen bg-gray-100">
+      {/* mobile top bar */}
       <header
         className="md:hidden fixed top-0 left-0 right-0 h-14
                    bg-[#04728f] text-white flex items-center
@@ -113,7 +114,7 @@ export default function DashboardLayout({
         />
       </header>
 
-      {/* ================= MOBILE OVERLAY ================= */}
+      {/* mobile overlay */}
       {isMobileOpen && (
         <div
           onClick={() => setIsMobileOpen(false)}
@@ -121,7 +122,7 @@ export default function DashboardLayout({
         />
       )}
 
-      <div className="flex pt-14 md:pt-0 h-full">
+      <div className="flex pt-14 md:pt-0 h-[calc(100vh-3.5rem)] md:h-screen overflow-hidden">
         <Sidebar
           user={user}
           isOpen={isOpen}
@@ -131,14 +132,12 @@ export default function DashboardLayout({
           onLogout={handleLogout}
         />
 
-        {/* ================= CONTENT ================= */}
         <main
           className="
-    flex-1 px-4 py-3 bg-[#f9f9010f]
-    min-h-0
-    h-full
-    overflow-y-auto
-  "
+        flex-1 px-4 py-3 bg-[#f9f9010f]
+        overflow-y-auto
+        overscroll-contain
+      "
         >
           {children}
         </main>

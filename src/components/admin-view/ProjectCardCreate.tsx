@@ -22,7 +22,7 @@ export default function ProjectCardCreate() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  /* ================= PREFILL FROM REDUX ================= */
+// Prefill from redux
   useEffect(() => {
     if (!activeProjectId || list.length === 0) return;
 
@@ -36,7 +36,7 @@ export default function ProjectCardCreate() {
     }
   }, [activeProjectId, list]);
 
-  /* ================= IMAGE HANDLERS ================= */
+// image handler
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -50,7 +50,7 @@ export default function ProjectCardCreate() {
     setImagePreview(null);
   };
 
-  /* ================= SAVE / UPDATE ================= */
+// Save / update
   const handleSave = async () => {
     if (saving) return;
 
@@ -80,18 +80,18 @@ export default function ProjectCardCreate() {
 
     const success = activeProjectId
       ? await updateProjectById({
-          id: activeProjectId,
-          content,
-          projectLink,
-          projectImage,
-          isActive: true,
-        })
+        id: activeProjectId,
+        content,
+        projectLink,
+        projectImage,
+        isActive: true,
+      })
       : await createProject({
-          content,
-          projectLink,
-          projectImage,
-          isActive: true,
-        });
+        content,
+        projectLink,
+        projectImage,
+        isActive: true,
+      });
 
     setSaving(false);
 
@@ -106,7 +106,6 @@ export default function ProjectCardCreate() {
 
   return (
     <div className="bg-white rounded-xl shadow h-[520px] flex flex-col">
-      {/* ================= HEADER ================= */}
       <div className="flex justify-between items-center px-5 py-3 border-b">
         <h2 className="font-semibold text-gray-800 text-lg">
           {activeProjectId ? "Edit Project" : "Create Project"}
@@ -134,9 +133,11 @@ export default function ProjectCardCreate() {
         </button>
       </div>
 
-      {/* ================= CONTENT ================= */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4">
-        {/* RICH TEXT */}
+      {/* Content */}
+      <div
+        className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4"
+        onWheel={(e) => e.stopPropagation()}
+      >
         <RichTextEditor
           key={activeProjectId || "create"}
           value={content}
@@ -144,7 +145,6 @@ export default function ProjectCardCreate() {
           minHeight="min-h-[220px]"
         />
 
-        {/* LINK */}
         <input
           value={projectLink}
           onChange={(e) => setProjectLink(e.target.value)}
@@ -152,7 +152,6 @@ export default function ProjectCardCreate() {
           className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#6A38C2]"
         />
 
-        {/* IMAGE */}
         {!imagePreview ? (
           <label className="cursor-pointer block">
             <div className="border-2 border-dashed border-gray-300 rounded-xl h-28 flex flex-col items-center justify-center text-gray-500 hover:border-[#6A38C2] hover:text-[#6A38C2] transition">
@@ -184,15 +183,7 @@ export default function ProjectCardCreate() {
           </div>
         )}
       </div>
-        <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background-color: rgba(0, 0, 0, 0.25);
-          border-radius: 10px;
-        }
-      `}</style>
+
     </div>
   );
 }

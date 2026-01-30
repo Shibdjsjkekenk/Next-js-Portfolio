@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "@studio-freight/lenis";
 
 export default function SmoothScroll({
@@ -8,7 +9,12 @@ export default function SmoothScroll({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
   useEffect(() => {
+    // ❌ Admin panel ke liye smooth scroll band
+    if (pathname.startsWith("/admin")) return;
+
     const lenis = new Lenis({
       //  cinematic smoothness
       duration: 1.8,
@@ -28,7 +34,6 @@ export default function SmoothScroll({
           : 1 - Math.pow(-2 * t + 2, 3) / 2, // easeInOutCubic
     });
 
-    // RAF loop
     const raf = (time: number) => {
       lenis.raf(time);
       requestAnimationFrame(raf);
@@ -39,7 +44,7 @@ export default function SmoothScroll({
     return () => {
       lenis.destroy();
     };
-  }, []);
+  }, [pathname]);
 
   return <>{children}</>;
 }

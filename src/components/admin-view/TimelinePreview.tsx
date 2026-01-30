@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { useTimeline } from "@/hooks/useTimeline";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
-
-/* ================= DND ================= */
 import {
   DndContext,
   closestCenter,
@@ -26,7 +24,7 @@ import {
 
 import { CSS } from "@dnd-kit/utilities";
 
-/* ================= SORTABLE CARD (LIST) ================= */
+// sortable card (list)
 function SortableTimelineCard({
   item,
   onEdit,
@@ -72,7 +70,7 @@ function SortableTimelineCard({
   );
 }
 
-/* ================= STATIC CARD (OVERLAY) ================= */
+// Static card overlay
 function TimelineCardContent({
   item,
   onEdit,
@@ -84,7 +82,6 @@ function TimelineCardContent({
 }) {
   return (
     <>
-      {/* HEADER */}
       <div className="flex justify-between mb-2">
         <span className="px-3 py-1 mb-2 rounded-full text-md font-semibold bg-gradient-to-r from-[#04728F] to-[#04728f82] text-white">
           {item.category}
@@ -123,7 +120,7 @@ function TimelineCardContent({
   );
 }
 
-/* ================= MAIN ================= */
+// Main
 export default function TimelinePreview() {
   const {
     list,
@@ -140,8 +137,17 @@ export default function TimelinePreview() {
   }, []);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 5 } })
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 8,
+      },
+    })
   );
 
   const handleDelete = (id: string) => {
@@ -202,13 +208,16 @@ export default function TimelinePreview() {
           items={list.map((i) => i._id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="timeline-scroll flex-1 overflow-y-auto space-y-4 pr-1">
+          <div
+            className="timeline-scroll flex-1 overflow-y-auto space-y-4 pr-1"
+            onWheel={(e) => e.stopPropagation()}
+          >
             {list.map((item) => (
               <SortableTimelineCard
                 key={item._id}
                 item={item}
                 onEdit={(id) => setActiveTimeline(id)}
-                onDelete={handleDelete}   
+                onDelete={handleDelete}
               />
             ))}
           </div>
@@ -223,15 +232,6 @@ export default function TimelinePreview() {
           ) : null}
         </DragOverlay>
       </DndContext>
-       <style jsx global>{`
-        .timeline-scroll::-webkit-scrollbar {
-          width: 4px;
-        }
-        .timeline-scroll::-webkit-scrollbar-thumb {
-          background-color: rgba(0, 0, 0, 0.25);
-          border-radius: 10px;
-        }
-      `}</style>
     </div>
   );
 }

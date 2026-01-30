@@ -85,8 +85,8 @@ const SkillSection: React.FC = () => {
   });
 
   return (
-    <section ref={sectionRef} className="">
-      <div className="max-w-7xl py-5 mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 flex flex-col lg:flex-row gap-4 relative">
+    <section ref={sectionRef} >
+      <div className="max-w-7xl pb-15 md:pb-0 mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 flex flex-col lg:flex-row gap-4 relative">
         {/* ---------- LEFT CONTENT ---------- */}
         <div className="w-full lg:w-1/2">
           <div
@@ -99,7 +99,7 @@ const SkillSection: React.FC = () => {
               </span>
             </div>
 
-            <h2 className="text-3xl lg:text-3xl font-bold text-gray-900 mb-5 leading-tight">
+            <h2 className="text-2xl pt-2 lg:text-2xl font-bold text-gray-900 mb-5 leading-tight">
               My Experts Areas Where I Gained Skill
             </h2>
 

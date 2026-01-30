@@ -14,4 +14,7 @@ export const CACHE_KEYS = {
 
   PROJECT_ALL: "portfolio:projects:all",
   PROJECT_BY_ID: (id: string) => `portfolio:project:${id}`,
+
+  EXPERIENCE_ALL: "portfolio:experience:all",
+  EXPERIENCE_BY_ID: (id: string) => `portfolio:experience:${id}`,
 };

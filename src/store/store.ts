@@ -5,6 +5,7 @@ import bannerReducer from "./bannerSlice";
 import aboutReducer from "./aboutSlice";
 import timelineReducer from "./timelineSlice";
 import projectReducer from "./projectSlice";
+import experienceReducer from "./experienceSlice";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     about: aboutReducer,
     timeline: timelineReducer,
     projects: projectReducer,
+    experience: experienceReducer,
   },
 });
 

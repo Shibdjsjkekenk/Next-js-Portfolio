@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { FaProjectDiagram, FaChevronDown } from "react-icons/fa";
+import ExperienceContent from "@/components/admin-view/ExperienceContent";
 import ProjectCard from "@/components/admin-view/ProjectCard";
 
 export default function ProjectsPage() {
-  const [activeView, setActiveView] = useState<"content" | "cards">("cards");
+  const [activeView, setActiveView] = useState<"content" | "cards">("content");
   const [open, setOpen] = useState(false);
   const [cardClicked, setCardClicked] = useState(false);
 
@@ -87,11 +88,7 @@ export default function ProjectsPage() {
       {/* ================= CONTENT AREA ================= */}
       <div className="">
         {/* CONTENT VIEW */}
-        {activeView === "content" && (
-          <span className="text-gray-400 text-sm sm:text-base">
-            🚧 Coming Soon
-          </span>
-        )}
+       {activeView === "content" && <ExperienceContent />}
 
         {/* CARDS VIEW */}
         {activeView === "cards" && <ProjectCard />}
