@@ -111,7 +111,7 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
   };
 
   return (
-    <div className="flex items-center justify-center max-w-full relative z-10 mt-16">
+    <div className="flex items-center justify-center max-w-full relative z-10 mt-16 ">
       <div
         className="
     flex flex-col md:flex-row items-center
