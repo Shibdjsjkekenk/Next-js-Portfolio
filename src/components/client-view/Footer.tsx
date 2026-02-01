@@ -20,7 +20,6 @@ const Footer = () => {
             {/* Newsletter */}
             <div className="mb-6">
               <h2 className="text-lg font-bold">Sign up to our newsletter</h2>
-              <p className="text-sm">Lorem ipsum dolor sit amet consectetur.</p>
               <div className="flex mt-4 border rounded-full overflow-hidden">
                 <input
                   type="text"
@@ -34,8 +33,8 @@ const Footer = () => {
             </div>
 
             <p className="text-sm mt-4">
-              I am Shubhanshu Tiwari "Crafting seamless web experiences with 2
-              years+ of professional expertise in modern web development."
+              I am Shubhanshu Tiwari "Crafting seamless web experiences with 3
+              years+ of professional expertise in modern Software Developemnt & web development."
             </p>
           </div>
         </div>
@@ -47,14 +46,15 @@ const Footer = () => {
             <h2 className="text-lg font-bold text-[#EEDCB2]">Quick Links</h2>
             <ul className="mt-4 space-y-2 text-sm text-white">
               <li>Home</li>
-              <li>Our Services</li>
+              <li>About Us</li>
+              <li>My Expertise</li>
               <li>Contact Us</li>
             </ul>
           </div>
 
           {/* Our Services */}
           <div className="pt-3">
-            <h2 className="text-lg font-bold text-[#EEDCB2]">Our Services</h2>
+            <h2 className="text-lg font-bold text-[#EEDCB2]">My Expertise</h2>
             <ul className="mt-4 space-y-2 text-sm text-white">
               <li>Website Development</li>
               <li>Software Development</li>

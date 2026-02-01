@@ -4,48 +4,95 @@ import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-
 gsap.registerPlugin(ScrollTrigger);
 
 // Professional Step-by-Step Content
 const texts = [
   <>
-    <span className="block">Inspiring the World</span>
-    <span className="block text-[#6A38C2]">One Project at a</span>
+    <>
+      {/* Mobile view */}
+      <span className="block md:hidden">
+        <span className="block">Inspiring</span>
+        <span className="block">the</span>
+        <span className="block">World</span>
+      </span>
+
+      {/* Desktop view */}
+      <span className="hidden md:block">Inspiring the World</span>
+    </>
+    <>
+      {/* Mobile view */}
+      <span className="block md:hidden text-[#6A38C2]">
+        <span className="block">One Project</span>
+        <span className="block">at</span>
+        <span className="block">a</span>
+      </span>
+
+      {/* Desktop view */}
+      <span className="hidden md:block text-[#6A38C2]">One Project at a</span>
+    </>
     <span className="block">Time</span>
   </>,
   <>
-    <span className="block">A Portfolio of</span>
-    <span
-      className="block text-[#E7000B] italic"
-      style={{
-        fontFamily: "'Segoe Script','Brush Script MT',cursive",
-        letterSpacing: "0.05em",
-      }}
-    >
-      Creativity
-    </span>
-  </>,
-  <>
-    <span className="block">
-      A{" "}
+    {/* Mobile view */}
+    <span className="block md:hidden">
+      <span className="block">A</span>
+      <span className="block">Portfolio</span>
+      <span className="block">of</span>
       <span
-        className="inline-block text-[#FEC809]"
+        className="block text-[#E7000B] italic"
+        style={{
+          fontFamily: "'Segoe Script','Brush Script MT',cursive",
+          letterSpacing: "0.05em",
+        }}
       >
-        Portfolio
-      </span>{" "}
-      of Innovation
+        Creativity
+      </span>
+    </span>
+
+    {/* Desktop view */}
+    <span className="hidden md:block">
+      <span className="block">A Portfolio of</span>
+      <span
+        className="block text-[#E7000B] italic"
+        style={{
+          fontFamily: "'Segoe Script','Brush Script MT',cursive",
+          letterSpacing: "0.05em",
+        }}
+      >
+        Creativity
+      </span>
+    </span>
+  </>,
+
+  <>
+    <span className="block">
+      A <span className="inline-block text-[#FEC809]">Portfolio</span> of
+      Innovation
     </span>
   </>,
   <>
-    <span className="block">
-      A Showcase of Real-World{" "}
-      <span className="inline-block text-[#6A38C2] font-bold tracking-wide">
+    {/* Mobile view */}
+    <span className="block md:hidden">
+      <span className="block">A</span>
+      <span className="block">Showcase</span>
+      <span className="block">of</span>
+      <span className="block">Real-World</span>
+      <span className="block text-[#6A38C2] font-bold tracking-wide">
         Projects
       </span>
     </span>
-  </>
 
+    {/* Desktop view */}
+    <span className="hidden md:block">
+      <span className="block">
+        A Showcase of Real-World{" "}
+        <span className="inline-block text-[#6A38C2] font-bold tracking-wide">
+          Projects
+        </span>
+      </span>
+    </span>
+  </>,
 ];
 
 const OneProject = () => {
@@ -104,7 +151,7 @@ const OneProject = () => {
               ease: "none",
               duration: 1,
             },
-            "<"
+            "<",
           );
         }
 
@@ -118,7 +165,7 @@ const OneProject = () => {
             ease: "none",
             duration: 1,
           },
-          "<+=0.2"
+          "<+=0.2",
         );
       });
     }, sectionRef);
