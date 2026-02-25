@@ -88,7 +88,7 @@ export default function ChangeUserRoleModal({ user, onClose }: Props) {
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as User["role"])}
-            className=" border rounded-md px-3 py-2 outline-none"
+            className=" border rounded-md px-3 py-2 outline-none !block"
           >
             <option value="ADMIN">ADMIN</option>
             <option value="GENERAL">GENERAL</option>

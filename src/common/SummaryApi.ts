@@ -159,17 +159,17 @@ const SummaryApi = {
     method: "put",
   },
 
-  update_project_status: {
-    url: "/api/project/update-status",
-    method: "patch",
-  },
+  update_project_status: (id: string) => ({
+    url: `/api/project/update-status/${id}`,
+    method: "PATCH",
+  }),
 
   delete_project: {
     url: "/api/project/delete",
     method: "delete",
   },
 
-  
+
   // Experience
   create_experience: {
     url: "/api/experience/create",

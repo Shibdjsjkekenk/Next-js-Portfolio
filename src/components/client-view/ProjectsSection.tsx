@@ -14,8 +14,6 @@ type Props = {
 };
 
 const ProjectsSection = ({ list, experience }: Props) => {
-  if (!list?.length) return null;
-
   const activeExperience = experience.find(e => e.isActive);
 
   return (

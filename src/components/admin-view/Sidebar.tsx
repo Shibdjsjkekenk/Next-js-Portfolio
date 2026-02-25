@@ -103,9 +103,9 @@ export default function Sidebar({
         <MenuItem
           icon={<MdOutlineDashboardCustomize />}
           label="Dashboard"
-          href="/admin-panel"
+          href="/admin-panel/dashboard"
           isOpen={isOpen}
-          active={pathname === "/admin-panel"}
+          active={pathname === "/admin-panel/dashboard"}
           onClick={() => setIsMobileOpen(false)}
         />
 

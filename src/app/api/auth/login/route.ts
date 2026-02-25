@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import os from "os";
+import axios from "axios";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import { signToken } from "@/lib/jwt";
@@ -34,31 +35,79 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔹 LOGIN TRACKING
-    user.loginCount += 1;
-    user.logins.push({
+    /* ================= GET REAL IP ================= */
+    const forwarded = req.headers.get("x-forwarded-for");
+    let ip = forwarded?.split(",")[0] || "127.0.0.1";
+
+    if (ip.includes("::ffff:")) {
+      ip = ip.split("::ffff:").pop() || ip;
+    }
+
+    const isLocal =
+      ip === "127.0.0.1" ||
+      ip === "::1" ||
+      ip.startsWith("192.168");
+
+    /* ================= GEO LOOKUP ================= */
+    let city = "Local",
+      state = "Local",
+      country = "Local",
+      latitude = 19.076,
+      longitude = 72.8777;
+
+    if (!isLocal) {
+      try {
+        const geo = await axios.get(
+          `http://ip-api.com/json/${ip}?fields=status,country,regionName,city,lat,lon`
+        );
+
+        if (geo.data.status === "success") {
+          city = geo.data.city || city;
+          state = geo.data.regionName || state;
+          country = geo.data.country || country;
+          latitude = geo.data.lat || latitude;
+          longitude = geo.data.lon || longitude;
+        }
+      } catch {
+        console.log("Geo lookup failed");
+      }
+    }
+
+    /* ================= LOGIN TRACKING ================= */
+    user.loginCount = (user.loginCount || 0) + 1;
+
+    const loginData = {
       deviceName: os.hostname(),
-      ipAddress: "local",
-      city: "Local",
-      state: "Local",
-      country: "Local",
-      latitude: 0,
-      longitude: 0,
-    });
+      ipAddress: ip,
+      city,
+      state,
+      country,
+      latitude,
+      longitude,
+      loggedInAt: new Date(),
+    };
+
+    user.logins.push(loginData);
+
+    // ✅ LIMIT LOGIN HISTORY (prevents DB bloat)
+    if (user.logins.length > 50) {
+      user.logins = user.logins.slice(-50);
+    }
+
     await user.save();
 
-    // 🔐 JWT TOKEN
+    /* ================= JWT TOKEN ================= */
     const token = signToken({
       id: user._id,
       email: user.email,
       role: user.role,
     });
 
-    //  SERVER SIDE REDIRECT (IMPORTANT)
     const res = NextResponse.json({
       success: true,
       user: {
         role: user.role,
+        loginCount: user.loginCount,
       },
     });
 

@@ -20,8 +20,8 @@ export async function PUT(req: NextRequest) {
       new: true,
     });
 
-    // 🔥 invalidate caches
     await redis.del(CACHE_KEYS.PROJECT_ALL);
+    await redis.del(CACHE_KEYS.PROJECT_ACTIVE); 
     await redis.del(CACHE_KEYS.PROJECT_BY_ID(id));
 
     return NextResponse.json({

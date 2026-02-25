@@ -74,7 +74,7 @@ function SortableRow({
 }
 
 /* ================= MAIN ================= */
-export default function ProjectCardPreview() {
+export default function ProjectCardPreview({ search = "" }: { search?: string }) {
   const {
     list: projects,
     loading,
@@ -104,12 +104,23 @@ export default function ProjectCardPreview() {
   /* RESET PAGE WHEN DATA CHANGES */
   useEffect(() => {
     setCurrentPage(1);
-  }, [projects.length]);
+  }, [projects.length, search]);
+
+  /* ================= SEARCH FILTER ================= */
+  const filteredProjects = projects.filter((p) => {
+    if (!search) return true;
+
+    const key = search.toLowerCase();
+    return (
+      p.projectLink?.toLowerCase().includes(key) ||
+      p.content?.toLowerCase().includes(key)
+    );
+  });
 
   /* PAGINATION LOGIC */
-  const totalPages = Math.ceil(projects.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredProjects.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedProjects = projects.slice(
+  const paginatedProjects = filteredProjects.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE
   );
@@ -185,70 +196,86 @@ export default function ProjectCardPreview() {
               strategy={verticalListSortingStrategy}
             >
               <Table headers={["No", "Image", "Link", "Status", "Action"]}>
-                {paginatedProjects.map((project, index) => (
-                  <SortableRow key={project._id} id={project._id}>
-                    <td className="p-2 border">{startIndex + index + 1}</td>
-
-                    <td className="p-2 border">
-                      {project.projectImage ? (
-                        <img
-                          src={project.projectImage}
-                          className="w-16 h-10 object-cover rounded"
-                        />
-                      ) : "—"}
-                    </td>
-
-                    <td className="p-2 border truncate max-w-[250px]">
-                      <a
-                        href={project.projectLink}
-                        target="_blank"
-                        className="text-blue-600 hover:underline text-sm"
-                      >
-                        {project.projectLink}
-                      </a>
-                    </td>
-
-                    <td className="p-2 border">
-                      <span
-                        onClick={() =>
-                          toggleProjectStatus(project._id, !project.isActive)
-                        }
-                        className={`cursor-pointer px-2 py-1 rounded-full text-xs ${
-                          project.isActive
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {project.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-
-                    <td className="p-2 border">
-                      <div className="flex gap-2 justify-center">
-                        <button
-                          onClick={() => setViewProject(project._id)}
-                          className="p-1 rounded-full bg-blue-100 text-blue-700"
-                        >
-                          <FaEye size={14} />
-                        </button>
-
-                        <button
-                          onClick={() => setActiveProject(project._id)}
-                          className="p-1 rounded-full bg-green-100 text-green-700"
-                        >
-                          <FaEdit size={13} />
-                        </button>
-
-                        <button
-                          onClick={() => handleDelete(project._id)}
-                          className="p-1 rounded-full bg-red-100 text-red-700"
-                        >
-                          <FaTrash size={13} />
-                        </button>
+                {paginatedProjects.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="p-8 text-center">
+                      <div className="flex flex-col items-center gap-2 text-gray-500">
+                        <span className="text-lg font-semibold text-gray-600">
+                          🔍 No projects found
+                        </span>
+                        <span className="text-sm text-gray-400">
+                          Try a different search keyword
+                        </span>
                       </div>
                     </td>
-                  </SortableRow>
-                ))}
+                  </tr>
+                ) : (
+                  paginatedProjects.map((project, index) => (
+                    <SortableRow key={project._id} id={project._id}>
+                      <td className="p-2 border">{startIndex + index + 1}</td>
+
+                      <td className="p-2 border">
+                        {project.projectImage ? (
+                          <img
+                            src={project.projectImage}
+                            className="w-16 h-10 object-cover rounded"
+                          />
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+
+                      <td className="p-2 border truncate max-w-[250px]">
+                        <a
+                          href={project.projectLink}
+                          target="_blank"
+                          className="text-blue-600 hover:underline text-sm"
+                        >
+                          {project.projectLink}
+                        </a>
+                      </td>
+
+                      <td className="p-2 border">
+                        <span
+                          onClick={() =>
+                            toggleProjectStatus(project._id, !project.isActive)
+                          }
+                          className={`cursor-pointer px-2 py-1 rounded-full text-xs ${project.isActive
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                            }`}
+                        >
+                          {project.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+
+                      <td className="p-2 border">
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            onClick={() => setViewProject(project._id)}
+                            className="p-1 rounded-full bg-blue-100 text-blue-700"
+                          >
+                            <FaEye size={14} />
+                          </button>
+
+                          <button
+                            onClick={() => setActiveProject(project._id)}
+                            className="p-1 rounded-full bg-green-100 text-green-700"
+                          >
+                            <FaEdit size={13} />
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(project._id)}
+                            className="p-1 rounded-full bg-red-100 text-red-700"
+                          >
+                            <FaTrash size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    </SortableRow>
+                  ))
+                )}
               </Table>
             </SortableContext>
           </DndContext>

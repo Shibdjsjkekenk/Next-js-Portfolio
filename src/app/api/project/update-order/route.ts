@@ -4,6 +4,7 @@ import Project from "@/models/Project";
 import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
 import { revalidatePath } from "next/cache";
+import mongoose from "mongoose";
 
 export async function PUT(req: NextRequest) {
   try {
@@ -18,17 +19,21 @@ export async function PUT(req: NextRequest) {
 
     await connectDB();
 
+    // ✅ FIXED: ObjectId conversion
     const bulk = items.map((item: any) => ({
       updateOne: {
-        filter: { _id: item.id },
+        filter: { _id: new mongoose.Types.ObjectId(item.id) },
         update: { order: item.order },
       },
     }));
 
     await Project.bulkWrite(bulk);
 
+    // ✅ Clear Redis
     await redis.del(CACHE_KEYS.PROJECT_ALL);
+    await redis.del(CACHE_KEYS.PROJECT_ACTIVE);
 
+    // ✅ Revalidate Next cache
     revalidatePath("/");
     revalidatePath("/admin/projects");
 

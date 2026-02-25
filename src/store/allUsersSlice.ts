@@ -7,17 +7,28 @@ export type AllUser = {
   role: "ADMIN" | "GENERAL";
   profilePic?: string;
   createdAt: string;
+  loginCount?: number;
+  logins?: {
+    deviceName?: string;
+    ipAddress?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    latitude?: number;
+    longitude?: number;
+    loggedInAt?: string;
+  }[];
 };
 
 type AllUsersState = {
   list: AllUser[];
-  loading: boolean;     
-  fetchedOnce: boolean;  
+  loading: boolean;
+  fetchedOnce: boolean;
 };
 
 const initialState: AllUsersState = {
   list: [],
-  loading: true,        
+  loading: true,
   fetchedOnce: false,
 };
 

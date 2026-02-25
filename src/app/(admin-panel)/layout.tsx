@@ -108,8 +108,8 @@ export default function DashboardLayout({
         <Image
           src="/assets/logo-white.png"
           alt="logo"
-          width={28}
-          height={8}
+          width={130}
+          height={44}
           className="object-contain"
         />
       </header>

@@ -136,25 +136,33 @@ export function useProjects() {
     }
   };
 
+
   /* ================= STATUS UPDATE ================= */
-  const toggleProjectStatus = async (id: string, isActive: boolean) => {
-    try {
-      const res = await fetch(SummaryApi.update_project_status.url, {
-        method: SummaryApi.update_project_status.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, isActive }),
-      });
+const toggleProjectStatus = async (id: string, isActive: boolean) => {
+  try {
+    const api = SummaryApi.update_project_status(id);
 
-      const json = await res.json();
-      if (!json.success) throw new Error(json.message);
+    console.log("API DEBUG:", api); // 👈 must log object
 
-      dispatch(updateProjectStatus({ id, isActive }));
-      toast.success("Project status updated");
-    } catch {
-      toast.error("Status update failed");
-    }
-  };
+    const res = await fetch(api.url as string, {
+      method: api.method as string,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ isActive }),
+    });
 
+    const json = await res.json();
+
+    if (!json.success) throw new Error(json.message);
+
+    dispatch(updateProjectStatus({ id, isActive }));
+    toast.success("Project status updated");
+  } catch (err) {
+    console.error("STATUS ERROR:", err);
+    toast.error("Status update failed");
+  }
+};
   /* ================= REORDER ================= */
   const reorderProjects = async (activeId: string, overId: string) => {
     try {

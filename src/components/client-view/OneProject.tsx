@@ -33,44 +33,44 @@ const texts = [
     </>
     <span className="block">Time</span>
   </>,
-  <>
-    {/* Mobile view */}
-    <span className="block md:hidden">
-      <span className="block">A</span>
-      <span className="block">Portfolio</span>
-      <span className="block">of</span>
-      <span
-        className="block text-[#E7000B] italic"
-        style={{
-          fontFamily: "'Segoe Script','Brush Script MT',cursive",
-          letterSpacing: "0.05em",
-        }}
-      >
-        Creativity
-      </span>
-    </span>
+  // <>
+  //   {/* Mobile view */}
+  //   <span className="block md:hidden">
+  //     <span className="block">A</span>
+  //     <span className="block">Portfolio</span>
+  //     <span className="block">of</span>
+  //     <span
+  //       className="block text-[#E7000B] italic"
+  //       style={{
+  //         fontFamily: "'Segoe Script','Brush Script MT',cursive",
+  //         letterSpacing: "0.05em",
+  //       }}
+  //     >
+  //       Creativity
+  //     </span>
+  //   </span>
 
-    {/* Desktop view */}
-    <span className="hidden md:block">
-      <span className="block">A Portfolio of</span>
-      <span
-        className="block text-[#E7000B] italic"
-        style={{
-          fontFamily: "'Segoe Script','Brush Script MT',cursive",
-          letterSpacing: "0.05em",
-        }}
-      >
-        Creativity
-      </span>
-    </span>
-  </>,
+  //   {/* Desktop view */}
+  //   <span className="hidden md:block">
+  //     <span className="block">A Portfolio of</span>
+  //     <span
+  //       className="block text-[#E7000B] italic"
+  //       style={{
+  //         fontFamily: "'Segoe Script','Brush Script MT',cursive",
+  //         letterSpacing: "0.05em",
+  //       }}
+  //     >
+  //       Creativity
+  //     </span>
+  //   </span>
+  // </>,
 
-  <>
-    <span className="block">
-      A <span className="inline-block text-[#FEC809]">Portfolio</span> of
-      Innovation
-    </span>
-  </>,
+  // <>
+  //   <span className="block">
+  //     A <span className="inline-block text-[#FEC809]">Portfolio</span> of
+  //     Innovation
+  //   </span>
+  // </>,
   <>
     {/* Mobile view */}
     <span className="block md:hidden">
@@ -122,7 +122,7 @@ const OneProject = () => {
           end: `+=${scrollLength}`,
           scrub: 0.9,
           pin: true,
-          pinSpacing: true, // ✅ LET GSAP HANDLE SPACE
+          pinSpacing: true,
           anticipatePin: 1,
         },
       });

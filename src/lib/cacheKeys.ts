@@ -1,4 +1,4 @@
-//    Redis Cache Keys (Portfolio)
+// Redis Cache Keys (Portfolio)
 
 export const CACHE_KEYS = {
 
@@ -13,6 +13,7 @@ export const CACHE_KEYS = {
   TIMELINE_BY_CATEGORY: (cat: string) => `timeline:category:${cat}`,
 
   PROJECT_ALL: "portfolio:projects:all",
+  PROJECT_ACTIVE: "portfolio:projects:active",
   PROJECT_BY_ID: (id: string) => `portfolio:project:${id}`,
 
   EXPERIENCE_ALL: "portfolio:experience:all",
