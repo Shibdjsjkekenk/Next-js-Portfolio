@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My Portfolio",
-  description: "Shubhanshu Tiwari Portfolio",
+  title: "Hello, I am Shubhanshu Tiwari",
+  description: "Crafting Seamless Software Experiences with 3+ years of professional expertise in modern Software development and Web Development.",
 };
 
 export default function RootLayout({
