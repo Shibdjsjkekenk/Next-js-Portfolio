@@ -29,12 +29,16 @@ import {
 import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+import { Bot, Sparkles, X } from "lucide-react";
+import { useState } from "react";
+import AiChatModal from "@/components/client-view/AiChatModal";
 
 const UserMap = dynamic(() => import("@/components/admin-view/UserMap"), {
   ssr: false,
 });
 
 export default function AdminDashboardPage() {
+  const [openAI, setOpenAI] = useState(false);
   const dispatch = useDispatch();
 
   const { list, loading, fetchedOnce } = useSelector(
@@ -185,152 +189,165 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* HEADER */}
-      <div className="bg-white rounded-xl py-3 px-5 shadow">
-        <h1 className="font-bold text-gray-800 flex items-center gap-2 text-base sm:text-2xl">
-          <FaUsers className="text-[#6A38C2]" />
-          Admin Dashboard
-        </h1>
-      </div>
+    <>
+      <div className="space-y-6">
+        {/* HEADER */}
+        <div className="bg-white rounded-xl py-3 px-5 shadow flex items-center justify-between">
+          <h1 className="font-bold text-gray-800 flex items-center gap-2 text-base sm:text-2xl">
+            <FaUsers className="text-[#6A38C2]" />
+            Admin Dashboard
+          </h1>
 
-      {/* USERS */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <StatCard title="Total Users" value={userStats.total} icon={<Users size={20} />} color="indigo" />
-        <StatCard title="Admins" value={userStats.admin} icon={<ShieldCheck size={20} />} color="emerald" />
-        <StatCard title="General Users" value={userStats.general} icon={<User size={20} />} color="orange" />
-      </div>
+          {/* AI BUTTON */}
+          <button
+            onClick={() => setOpenAI(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-semibold shadow hover:scale-105 transition"
+          >
+            <Sparkles size={16} />
+            Ask with AI
+          </button>
+        </div>
 
-      {/* PROJECTS */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <StatCard title="Total Projects" value={projectStats.total} icon={<FolderKanban size={20} />} color="indigo" type="project" />
-        <StatCard title="Active Projects" value={projectStats.active} icon={<FolderKanban size={20} />} color="emerald" type="project" />
-        <StatCard title="Inactive Projects" value={projectStats.inactive} icon={<FolderKanban size={20} />} color="orange" type="project" />
-      </div>
+        {/* USERS */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <StatCard title="Total Users" value={userStats.total} icon={<Users size={20} />} color="indigo" />
+          <StatCard title="Admins" value={userStats.admin} icon={<ShieldCheck size={20} />} color="emerald" />
+          <StatCard title="General Users" value={userStats.general} icon={<User size={20} />} color="orange" />
+        </div>
 
-      {/* PROFESSIONAL CHARTS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        {/* PROJECTS */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <StatCard title="Total Projects" value={projectStats.total} icon={<FolderKanban size={20} />} color="indigo" type="project" />
+          <StatCard title="Active Projects" value={projectStats.active} icon={<FolderKanban size={20} />} color="emerald" type="project" />
+          <StatCard title="Inactive Projects" value={projectStats.inactive} icon={<FolderKanban size={20} />} color="orange" type="project" />
+        </div>
 
-        {/* USER LOGIN CHART */}
-        <div className="bg-white rounded-2xl shadow p-4 sm:p-5 md:col-span-3">
-          <h2 className="font-semibold mb-4 text-gray-700">
-            User Login Analytics
+        {/* PROFESSIONAL CHARTS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+
+          {/* USER LOGIN CHART */}
+          <div className="bg-white rounded-2xl shadow p-4 sm:p-5 md:col-span-3">
+            <h2 className="font-semibold mb-4 text-gray-700">
+              User Login Analytics
+            </h2>
+
+            {/* SCROLL WRAPPER */}
+            <div className="w-full">
+              <div className="relative w-full">
+
+                {/* ONLY horizontal scroll on mobile */}
+                <div className="overflow-x-auto overflow-y-hidden">
+                  <div className="min-w-[600px] md:min-w-full">
+
+                    {/* RESPONSIVE HEIGHT */}
+                    <div className="h-[340px] md:h-[300px]">
+                      <Bar data={loginChart} options={chartOptions} />
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          {/* PROJECT PIE */}
+          <div className="bg-white rounded-2xl shadow p-4 sm:p-5 md:col-span-1">
+            <h2 className="font-semibold mb-3 sm:mb-4 text-gray-700 text-sm sm:text-base">
+              Project Activity
+            </h2>
+
+            <ResponsiveContainer width="100%" height={240}>
+              <PieChart>
+                <Pie
+                  data={projectPie}
+                  dataKey="value"
+                  outerRadius={80} // mobile friendly
+                  label
+                >
+                  {projectPie.map((_, i) => (
+                    <Cell key={i} fill={PIE_COLORS[i]} />
+                  ))}
+                </Pie>
+                <PieTooltip />
+                <PieLegend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+        </div>
+        {/*  USER LOGIN TABLE (NEW) */}
+        <div className="bg-white rounded-2xl shadow p-5 mt-6">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            User Last Login Info
           </h2>
 
-          {/* SCROLL WRAPPER */}
-          <div className="w-full">
-            <div className="relative w-full">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm text-left border border-gray-200 rounded-lg overflow-hidden">
+              <thead className="bg-gray-100 text-gray-700">
+                <tr>
+                  <th className="p-3">Name</th>
+                  <th className="p-3">Role</th>
+                  <th className="p-3">Device</th>
+                  <th className="p-3">IP</th>
+                  <th className="p-3">City</th>
+                  <th className="p-3">State</th>
+                  <th className="p-3">Country</th>
+                  <th className="p-3">Logins</th>
+                </tr>
+              </thead>
 
-              {/* ONLY horizontal scroll on mobile */}
-              <div className="overflow-x-auto overflow-y-hidden">
-                <div className="min-w-[600px] md:min-w-full">
+              <tbody>
+                {list.map((user: any, i: number) => {
+                  const last = getLastLogin(user);
 
-                  {/* RESPONSIVE HEIGHT */}
-                  <div className="h-[340px] md:h-[300px]">
-                    <Bar data={loginChart} options={chartOptions} />
-                  </div>
+                  return (
+                    <tr key={i} className="border-t hover:bg-gray-50 transition">
+                      <td className="p-3 font-medium">
+                        {user.name || user.email}
+                      </td>
 
-                </div>
-              </div>
+                      <td className="p-3">
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-semibold ${user.role === "ADMIN"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-green-100 text-green-700"
+                            }`}
+                        >
+                          {user.role}
+                        </span>
+                      </td>
 
+                      <td className="p-3">{last?.deviceName || "—"}</td>
+                      <td className="p-3">{last?.ipAddress || "—"}</td>
+                      <td className="p-3">{last?.city || "—"}</td>
+                      <td className="p-3">{last?.state || "—"}</td>
+                      <td className="p-3">{last?.country || "—"}</td>
+                      <td className="p-3 font-semibold">
+                        {user.loginCount || 0}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* USER LOCATION MAP */}
+          <div className="bg-white rounded-2xl shadow p-5 mt-6">
+            <h2 className="text-lg font-semibold text-gray-700 mb-4">
+              User Location Map
+            </h2>
+
+            <div className="h-[420px] w-full rounded-xl overflow-hidden border">
+              <UserMap users={mapUsers} />
             </div>
           </div>
         </div>
-
-        {/* PROJECT PIE */}
-        <div className="bg-white rounded-2xl shadow p-4 sm:p-5 md:col-span-1">
-          <h2 className="font-semibold mb-3 sm:mb-4 text-gray-700 text-sm sm:text-base">
-            Project Activity
-          </h2>
-
-          <ResponsiveContainer width="100%" height={240}>
-            <PieChart>
-              <Pie
-                data={projectPie}
-                dataKey="value"
-                outerRadius={80} // mobile friendly
-                label
-              >
-                {projectPie.map((_, i) => (
-                  <Cell key={i} fill={PIE_COLORS[i]} />
-                ))}
-              </Pie>
-              <PieTooltip />
-              <PieLegend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
       </div>
-      {/*  USER LOGIN TABLE (NEW) */}
-      <div className="bg-white rounded-2xl shadow p-5 mt-6">
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">
-          User Last Login Info
-        </h2>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm text-left border border-gray-200 rounded-lg overflow-hidden">
-            <thead className="bg-gray-100 text-gray-700">
-              <tr>
-                <th className="p-3">Name</th>
-                <th className="p-3">Role</th>
-                <th className="p-3">Device</th>
-                <th className="p-3">IP</th>
-                <th className="p-3">City</th>
-                <th className="p-3">State</th>
-                <th className="p-3">Country</th>
-                <th className="p-3">Logins</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {list.map((user: any, i: number) => {
-                const last = getLastLogin(user);
-
-                return (
-                  <tr key={i} className="border-t hover:bg-gray-50 transition">
-                    <td className="p-3 font-medium">
-                      {user.name || user.email}
-                    </td>
-
-                    <td className="p-3">
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-semibold ${user.role === "ADMIN"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-green-100 text-green-700"
-                          }`}
-                      >
-                        {user.role}
-                      </span>
-                    </td>
-
-                    <td className="p-3">{last?.deviceName || "—"}</td>
-                    <td className="p-3">{last?.ipAddress || "—"}</td>
-                    <td className="p-3">{last?.city || "—"}</td>
-                    <td className="p-3">{last?.state || "—"}</td>
-                    <td className="p-3">{last?.country || "—"}</td>
-                    <td className="p-3 font-semibold">
-                      {user.loginCount || 0}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {/* USER LOCATION MAP */}
-        <div className="bg-white rounded-2xl shadow p-5 mt-6">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">
-            User Location Map
-          </h2>
-
-          <div className="h-[420px] w-full rounded-xl overflow-hidden border">
-            <UserMap users={mapUsers} />
-          </div>
-        </div>
-      </div>
-    </div>
+      <AiChatModal open={openAI} onClose={() => setOpenAI(false)} />
+    </>
   );
 }
 

@@ -6,13 +6,14 @@ import {
   FaLinkedinIn,
   FaGlobe,
 } from "react-icons/fa";
+import AskAIButton from "@/components/client-view/AskAIButton";
 
 const Footer = () => {
   return (
     <>
       <div
         className="flex flex-col lg:flex-row items-start justify-between gap-6 px-4 lg:px-10 py-10 bg-cover bg-center bg-no-repeat "
-       style={{ backgroundImage: "url('/assets/footer-bg.jpeg')" }}
+        style={{ backgroundImage: "url('/assets/footer-bg.jpeg')" }}
       >
         {/* First Column (Larger) */}
         <div className="lg:w-1/2 bg-opacity-80 p-6 lg:p-10 rounded-lg shadow-lg max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -136,6 +137,8 @@ const Footer = () => {
           </p>
         </div>
       </div>
+
+      <AskAIButton />
     </>
   );
 };

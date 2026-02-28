@@ -12,7 +12,7 @@ export async function getActiveProjects() {
     const cached = await redis.get(CACHE_KEYS.PROJECT_ACTIVE);
 
     if (cached) {
-      console.log("REDIS ACTIVE HIT");
+      // console.log("REDIS ACTIVE HIT");
       return JSON.parse(cached);
     }
 

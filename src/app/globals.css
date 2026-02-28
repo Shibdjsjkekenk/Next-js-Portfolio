@@ -949,3 +949,17 @@ select {
   background-color: rgba(0, 0, 0, 0.25);
   border-radius: 10px;
 }
+
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 6s linear infinite;
+}
