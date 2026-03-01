@@ -3,6 +3,7 @@
 import { Bot, X, Send, Mic } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import AIProjectCards from "@/components/client-view/AIProjectCards";
+import SiriWaveChat from "@/components/client-view/SiriWaveChat";
 
 interface Props {
   open: boolean;
@@ -50,6 +51,7 @@ Feel free to ask anything — I'm here to help `;
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [introRemoved, setIntroRemoved] = useState(false);
+  const [listening, setListening] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -135,17 +137,38 @@ Feel free to ask anything — I'm here to help `;
       return;
     }
 
+    // 🔊 MIC START SOUND
+    new Audio("/sound-on-chat-ai.mp3").play();
+
     const recognition = new SpeechRecognition();
     recognition.lang = "en-IN";
 
+    recognition.continuous = false;
+    recognition.interimResults = true;
+
+    setListening(true);
+
     recognition.onresult = (e: any) => {
-      const text = e.results[0][0].transcript;
+      const result = e.results[0];
+      const transcript = result[0].transcript;
 
-      // Voice question spoken by user (optional)
-      speak(text);
+      // ✨ Live typing
+      setInput(transcript);
 
-      // Send with voice mode ON
-      sendMessage(text, true);
+      if (result.isFinal) {
+        setListening(false);
+
+        // 🔊 MIC END SOUND
+        new Audio("/sound-on-chat-ai.mp3").play();
+
+        sendMessage(transcript, true);
+        recognition.stop();
+        setInput("");
+      }
+    };
+
+    recognition.onerror = () => {
+      setListening(false);
     };
 
     recognition.start();
@@ -162,7 +185,7 @@ Feel free to ask anything — I'm here to help `;
       />
 
       {/* CHAT BOX */}
-      <div className="fixed z-50 bottom-20 right-4 w-[360px] max-w-[95vw] md:bottom-24 md:right-5 max-md:left-3 max-md:right-3 max-md:w-auto">
+      <div className="fixed z-50 bottom-20 right-4 w-[360px] max-w-[95vw] md:bottom-24 md:right-5 max-md:left-4 max-md:right-4 max-md:w-auto">
         <div className="bg-white rounded-2xl shadow-2xl border overflow-hidden flex flex-col">
           {/* HEADER */}
           <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 text-white">
@@ -179,7 +202,7 @@ Feel free to ask anything — I'm here to help `;
               </div>
             </div>
 
-               <button
+            <button
               onClick={onClose}
               className="
     relative
@@ -244,10 +267,20 @@ Feel free to ask anything — I'm here to help `;
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about projects, skills..."
+                placeholder={
+                  listening
+                    ? "🎤 Listening..."
+                    : "Ask about projects, skills..."
+                }
                 className="flex-1 bg-transparent outline-none text-sm"
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               />
+
+              {listening && (
+                <div className="bg-indigo-50 rounded-xl p-2 animate-fade-in">
+                  <SiriWaveChat active />
+                </div>
+              )}
 
               <button
                 onClick={() => sendMessage()}
