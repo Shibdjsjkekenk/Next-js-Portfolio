@@ -21,7 +21,7 @@ export default function AskAIButton() {
             shadow-lg
           "
           >
-            Ask with AI
+            Ask with T'AI
             {/* Arrow */}
             <span
               className="

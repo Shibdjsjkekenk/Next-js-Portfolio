@@ -1,6 +1,6 @@
 "use client";
 
-import { Bot, X, Send } from "lucide-react";
+import { Bot, X, Send, Mic } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import AIProjectCards from "@/components/client-view/AIProjectCards";
 
@@ -21,7 +21,6 @@ interface Msg {
   cards?: Card[];
 }
 
-// Professional Greeting
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return "Good morning";
@@ -34,7 +33,7 @@ export default function AiChatModal({ open, onClose }: Props) {
 
   const introMessage = `${greeting} 👋  
 
-Welcome! I'm your AI portfolio assistant.
+Welcome! I'm your AI portfolio assistant. You can type or use voice 🎤
 
 I can help you explore:
 • Projects & case studies  
@@ -42,7 +41,7 @@ I can help you explore:
 • Experience & background  
 • Tools and technologies  
 
-Feel free to ask anything — I'm here to help 🚀`;
+Feel free to ask anything — I'm here to help `;
 
   const [messages, setMessages] = useState<Msg[]>([
     { role: "ai", text: introMessage },
@@ -54,26 +53,36 @@ Feel free to ask anything — I'm here to help 🚀`;
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Auto scroll
+  // scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Lock body scroll
+  // lock scroll
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
   }, [open]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+  // 🔊 SPEAK FUNCTION (only used in voice mode)
+  const speak = (text: string) => {
+    speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "en-IN";
+    speechSynthesis.speak(utter);
+  };
 
-    const userText = input;
+  // =============================
+  // NORMAL TEXT MESSAGE (NO VOICE)
+  // =============================
+  const sendMessage = async (textOverride?: string, isVoice = false) => {
+    const userText = textOverride || input;
+    if (!userText.trim() || loading) return;
+
     setInput("");
 
     setMessages((prev) => {
       let updated = [...prev];
 
-      // Remove intro after first user message
       if (!introRemoved) {
         updated = updated.filter((m) => m.text !== introMessage);
         setIntroRemoved(true);
@@ -91,6 +100,9 @@ Feel free to ask anything — I'm here to help 🚀`;
       });
 
       const data = await res.json();
+
+      // 🔊 ONLY speak if voice mode
+      if (isVoice) speak(data.answer);
 
       setMessages((prev) => [
         ...prev,
@@ -110,6 +122,35 @@ Feel free to ask anything — I'm here to help 🚀`;
     setLoading(false);
   };
 
+  // =============================
+  // 🎤 VOICE INPUT
+  // =============================
+  const startVoice = () => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Voice not supported in this browser");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-IN";
+
+    recognition.onresult = (e: any) => {
+      const text = e.results[0][0].transcript;
+
+      // Voice question spoken by user (optional)
+      speak(text);
+
+      // Send with voice mode ON
+      sendMessage(text, true);
+    };
+
+    recognition.start();
+  };
+
   if (!open) return null;
 
   return (
@@ -123,15 +164,14 @@ Feel free to ask anything — I'm here to help 🚀`;
       {/* CHAT BOX */}
       <div className="fixed z-50 bottom-20 right-4 w-[360px] max-w-[95vw] md:bottom-24 md:right-5 max-md:left-3 max-md:right-3 max-md:w-auto">
         <div className="bg-white rounded-2xl shadow-2xl border overflow-hidden flex flex-col">
-          {/* PREMIUM HEADER */}
+          {/* HEADER */}
           <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 text-white">
             <div className="flex items-center gap-3">
               <div className="bg-white/20 backdrop-blur rounded-lg p-1.5">
                 <Bot size={16} />
               </div>
-
               <div className="leading-tight">
-                <div className="text-sm font-semibold">AI Assistant</div>
+                <div className="text-sm font-semibold">T'AI Assistant</div>
                 <div className="text-[10px] text-white/80 flex items-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
                   Online
@@ -139,7 +179,7 @@ Feel free to ask anything — I'm here to help 🚀`;
               </div>
             </div>
 
-            <button
+               <button
               onClick={onClose}
               className="
     relative
@@ -159,7 +199,7 @@ Feel free to ask anything — I'm here to help 🚀`;
             </button>
           </div>
 
-          {/* CHAT BODY */}
+          {/* BODY */}
           <div className="h-[60vh] overflow-y-auto p-4 space-y-4 bg-gray-50">
             {messages.map((m, i) => (
               <div
@@ -196,6 +236,11 @@ Feel free to ask anything — I'm here to help 🚀`;
           {/* INPUT */}
           <div className="p-3 border-t bg-white">
             <div className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-2">
+              {/* 🎤 MIC BUTTON */}
+              <button onClick={startVoice}>
+                <Mic size={16} />
+              </button>
+
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -205,7 +250,7 @@ Feel free to ask anything — I'm here to help 🚀`;
               />
 
               <button
-                onClick={sendMessage}
+                onClick={() => sendMessage()}
                 className="bg-indigo-600 text-white p-2 rounded-full hover:scale-105 transition"
               >
                 <Send size={14} />
