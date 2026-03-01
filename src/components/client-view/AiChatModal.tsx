@@ -65,7 +65,7 @@ Feel free to ask anything — I'm here to help `;
     document.body.style.overflow = open ? "hidden" : "";
   }, [open]);
 
-  // 🔊 SPEAK FUNCTION (only used in voice mode)
+  // SPEAK FUNCTION (only used in voice mode)
   const speak = (text: string) => {
     speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
@@ -73,9 +73,7 @@ Feel free to ask anything — I'm here to help `;
     speechSynthesis.speak(utter);
   };
 
-  // =============================
   // NORMAL TEXT MESSAGE (NO VOICE)
-  // =============================
   const sendMessage = async (textOverride?: string, isVoice = false) => {
     const userText = textOverride || input;
     if (!userText.trim() || loading) return;
@@ -103,7 +101,7 @@ Feel free to ask anything — I'm here to help `;
 
       const data = await res.json();
 
-      // 🔊 ONLY speak if voice mode
+      // ONLY speak if voice mode
       if (isVoice) speak(data.answer);
 
       setMessages((prev) => [
@@ -124,55 +122,59 @@ Feel free to ask anything — I'm here to help `;
     setLoading(false);
   };
 
-  // =============================
-  // 🎤 VOICE INPUT
-  // =============================
-  const startVoice = () => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
+  // VOICE INPUT
+const startVoice = () => {
+  const SpeechRecognition =
+    (window as any).SpeechRecognition ||
+    (window as any).webkitSpeechRecognition;
 
-    if (!SpeechRecognition) {
-      alert("Voice not supported in this browser");
-      return;
-    }
+  if (!SpeechRecognition) {
+    alert("Voice not supported in this browser");
+    return;
+  }
 
-    // 🔊 MIC START SOUND
-    new Audio("/sound-on-chat-ai.mp3").play();
+  // 🔊 PROFESSIONAL MIC SOUND (single + soft)
+  try {
+    const sound = new Audio("/sound-on-chat-ai.mp3");
+    sound.volume = 0.35; // soft premium volume
+    sound.play().catch(() => {}); // avoid mobile autoplay crash
+  } catch {}
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = "en-IN";
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-IN";
+  recognition.continuous = false;
+  recognition.interimResults = true;
 
-    recognition.continuous = false;
-    recognition.interimResults = true;
+  setListening(true);
 
-    setListening(true);
+  recognition.onresult = (e: any) => {
+    const result = e.results[0];
+    const transcript = result[0].transcript;
 
-    recognition.onresult = (e: any) => {
-      const result = e.results[0];
-      const transcript = result[0].transcript;
+    // ✨ Live typing
+    setInput(transcript);
 
-      // ✨ Live typing
-      setInput(transcript);
-
-      if (result.isFinal) {
-        setListening(false);
-
-        // 🔊 MIC END SOUND
-        new Audio("/sound-on-chat-ai.mp3").play();
-
-        sendMessage(transcript, true);
-        recognition.stop();
-        setInput("");
-      }
-    };
-
-    recognition.onerror = () => {
+    if (result.isFinal) {
       setListening(false);
-    };
 
-    recognition.start();
+      // ❌ removed end sound (prevents double audio on mobile)
+
+      sendMessage(transcript, true);
+      recognition.stop();
+      setInput("");
+    }
   };
+
+  recognition.onerror = () => {
+    setListening(false);
+  };
+
+  recognition.onend = () => {
+    setListening(false);
+  };
+
+  recognition.start();
+};
 
   if (!open) return null;
 
