@@ -1,42 +1,33 @@
 import Project from "@/models/Project";
 
 export async function buildProjectRAG(question: string) {
+
   let projects = await Project.find({ isActive: true }).sort({ order: 1 });
+
   if (!projects.length) return { text: "", cards: [] };
 
   const q = question.toLowerCase();
 
-  const isProjectQuery =
-    q.includes("project") ||
-    q.includes("work") ||
-    q.includes("portfolio") ||
-    q.includes("demo");
-
-  if (!isProjectQuery) return { text: "", cards: [] };
-
   // SMART RANKING ENGINE
 
-  // FEATURED PROJECT
   if (q.includes("best") || q.includes("featured") || q.includes("top")) {
     const featured = projects.find((p) => p.featured);
     if (featured) projects = [featured];
   }
 
-  // LATEST PROJECT
   else if (q.includes("latest") || q.includes("recent") || q.includes("new")) {
     projects = [...projects].sort(
       (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)
     );
   }
 
-  // QUALITY BASED (fallback best)
   else if (q.includes("recommend") || q.includes("suggest")) {
     projects = [...projects].sort(
       (a, b) => b.content.length - a.content.length
     );
   }
 
-  // Count detaction
+  // Count detection
 
   let limit = projects.length;
 
@@ -48,7 +39,6 @@ export async function buildProjectRAG(question: string) {
 
   const selected = projects.slice(0, limit);
 
-  //  OUTPUT
   const text = selected
     .map((p, i) => `Project ${i + 1}: ${stripHtml(p.content)}`)
     .join("\n");
@@ -62,7 +52,9 @@ export async function buildProjectRAG(question: string) {
   return { text, cards };
 }
 
+
 // helpers
+
 function stripHtml(html: string) {
   return html.replace(/<[^>]*>/g, "");
 }

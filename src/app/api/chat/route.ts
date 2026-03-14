@@ -1,38 +1,72 @@
 import { connectDB } from "@/lib/db";
 import { buildBannerRAG } from "@/lib/ai/ragBanner";
+import { buildAboutRAG } from "@/lib/ai/ragAbout";
 import { buildTimelineRAG } from "@/lib/ai/ragTimeline";
 import { buildProjectRAG } from "@/lib/ai/ragProjects";
+import { buildSkillsRAG } from "@/lib/ai/ragSkills";
 import { ai } from "@/lib/ai/genai";
-
+import AboutUs from "@/models/AboutUs";
 export async function POST(req: Request) {
   try {
     const { question } = await req.json();
     await connectDB();
 
+    const q = question.toLowerCase();
+
+    // detect project related query
+    const isProjectQuery =
+      q.includes("project") ||
+      q.includes("portfolio") ||
+      q.includes("work") ||
+      q.includes("demo");
+
     const banner = await buildBannerRAG(question);
+    const about = await buildAboutRAG(question);
     const timeline = await buildTimelineRAG(question);
-    const projects = await buildProjectRAG(question);
+    const skills = buildSkillsRAG();
+    let projects: {
+      text: string;
+      cards: { title: string; image: string; link: string }[];
+    } = {
+      text: "",
+      cards: [],
+    };
+
+    if (isProjectQuery) {
+      projects = await buildProjectRAG(question);
+    }
 
     const ragContext = `
 === PROFILE ===
-${banner}
+${banner?.slice(0, 200)}
+
+=== ABOUT ===
+${about?.slice(0, 400)}
+
+=== SKILLS ===
+${skills}
 
 === TIMELINE ===
-${timeline}
+${timeline?.slice(0, 200)}
 
-=== PROJECTS ===
-${projects.text}
+${isProjectQuery ? `=== PROJECTS ===\n${projects.text?.slice(0, 300)}` : ""}
 `;
 
     const completion = await ai.chat.completions.create({
-      model: "llama-3.3-70b-versatile", // best free Groq model
+      model: "llama-3.3-70b-versatile",
+      max_tokens: 120,
       messages: [
         {
           role: "system",
           content: `You are a professional portfolio AI.
-If projects are asked:
-- Respond briefly
-- Say "Here are my projects"`,
+Speak in first person as the developer.
+
+Rules:
+- Use only the provided context
+- Do not invent information
+
+If the user asks about projects:
+Say "Here are my projects".`,
         },
         {
           role: "user",
@@ -49,33 +83,25 @@ User: ${question}
     const answer =
       completion.choices[0]?.message?.content || "AI did not respond.";
 
-    // console.log("Groq RAW:", completion);
+    const aboutData = await AboutUs.findOne({ isActive: true });
 
-    //  IMPORTANT: return cards
     return Response.json({
       answer,
-      projectCards: projects.cards, // send cards to UI
+      projectCards: isProjectQuery ? projects.cards : [],
+      resume: aboutData?.resume || ""
     });
+
   } catch (err: any) {
     console.error("AI ERROR:", err);
 
-    //  Detect Gemini quota error
     if (err?.status === 429) {
       return Response.json({
         answer: `
 ⚠️ AI is taking a short break right now.
 
-I’ve reached my daily AI limit 🤖  
-Please try again after some time.
-
-Meanwhile, you can still explore:
-• My projects 🚀
-• My experience 💼
-• My skills ⚡
-
-Thanks for your patience ❤️
-      `,
-        isQuota: true, // optional flag
+Please try again later.
+`,
+        isQuota: true,
       });
     }
 
@@ -83,7 +109,7 @@ Thanks for your patience ❤️
       {
         answer: "Something went wrong. Please try again later.",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

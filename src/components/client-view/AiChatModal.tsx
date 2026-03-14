@@ -20,6 +20,7 @@ interface Msg {
   role: "user" | "ai";
   text: string;
   cards?: Card[];
+  resume?: string;
 }
 
 function getGreeting() {
@@ -110,6 +111,7 @@ Feel free to ask anything — I'm here to help `;
           role: "ai",
           text: data.answer,
           cards: data.projectCards || [],
+          resume: data.resume || "",
         },
       ]);
     } catch {
@@ -123,58 +125,58 @@ Feel free to ask anything — I'm here to help `;
   };
 
   // VOICE INPUT
-const startVoice = () => {
-  const SpeechRecognition =
-    (window as any).SpeechRecognition ||
-    (window as any).webkitSpeechRecognition;
+  const startVoice = () => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
 
-  if (!SpeechRecognition) {
-    alert("Voice not supported in this browser");
-    return;
-  }
-
-  // 🔊 PROFESSIONAL MIC SOUND (single + soft)
-  try {
-    const sound = new Audio("/sound-on-chat-ai.mp3");
-    sound.volume = 0.35; // soft premium volume
-    sound.play().catch(() => {}); // avoid mobile autoplay crash
-  } catch {}
-
-  const recognition = new SpeechRecognition();
-  recognition.lang = "en-IN";
-  recognition.continuous = false;
-  recognition.interimResults = true;
-
-  setListening(true);
-
-  recognition.onresult = (e: any) => {
-    const result = e.results[0];
-    const transcript = result[0].transcript;
-
-    // ✨ Live typing
-    setInput(transcript);
-
-    if (result.isFinal) {
-      setListening(false);
-
-      // ❌ removed end sound (prevents double audio on mobile)
-
-      sendMessage(transcript, true);
-      recognition.stop();
-      setInput("");
+    if (!SpeechRecognition) {
+      alert("Voice not supported in this browser");
+      return;
     }
-  };
 
-  recognition.onerror = () => {
-    setListening(false);
-  };
+    // 🔊 PROFESSIONAL MIC SOUND (single + soft)
+    try {
+      const sound = new Audio("/sound-on-chat-ai.mp3");
+      sound.volume = 0.35; // soft premium volume
+      sound.play().catch(() => { }); // avoid mobile autoplay crash
+    } catch { }
 
-  recognition.onend = () => {
-    setListening(false);
-  };
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = true;
 
-  recognition.start();
-};
+    setListening(true);
+
+    recognition.onresult = (e: any) => {
+      const result = e.results[0];
+      const transcript = result[0].transcript;
+
+      // ✨ Live typing
+      setInput(transcript);
+
+      if (result.isFinal) {
+        setListening(false);
+
+        // ❌ removed end sound (prevents double audio on mobile)
+
+        sendMessage(transcript, true);
+        recognition.stop();
+        setInput("");
+      }
+    };
+
+    recognition.onerror = () => {
+      setListening(false);
+    };
+
+    recognition.onend = () => {
+      setListening(false);
+    };
+
+    recognition.start();
+  };
 
   if (!open) return null;
 
@@ -229,22 +231,33 @@ const startVoice = () => {
             {messages.map((m, i) => (
               <div
                 key={i}
-                className={`flex ${
-                  m.role === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${m.role === "user" ? "justify-end" : "justify-start"
+                  }`}
               >
                 <div className="max-w-[85%] space-y-2">
                   <div
-                    className={`px-4 py-3 rounded-xl text-sm whitespace-pre-line ${
-                      m.role === "user"
-                        ? "bg-indigo-600 text-white"
-                        : "bg-white border"
-                    }`}
+                    className={`px-4 py-3 rounded-xl text-sm whitespace-pre-line ${m.role === "user"
+                      ? "bg-indigo-600 text-white"
+                      : "bg-white border"
+                      }`}
                   >
                     {m.text}
                   </div>
 
                   {m.cards?.length ? <AIProjectCards cards={m.cards} /> : null}
+
+                  {m.resume && (
+                    <div className="mt-2">
+                      <a
+                        href={m.resume}
+                        download="Shubhanshu_Tiwari_CV.pdf"
+                        target="_blank"
+                        className="inline-block bg-indigo-600 text-white text-xs px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                      >
+                        📄 Download CV
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
