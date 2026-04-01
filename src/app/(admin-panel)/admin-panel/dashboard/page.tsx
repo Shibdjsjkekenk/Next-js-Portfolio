@@ -31,7 +31,7 @@ import dynamic from "next/dynamic";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 import { Bot, Sparkles, X } from "lucide-react";
 import { useState } from "react";
-import AiChatModal from "@/components/client-view/AiChatModal";
+import AdminAiModal from "@/components/admin-view/AdminAiModal.tsx";
 
 const UserMap = dynamic(() => import("@/components/admin-view/UserMap"), {
   ssr: false,
@@ -346,7 +346,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <AiChatModal open={openAI} onClose={() => setOpenAI(false)} />
+      <AdminAiModal open={openAI} onClose={() => setOpenAI(false)} />
     </>
   );
 }

@@ -4,8 +4,9 @@ import { buildAboutRAG } from "@/lib/ai/ragAbout";
 import { buildTimelineRAG } from "@/lib/ai/ragTimeline";
 import { buildProjectRAG } from "@/lib/ai/ragProjects";
 import { buildSkillsRAG } from "@/lib/ai/ragSkills";
-import { ai } from "@/lib/ai/genai";
 import AboutUs from "@/models/AboutUs";
+import { runAIChain } from "@/lib/langchain/chain";
+
 export async function POST(req: Request) {
   try {
     const { question } = await req.json();
@@ -36,59 +37,27 @@ export async function POST(req: Request) {
       projects = await buildProjectRAG(question);
     }
 
-    const ragContext = `
-=== PROFILE ===
-${banner?.slice(0, 200)}
-
-=== ABOUT ===
-${about?.slice(0, 400)}
-
-=== SKILLS ===
-${skills}
-
-=== TIMELINE ===
-${timeline?.slice(0, 200)}
-
-${isProjectQuery ? `=== PROJECTS ===\n${projects.text?.slice(0, 300)}` : ""}
-`;
-
-    const completion = await ai.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      max_tokens: 120,
-      messages: [
-        {
-          role: "system",
-          content: `You are a professional portfolio AI.
-Speak in first person as the developer.
-
-Rules:
-- Use only the provided context
-- Do not invent information
-
-If the user asks about projects:
-Say "Here are my projects".`,
-        },
-        {
-          role: "user",
-          content: `
-Context:
-${ragContext}
-
-User: ${question}
-`,
-        },
-      ],
+    const structuredContext = JSON.stringify({
+      profile: banner?.slice(0, 200),
+      about: about?.slice(0, 300),
+      skills,
+      timeline: timeline?.slice(0, 200),
+      projects: isProjectQuery ? projects.text?.slice(0, 300) : "",
     });
 
-    const answer =
-      completion.choices[0]?.message?.content || "AI did not respond.";
+    const answer = await runAIChain(structuredContext, question);
 
     const aboutData = await AboutUs.findOne({ isActive: true });
+
+    const isResumeQuery =
+      q.includes("resume") ||
+      q.includes("cv") ||
+      q.includes("download");
 
     return Response.json({
       answer,
       projectCards: isProjectQuery ? projects.cards : [],
-      resume: aboutData?.resume || ""
+      resume: isResumeQuery ? aboutData?.resume || "" : "",
     });
 
   } catch (err: any) {
