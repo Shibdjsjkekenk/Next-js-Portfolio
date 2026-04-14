@@ -7,6 +7,7 @@ import { buildSkillsRAG } from "@/lib/ai/ragSkills";
 import AboutUs from "@/models/AboutUs";
 import { runAIChain } from "@/lib/langchain/chain";
 
+
 export async function POST(req: Request) {
   try {
     const { question } = await req.json();

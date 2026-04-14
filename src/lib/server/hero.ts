@@ -6,28 +6,39 @@ import { CACHE_TTL } from "@/lib/cacheTTL";
 
 export async function getActiveBanner() {
   try {
-    //  Redis
+    // ✅ REDIS CHECK
     const cached = await redis.get(CACHE_KEYS.BANNERS_ALL);
+
     if (cached) {
       const list = JSON.parse(cached);
-      return list.find((b: any) => b.isActive) ?? list[0] ?? null;
+
+      // ❌ REMOVE fallback
+      const activeBanner = list.find((b: any) => b.isActive === true);
+
+      return activeBanner || null; // ✅ ONLY active
     }
 
-    //  DB
+    // ✅ DB CALL
     await connectDB();
-    const banners = await Banner.find().sort({ createdAt: -1 }).lean(); // THIS IS THE KEY
+
+    const banners = await Banner.find()
+      .sort({ createdAt: -1 })
+      .lean();
 
     if (!banners.length) return null;
 
-    //  Cache
+    // ✅ CACHE STORE
     await redis.set(
       CACHE_KEYS.BANNERS_ALL,
       JSON.stringify(banners),
       "EX",
-      CACHE_TTL.MEDIUM,
+      CACHE_TTL.MEDIUM
     );
 
-    return banners.find((b) => b.isActive) ?? banners[0];
+    // ❌ REMOVE fallback
+    const activeBanner = banners.find((b) => b.isActive === true);
+
+    return activeBanner || null; // ✅ ONLY active
   } catch (e) {
     console.error("Hero fetch failed", e);
     return null;

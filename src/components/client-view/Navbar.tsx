@@ -4,13 +4,26 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaGithub,
+  FaLinkedinIn,
+  FaGlobe,
+} from "react-icons/fa";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   /*  Lock scroll when mobile menu open */
   useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "auto";
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
   }, [isOpen]);
 
   return (
@@ -36,7 +49,7 @@ const Navbar = () => {
               Home
             </Link>
 
-            <Link href="/" className="font-bold hover:text-red-600 text-[17px]">
+            <Link href="#about-us" className="font-bold hover:text-red-600 text-[17px]">
               About Us
             </Link>
 
@@ -78,7 +91,7 @@ const Navbar = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 z-[9999] bg-white flex items-center justify-center"
+            className="fixed inset-0 z-[99999] bg-white flex items-center justify-center overflow-hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -101,11 +114,11 @@ const Navbar = () => {
                 hidden: {},
                 show: { transition: { staggerChildren: 0.2 } },
               }}
-              className="flex flex-col items-end gap-10 w-full pr-15"
+              className="flex flex-col items-end gap-10 w-full pr-15 mb-0"
             >
               {[
                 { name: "Home", href: "/" },
-                { name: "About Us", href: "/" },
+                { name: "About Us", href: "#about-us" },
                 { name: "My Expertise", href: "#services" },
                 { name: "Contact Us", href: "/contact" },
               ].map((item) => (
@@ -124,6 +137,46 @@ const Navbar = () => {
                     {item.name}
                   </Link>
                 </motion.div>
+              ))}
+            </motion.div>
+
+            {/* ✅ SOCIAL ICONS (BOTTOM) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="absolute bottom-10 left-0 w-full flex justify-center gap-5"
+            >
+              {[
+                {
+                  href: "https://www.facebook.com/shubhanshu.tiwari.167",
+                  icon: <FaFacebookF className="text-blue-600" />,
+                },
+                {
+                  href: "https://www.instagram.com/phenomenalllt",
+                  icon: <FaInstagram className="text-pink-500" />,
+                },
+                {
+                  href: "https://github.com/Shibdjsjkekenk",
+                  icon: <FaGithub className="text-gray-800" />,
+                },
+                {
+                  href: "https://www.linkedin.com/in/tiwari-shubhanshu-93bb95267",
+                  icon: <FaLinkedinIn className="text-blue-700" />,
+                },
+                {
+                  href: "https://www.shubhanshutiwari.com",
+                  icon: <FaGlobe className="text-green-500" />,
+                },
+              ].map((item, i) => (
+                <a
+                  key={i}
+                  href={item.href}
+                  target="_blank"
+                  className="w-10 h-10 border border-gray-300 rounded-full flex items-center justify-center shadow-md hover:scale-110 transition"
+                >
+                  {item.icon}
+                </a>
               ))}
             </motion.div>
           </motion.div>

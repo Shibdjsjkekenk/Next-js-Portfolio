@@ -87,7 +87,7 @@ export default function AboutSection({ about }: { about: About | null }) {
   };
 
   return (
-    <section className="">
+    <section className="" id="about-us">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
