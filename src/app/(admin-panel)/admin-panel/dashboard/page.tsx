@@ -31,7 +31,7 @@ import dynamic from "next/dynamic";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 import { Bot, Sparkles, X } from "lucide-react";
 import { useState } from "react";
-import AdminAiModal from "@/components/admin-view/AdminAiModal.tsx";
+import AdminAiModal from "@/components/admin-view/AdminAiModal";
 
 const UserMap = dynamic(() => import("@/components/admin-view/UserMap"), {
   ssr: false,
