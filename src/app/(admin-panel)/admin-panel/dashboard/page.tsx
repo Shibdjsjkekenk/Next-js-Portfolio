@@ -31,9 +31,10 @@ import AdminAiModal from "@/components/admin-view/AdminAiModal";
 
 import dynamic from "next/dynamic";
 
-const Bar = dynamic(() => import("react-chartjs-2").then((mod) => mod.Bar), {
-  ssr: false,
-});
+const Bar = dynamic(
+  () => import("react-chartjs-2").then((mod) => mod.Bar),
+  { ssr: false }
+);
 
 const UserMap = dynamic(() => import("@/components/admin-view/UserMap"), {
   ssr: false,
@@ -44,7 +45,7 @@ export default function AdminDashboardPage() {
   const dispatch = useDispatch();
 
   const { list, loading, fetchedOnce } = useSelector(
-    (state: RootState) => state.allUsers,
+    (state: RootState) => state.allUsers
   );
 
   const { list: projects, getAllProjects } = useProjects();
@@ -77,7 +78,7 @@ export default function AdminDashboardPage() {
   /* ================= FETCH PROJECTS ================= */
   useEffect(() => {
     getAllProjects();
-  }, [getAllProjects]);
+  }, []);
 
   /* ================= USER STATS ================= */
   const userStats = useMemo(() => {
@@ -132,7 +133,7 @@ export default function AdminDashboardPage() {
         label: "Login Count",
         data: list.map((u: any) => u.loginCount || 0),
         backgroundColor: list.map((u: any) =>
-          u.role === "ADMIN" ? "#fbbf24" : "#4ade80",
+          u.role === "ADMIN" ? "#fbbf24" : "#4ade80"
         ),
         borderRadius: 8,
       },
@@ -212,53 +213,21 @@ export default function AdminDashboardPage() {
 
         {/* USERS */}
         <div className="grid gap-6 md:grid-cols-3">
-          <StatCard
-            title="Total Users"
-            value={userStats.total}
-            icon={<Users size={20} />}
-            color="indigo"
-          />
-          <StatCard
-            title="Admins"
-            value={userStats.admin}
-            icon={<ShieldCheck size={20} />}
-            color="emerald"
-          />
-          <StatCard
-            title="General Users"
-            value={userStats.general}
-            icon={<User size={20} />}
-            color="orange"
-          />
+          <StatCard title="Total Users" value={userStats.total} icon={<Users size={20} />} color="indigo" />
+          <StatCard title="Admins" value={userStats.admin} icon={<ShieldCheck size={20} />} color="emerald" />
+          <StatCard title="General Users" value={userStats.general} icon={<User size={20} />} color="orange" />
         </div>
 
         {/* PROJECTS */}
         <div className="grid gap-6 md:grid-cols-3">
-          <StatCard
-            title="Total Projects"
-            value={projectStats.total}
-            icon={<FolderKanban size={20} />}
-            color="indigo"
-            type="project"
-          />
-          <StatCard
-            title="Active Projects"
-            value={projectStats.active}
-            icon={<FolderKanban size={20} />}
-            color="emerald"
-            type="project"
-          />
-          <StatCard
-            title="Inactive Projects"
-            value={projectStats.inactive}
-            icon={<FolderKanban size={20} />}
-            color="orange"
-            type="project"
-          />
+          <StatCard title="Total Projects" value={projectStats.total} icon={<FolderKanban size={20} />} color="indigo" type="project" />
+          <StatCard title="Active Projects" value={projectStats.active} icon={<FolderKanban size={20} />} color="emerald" type="project" />
+          <StatCard title="Inactive Projects" value={projectStats.inactive} icon={<FolderKanban size={20} />} color="orange" type="project" />
         </div>
 
         {/* PROFESSIONAL CHARTS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+
           {/* USER LOGIN CHART */}
           <div className="bg-white rounded-2xl shadow p-4 sm:p-5 md:col-span-3">
             <h2 className="font-semibold mb-4 text-gray-700">
@@ -268,15 +237,19 @@ export default function AdminDashboardPage() {
             {/* SCROLL WRAPPER */}
             <div className="w-full">
               <div className="relative w-full">
+
                 {/* ONLY horizontal scroll on mobile */}
                 <div className="overflow-x-auto overflow-y-hidden">
                   <div className="min-w-[600px] md:min-w-full">
+
                     {/* RESPONSIVE HEIGHT */}
                     <div className="h-[340px] md:h-[300px]">
                       <Bar data={loginChart} options={chartOptions} />
                     </div>
+
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
@@ -304,6 +277,7 @@ export default function AdminDashboardPage() {
               </PieChart>
             </ResponsiveContainer>
           </div>
+
         </div>
         {/*  USER LOGIN TABLE (NEW) */}
         <div className="bg-white rounded-2xl shadow p-5 mt-6">
@@ -331,21 +305,17 @@ export default function AdminDashboardPage() {
                   const last = getLastLogin(user);
 
                   return (
-                    <tr
-                      key={i}
-                      className="border-t hover:bg-gray-50 transition"
-                    >
+                    <tr key={i} className="border-t hover:bg-gray-50 transition">
                       <td className="p-3 font-medium">
                         {user.name || user.email}
                       </td>
 
                       <td className="p-3">
                         <span
-                          className={`px-2 py-1 rounded text-xs font-semibold ${
-                            user.role === "ADMIN"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-green-100 text-green-700"
-                          }`}
+                          className={`px-2 py-1 rounded text-xs font-semibold ${user.role === "ADMIN"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-green-100 text-green-700"
+                            }`}
                         >
                           {user.role}
                         </span>
@@ -412,13 +382,10 @@ function StatCard({
     orange: "from-rose-500 to-pink-500",
   };
 
-  const gradient =
-    type === "project" ? projectColors[color] : userColors[color];
+  const gradient = type === "project" ? projectColors[color] : userColors[color];
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-r ${gradient} text-white shadow-lg`}
-    >
+    <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-r ${gradient} text-white shadow-lg`}>
       <div className="py-3 px-4 flex items-center justify-between">
         <div>
           <p className="text-white text-xl font-bold">{title}</p>
