@@ -1,12 +1,9 @@
 import { connectDB } from "@/lib/db";
-import { buildBannerRAG } from "@/lib/ai/ragBanner";
-import { buildAboutRAG } from "@/lib/ai/ragAbout";
-import { buildTimelineRAG } from "@/lib/ai/ragTimeline";
+import { getRAGContext } from "@/lib/ai/commonRAG"; 
 import { buildProjectRAG } from "@/lib/ai/ragProjects";
 import { buildSkillsRAG } from "@/lib/ai/ragSkills";
 import AboutUs from "@/models/AboutUs";
 import { runAIChain } from "@/lib/langchain/chain";
-
 
 export async function POST(req: Request) {
   try {
@@ -22,10 +19,12 @@ export async function POST(req: Request) {
       q.includes("work") ||
       q.includes("demo");
 
-    const banner = await buildBannerRAG(question);
-    const about = await buildAboutRAG(question);
-    const timeline = await buildTimelineRAG(question);
+    const banner = await getRAGContext(question, "banner");
+    const about = await getRAGContext(question, "about");
+    const timeline = await getRAGContext(question, "timeline");
+
     const skills = buildSkillsRAG();
+
     let projects: {
       text: string;
       cards: { title: string; image: string; link: string }[];
@@ -40,9 +39,9 @@ export async function POST(req: Request) {
 
     const structuredContext = JSON.stringify({
       profile: banner?.slice(0, 200),
-      about: about?.slice(0, 300),
+      about: about?.slice(0, 300), 
       skills,
-      timeline: timeline?.slice(0, 200),
+      timeline: timeline?.slice(0, 300),
       projects: isProjectQuery ? projects.text?.slice(0, 300) : "",
     });
 

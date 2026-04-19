@@ -7,18 +7,30 @@ const bannerSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+
     paragraph: {
       type: String,
       required: true,
       trim: true,
     },
+
     italicTitle: {
       type: String,
       trim: true,
     },
+
     image: {
       type: String,
     },
+
+    plainText: {
+      type: String,
+    },
+
+    embedding: {
+      type: [Number],
+    },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -27,4 +39,5 @@ const bannerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Banner || mongoose.model("Banner", bannerSchema);
+export default mongoose.models.Banner ||
+  mongoose.model("Banner", bannerSchema);

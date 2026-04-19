@@ -7,8 +7,25 @@ import { CACHE_TTL } from "@/lib/cacheTTL";
 
 export async function GET() {
   try {
-    //  Redis check
+    await connectDB();
+
+    // 1. Always fetch from DB first
+    const banners = await Banner.find().sort({ createdAt: -1 });
+
+    // 2. If DB empty → clear cache
+    if (!banners.length) {
+      await redis.del(CACHE_KEYS.BANNERS_ALL);
+
+      return NextResponse.json({
+        success: true,
+        source: "db-empty",
+        data: [],
+      });
+    }
+
+    // 3. Check Redis
     const cachedBanners = await redis.get(CACHE_KEYS.BANNERS_ALL);
+
     if (cachedBanners) {
       return NextResponse.json({
         success: true,
@@ -17,13 +34,7 @@ export async function GET() {
       });
     }
 
-    //  DB connect
-    await connectDB();
-
-    //  MongoDB fetch
-    const banners = await Banner.find().sort({ createdAt: -1 });
-
-    //  Save to Redis
+    // 4. Save fresh data
     await redis.set(
       CACHE_KEYS.BANNERS_ALL,
       JSON.stringify(banners),

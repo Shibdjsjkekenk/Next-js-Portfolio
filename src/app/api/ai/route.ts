@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/db";
 import Timeline from "@/models/Timeline";
-import OpenAI from "openai";
+import { ai } from "@/lib/ai/genai";
 import { handleRead } from "@/ai-agent/timelineService";
 import {
   createBanner,
@@ -15,11 +15,6 @@ const promptMap: any = {
   banner: bannerPrompt,
   timeline: timelinePrompt,
 };
-
-const ai = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY!,
-  baseURL: "https://api.groq.com/openai/v1",
-});
 
 const cleanHTMLForAI = (html: string) => {
   return html

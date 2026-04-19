@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import AboutUs from "@/models/AboutUs";
+import Document from "@/models/Document";
 import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
 
@@ -11,10 +12,10 @@ export async function DELETE(
   try {
     await connectDB();
 
-    // ✅ async params fix
     const { id } = await context.params;
 
     const about = await AboutUs.findByIdAndDelete(id);
+
     if (!about) {
       return NextResponse.json(
         { success: false, message: "About Us not found" },
@@ -22,7 +23,13 @@ export async function DELETE(
       );
     }
 
-    /* REDIS CACHE INVALIDATE */
+    // delete from Document (vector DB)
+    await Document.findOneAndDelete({
+      "metadata.aboutId": about._id,
+      type: "about",
+    });
+
+    // cache clear
     await redis.del(CACHE_KEYS.ABOUT_ALL);
     await redis.del(CACHE_KEYS.ABOUT_BY_ID(id));
 
