@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Users, ShieldCheck, User, FolderKanban } from "lucide-react";
 import type { RootState } from "@/store/store";
@@ -17,7 +17,6 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { Bar } from "react-chartjs-2";
 import {
   PieChart,
   Pie,
@@ -26,12 +25,16 @@ import {
   Tooltip as PieTooltip,
   Legend as PieLegend,
 } from "recharts";
-import "leaflet/dist/leaflet.css";
-import dynamic from "next/dynamic";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 import { Bot, Sparkles, X } from "lucide-react";
-import { useState } from "react";
-import AdminAiModal from "@/components/admin-view/AdminAiModal.tsx";
+import AdminAiModal from "@/components/admin-view/AdminAiModal";
+
+import dynamic from "next/dynamic";
+
+const Bar = dynamic(
+  () => import("react-chartjs-2").then((mod) => mod.Bar),
+  { ssr: false }
+);
 
 const UserMap = dynamic(() => import("@/components/admin-view/UserMap"), {
   ssr: false,
