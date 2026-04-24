@@ -22,7 +22,7 @@ import {
   SiSocketdotio,
   SiWebrtc,
 } from "react-icons/si";
-import { skills } from "@/common/skills";
+import { skillsCategory  } from "@/common/skills";
 import { MdLocationOn } from "react-icons/md";
 import { useSkill } from "@/hooks/gsap/useSkill";
 
@@ -113,7 +113,7 @@ const SkillSection: React.FC = () => {
             gap-4 sm:gap-6
           "
         >
-          {skills.map((skill, index) => (
+         {skillsCategory.flatMap(cat => cat.items).map((skill, index) => (
             <div
               key={index}
               className="

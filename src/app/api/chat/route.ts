@@ -17,11 +17,11 @@ export async function POST(req: Request) {
 
     const q = question.toLowerCase();
 
-    // GET RESUME FROM DB FIRST
+    //  GET RESUME
     const aboutData = await AboutUs.findOne({ isActive: true });
     const resumeLink = aboutData?.resume || "";
 
-    //  RESUME DIRECT HANDLE (NO AI CALL → NO CRASH)
+    //  DIRECT RESUME
     if (
       q.includes("resume") ||
       q.includes("cv") ||
@@ -29,25 +29,15 @@ export async function POST(req: Request) {
     ) {
       return Response.json({
         answer: "Here is my resume. You can download it below.",
-        projectCards: [],
+        projectCards: [], 
         resume: resumeLink,
       });
     }
 
-    // RAG DATA
-    const banner = (await getRAGContext(question, "banner")) as unknown as
-      | RAGResponse
-      | string;
-
-    const about = (await getRAGContext(question, "about")) as unknown as
-      | RAGResponse
-      | string;
-
-    const timeline = (await getRAGContext(question, "timeline")) as unknown as
-      | RAGResponse
-      | string;
-
-    //  PROJECT RAG
+    //  RAG DATA
+    const banner = await getRAGContext(question, "banner");
+    const about = await getRAGContext(question, "about");
+    const timeline = await getRAGContext(question, "timeline");
     const projectData = (await getRAGContext(
       question,
       "project"
@@ -56,10 +46,10 @@ export async function POST(req: Request) {
     const projectsText = projectData?.text ?? "";
     const projectIds = projectData?.projectIds ?? [];
 
-    // SKILLS LIMIT
-    const skills = buildSkillsRAG().slice(0, 5);
+    //  SKILLS (BULLET FORMAT)
+    const skills = buildSkillsRAG(); 
 
-    // ensure string
+    //  SAFE TEXT
     const bannerText =
       typeof banner === "string" ? banner : banner?.text || "";
     const aboutText =
@@ -67,26 +57,35 @@ export async function POST(req: Request) {
     const timelineText =
       typeof timeline === "string" ? timeline : timeline?.text || "";
 
-    // OPTIMIZED CONTEXT (VERY IMPORTANT)
-    const structuredContext = JSON.stringify({
-      profile: bannerText.slice(0, 100),
-      about: aboutText.slice(0, 120),
-      skills,
-      timeline: timelineText.slice(0, 120),
-      projects: projectsText.slice(0, 300),
-    });
+    //  CLEAN CONTEXT (SECTION BASED)
+    const context = `
+PROFILE:
+${bannerText.slice(0, 100)}
 
-    // SAFE LIMIT (extra protection)
+ABOUT:
+${aboutText.slice(0, 150)}
+
+SKILLS:
+${skills}
+
+TIMELINE:
+${timelineText.slice(0, 150)}
+
+PROJECTS:
+${projectsText.slice(0, 400)}
+`;
+
+    //  LIMIT CONTEXT
     const MAX_CONTEXT = 2000;
     const safeContext =
-      structuredContext.length > MAX_CONTEXT
-        ? structuredContext.slice(0, MAX_CONTEXT)
-        : structuredContext;
+      context.length > MAX_CONTEXT
+        ? context.slice(0, MAX_CONTEXT)
+        : context;
 
-    // AI RESPONSE
+    //  CORRECT AI CALL (NO DOUBLE PROMPT)
     const answer = await runAIChain(safeContext, question);
 
-    // FETCH PROJECT CARDS
+    //  PROJECT CARDS
     let projectCards: any[] = [];
 
     if (projectIds.length > 0) {
@@ -103,10 +102,12 @@ export async function POST(req: Request) {
       }));
     }
 
+    const isProjectRelated = q.includes("project");
+
     return Response.json({
       answer,
-      projectCards,
-      resume: resumeLink, // always send
+      projectCards: isProjectRelated ? projectCards : [],
+      resume: "",
     });
 
   } catch (err: any) {

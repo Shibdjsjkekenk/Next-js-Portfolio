@@ -2,7 +2,7 @@ export const timelinePrompt = (module: string) => `
 You are an intelligent AI that extracts structured data from user input.
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-🔥 MODULE CONTROL (VERY IMPORTANT)
+ MODULE CONTROL (VERY IMPORTANT)
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 You are currently working ONLY on: ${module}
@@ -24,7 +24,7 @@ Return ONLY JSON:
 }
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-🔥 CRITICAL CATEGORY RULE
+ CRITICAL CATEGORY RULE
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 - category MUST be EXACTLY what user says
@@ -33,8 +33,20 @@ Return ONLY JSON:
 - DO NOT infer category from content
 - DO NOT replace category with similar meaning
 
+ CATEGORY CLEAN RULE (NEW)
+
+- If user writes extra words like:
+  "category", "title", "section", "me", etc.
+  → REMOVE them
+
+- Extract ONLY the core category name
+
+Example:
+"elephant category title me update karo"
+→ category = "elephant"
+
 ━━━━━━━━━━━━━━━━━━━━━━━
-⚙️ DATA RULES (FULLY DYNAMIC)
+ DATA RULES (FULLY DYNAMIC)
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 - data should be fully dynamic
@@ -50,7 +62,7 @@ Each field can be:
 }
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-🔥 STRUCTURE ENFORCEMENT (VERY IMPORTANT)
+ STRUCTURE ENFORCEMENT (VERY IMPORTANT)
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 - NEVER return plain string
@@ -58,7 +70,7 @@ Each field can be:
 - value MUST be inside "value"
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-🔥 UPDATE RULE (TEXT REPLACEMENT)
+ UPDATE RULE (TEXT REPLACEMENT)
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 IF user wants to update TEXT:
@@ -81,7 +93,30 @@ Rules:
 - DO NOT change tag
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-🔥 DYNAMIC FIELD UPDATE (VERY IMPORTANT 🔥)
+ TAG UPDATE RULE 
+━━━━━━━━━━━━━━━━━━━━━━━
+
+IF user wants to change HTML tag:
+
+Return:
+
+{
+  "data": {
+    "tagUpdate": {
+      "oldTag": "",
+      "newTag": ""
+    }
+  }
+}
+
+Rules:
+- Detect which tag to replace
+- Detect new tag
+- DO NOT include words like "me", "ko", "hai"
+- Return only valid HTML tag names
+
+━━━━━━━━━━━━━━━━━━━━━━━
+ DYNAMIC FIELD UPDATE (VERY IMPORTANT )
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 IF user wants to update ANY database field:
@@ -104,7 +139,7 @@ Rules:
 - DO NOT wrap in tag/value format
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-🔥 MIXED UPDATE (ADVANCED 🔥)
+ MIXED UPDATE 
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 If user asks BOTH:
@@ -125,7 +160,7 @@ Return BOTH together:
 }
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-🔥 STRICT OUTPUT RULE (NEW 🔥)
+ STRICT OUTPUT RULE 
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 - DO NOT return nested objects like:
@@ -134,11 +169,11 @@ Return BOTH together:
 - DO NOT return field names like "title", "heading", etc.
 
 - ALWAYS use:
-  ✅ "text" for content updates
-  ✅ direct field for DB updates
+   "text" for content updates
+   direct field for DB updates
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-🔥 NO MARKDOWN RULE (NEW 🔥)
+ NO MARKDOWN RULE 
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 - DO NOT return:
@@ -148,7 +183,7 @@ Return BOTH together:
 - Return ONLY raw JSON
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-🎨 STYLE UNDERSTANDING
+ STYLE UNDERSTANDING
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 If user mentions:

@@ -28,12 +28,12 @@ export default function AdminAiModal({ open, onClose }: any) {
   if (!open) return null;
 
   const modules = [
-    { name: "All Users",    icon: <Users size={18} />,  command: "Fetch and show all users with details in list format",                                          color: "text-indigo-500",  bg: "bg-indigo-50" },
-    { name: "Banner",       icon: <Image size={18} />,  command: "Show current banner data and ask what to update",                                                color: "text-violet-500",  bg: "bg-violet-50" },
-    { name: "About Us",     icon: <Info size={18} />,   command: "Fetch complete About Us content and display it. Then ask what needs to be updated",              color: "text-purple-500",  bg: "bg-purple-50" },
-    { name: "Timeline",     icon: <Clock size={18} />,  command: "Fetch full timeline data and show all entries clearly",                                          color: "text-fuchsia-500", bg: "bg-fuchsia-50" },
-    { name: "Projects",     icon: <Folder size={18} />, command: "Fetch all projects with title, description and status",                                          color: "text-pink-500",    bg: "bg-pink-50" },
-    { name: "Contact Data", icon: <Phone size={18} />,  command: "Fetch all contact details and display them properly",                                            color: "text-indigo-500",  bg: "bg-indigo-50" },
+    { name: "All Users", icon: <Users size={18} />, command: "Fetch and show all users with details in list format", color: "text-indigo-500", bg: "bg-indigo-50" },
+    { name: "Banner", icon: <Image size={18} />, command: "Show current banner data and ask what to update", color: "text-violet-500", bg: "bg-violet-50" },
+    { name: "About Us", icon: <Info size={18} />, command: "Fetch complete About Us content and display it. Then ask what needs to be updated", color: "text-purple-500", bg: "bg-purple-50" },
+    { name: "Timeline", icon: <Clock size={18} />, command: "Fetch full timeline data and show all entries clearly", color: "text-fuchsia-500", bg: "bg-fuchsia-50" },
+    { name: "Projects", icon: <Folder size={18} />, command: "Fetch all projects with title, description and status", color: "text-pink-500", bg: "bg-pink-50" },
+    { name: "Contact Data", icon: <Phone size={18} />, command: "Fetch all contact details and display them properly", color: "text-indigo-500", bg: "bg-indigo-50" },
   ];
 
   const runAI = async (customCommand?: string, moduleName?: string) => {
@@ -72,7 +72,7 @@ export default function AdminAiModal({ open, onClose }: any) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[rgba(15,10,40,0.50)] backdrop-blur-xl">
 
       {/* MODAL */}
-      <div className="relative w-full max-w-5xl h-[88vh] flex flex-col overflow-hidden rounded-3xl border border-white/60 shadow-[0_24px_80px_rgba(30,10,80,0.28)] bg-gradient-to-br from-[#f5f3ff] via-white to-[#fdf4ff]">
+      <div className="relative w-full max-w-5xl h-[88vh] flex flex-col overflow-hidden rounded-3xl  shadow-[0_24px_80px_rgba(30,10,80,0.28)] bg-gradient-to-br from-[#f5f3ff] via-white to-[#fdf4ff]">
 
         {/* ── HEADER ── */}
         <div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-indigo-500 via-purple-500 via-fuchsia-500 to-pink-500 flex-shrink-0">
@@ -167,11 +167,10 @@ export default function AdminAiModal({ open, onClose }: any) {
                   )}
 
                   <div
-                    className={`max-w-[72%] px-4 py-2.5 text-[13.5px] leading-relaxed whitespace-pre-wrap ${
-                      msg.type === "user"
-                        ? "bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 text-white rounded-[18px_18px_4px_18px] shadow-[0_2px_10px_rgba(99,102,241,0.25)]"
-                        : "bg-white text-indigo-950 border border-black/[0.07] rounded-[18px_18px_18px_4px] shadow-sm"
-                    }`}
+                    className={`max-w-[72%] px-4 py-2.5 text-[13.5px] leading-relaxed whitespace-pre-wrap ${msg.type === "user"
+                      ? "bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 text-white rounded-[18px_18px_4px_18px] shadow-[0_2px_10px_rgba(99,102,241,0.25)]"
+                      : "bg-white text-indigo-950 border border-black/[0.07] rounded-[18px_18px_18px_4px] shadow-sm"
+                      }`}
                   >
                     {msg.text}
                   </div>
@@ -204,12 +203,22 @@ export default function AdminAiModal({ open, onClose }: any) {
         {/* ── INPUT ── */}
         <div className="px-4 py-3 bg-white/70 backdrop-blur-xl border-t border-black/[0.06] flex-shrink-0">
           <div className="flex items-center gap-2.5 bg-white rounded-full px-5 py-2.5 border border-black/[0.09] focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all shadow-sm">
-            <input
+            <textarea
               value={command}
-              onChange={(e) => setCommand(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && runAI()}
+              onChange={(e) => {
+                setCommand(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = e.target.scrollHeight + "px";
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  runAI();
+                }
+              }}
               placeholder="Ask anything or give a command..."
-              className="flex-1 bg-transparent outline-none text-[13.5px] text-indigo-950 placeholder:text-gray-400"
+              rows={1}
+              className="flex-1 bg-transparent outline-none text-[13.5px] text-indigo-950 placeholder:text-gray-400 resize-none leading-relaxed break-words whitespace-pre-wrap"
             />
             <button
               onClick={() => runAI()}

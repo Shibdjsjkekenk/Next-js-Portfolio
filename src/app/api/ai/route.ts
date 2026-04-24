@@ -1,15 +1,11 @@
 import { connectDB } from "@/lib/db";
-import Timeline from "@/models/Timeline";
 import { ai } from "@/lib/ai/genai";
-import { handleRead } from "@/ai-agent/timelineService";
-import {
-  createBanner,
-  getBanner,
-  updateBanner,
-  deleteBanner,
-} from "@/ai-agent/bannerService";
+import { createTimeline, updateTimeline, deleteTimeline, handleRead, } from "@/ai-agent/timelineService";
+import { createBanner, getBanner, updateBanner, deleteBanner, } from "@/ai-agent/bannerService";
 import { bannerPrompt } from "@/ai-prompts/bannerPrompt";
 import { timelinePrompt } from "@/ai-prompts/timelinePrompt";
+import redis from "@/lib/redis";
+import { CACHE_KEYS } from "@/lib/cacheKeys";
 
 const promptMap: any = {
   banner: bannerPrompt,
@@ -160,143 +156,45 @@ export async function POST(req: Request) {
 
       const html = buildHTML(data);
 
-      await Timeline.create({
-        category: category.toLowerCase().replace("timeline", "").trim(),
-        content: html,
-      });
+      // ✅ NEW (service use)
+      const result = await createTimeline(category, html);
+
+      await redis.del(CACHE_KEYS.TIMELINE_ALL);
 
       return Response.json({
-        answer: `Timeline "${category}" created successfully`,
+        answer: result,
       });
     }
+
 
     // DELETE
     if (action === "delete") {
-      const res = await Timeline.deleteMany({
-        category: { $regex: category, $options: "i" },
-      });
 
-      if (res.deletedCount === 0) {
-        return Response.json({
-          answer: "No matching timeline found",
-        });
-      }
+      // ✅ NEW (service use)
+      const result = await deleteTimeline(category);
+
+      await redis.del(CACHE_KEYS.TIMELINE_ALL);
 
       return Response.json({
-        answer: `${res.deletedCount} timeline(s) deleted`,
+        answer: result,
       });
     }
+
 
     // UPDATE 
     if (action === "update") {
 
-      const cleanCat = category.toLowerCase().replace("timeline", "").trim();
+      // ✅ NEW (service use)
+      const result = await updateTimeline(question, { ...data, category });
 
-      const existing = await Timeline.findOne({
-        category: { $regex: `^${cleanCat}$`, $options: "i" },
+      await redis.del(CACHE_KEYS.TIMELINE_ALL);
+
+      return Response.json({
+        answer: result,
       });
-
-      if (!existing) {
-        return Response.json({ answer: `No timeline found for category: ${cleanCat}` });
-      }
-
-
-      let updateData: any = {};
-
-      // isActive
-      if (question.toLowerCase().includes("inactive")) {
-        updateData.isActive = false;
-      }
-      else if (question.toLowerCase().includes("active")) {
-        updateData.isActive = true;
-      }
-
-      // order
-      const orderMatch = question.match(/order\s*(\d+)/i);
-      if (orderMatch) {
-        updateData.order = Number(orderMatch[1]);
-      }
-
-      //  अगर field update है → direct DB update करो
-      if (Object.keys(updateData).length > 0) {
-        await Timeline.updateOne(
-          { _id: existing._id },
-          { $set: updateData }
-        );
-
-        return Response.json({
-          answer: `Timeline "${cleanCat}" updated successfully`,
-        });
-      }
-
-      // 1. Existing content ko clean karke AI ko dikhao taaki wo oldValue sahi pakde
-      const currentText = cleanHTMLForAI(existing.content);
-
-      const updateCompletion = await ai.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          {
-            role: "system",
-            content: `You are a precise text-replacement engine.
-        
-        TASK:
-        1. Identify the EXACT text from 'Existing Content' that needs to be changed (oldValue).
-        2. Identify the NEW text the user wants to put there (newValue).
-        
-        STRICT RULES:
-        - 'oldValue' MUST be exactly present in the 'Existing Content'.
-        - 'newValue' MUST NOT contain any instructions like "update this", "category", or "change to".
-        - If user says "X ko Y kar do", oldValue is "X" and newValue is "Y".
-        
-        Return ONLY JSON: {"oldValue": "string", "newValue": "string"}`
-          },
-          {
-            role: "user",
-            content: `Existing Content: "${currentText}"\nUser Request: "${question}"`
-          },
-        ],
-      });
-
-      let extracted;
-      try {
-        extracted = JSON.parse(updateCompletion.choices[0].message.content!.replace(/```json|```/g, ""));
-      } catch (e) {
-        return Response.json({ answer: "AI extraction failed." });
-      }
-
-      const { oldValue, newValue } = extracted;
-
-      if (!oldValue || !newValue) {
-        return Response.json({ answer: "Could not identify what to change. Please try: 'X' ko 'Y' kar do." });
-      }
-
-      // CORE FIX: Sirf text replace hoga, HTML tags (h1, p, style) ko haath bhi nahi lagayenge
-      let finalHTML = existing.content;
-
-      // Regex escape taaki special characters se crash na ho
-      const escapedOld = oldValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const regex = new RegExp(escapedOld, "g");
-
-      if (finalHTML.includes(oldValue)) {
-        finalHTML = finalHTML.replace(regex, newValue);
-
-        await Timeline.updateOne(
-          { _id: existing._id },
-          { $set: { content: finalHTML } }
-        );
-
-        return Response.json({
-          answer: `Updated "${oldValue}" to "${newValue}" in ${cleanCat}. Styles preserved.`,
-        });
-      } else {
-        // Agar exact match na mile (spaces etc ka issue), toh fallback for partial match
-        return Response.json({
-          answer: `Could not find "${oldValue}" in the existing content. Make sure you use the exact words.`
-        });
-      }
     }
 
-    // ✅ READ (FULLY DYNAMIC INDEXING)
+    //  READ (FULLY DYNAMIC INDEXING)
 
     if (action === "read") {
       const result = await handleRead(question);
