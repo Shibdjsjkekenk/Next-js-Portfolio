@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Project from "@/models/Project";
+import Document from "@/models/Document"; 
 import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
+import { prepareAIFields } from "@/lib/ai/embeddingHelper";
 
 export async function PUT(req: NextRequest) {
   try {
     await connectDB();
+
     const { id, ...updates } = await req.json();
 
     if (!id) {
@@ -16,12 +19,56 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const project = await Project.findByIdAndUpdate(id, updates, {
+    let updateData: any = { ...updates };
+
+    let plainText = "";
+    let embedding: number[] = [];
+
+    //  regenerate only if content changes
+    if (updates.content) {
+      const aiData = await prepareAIFields(updates.content);
+
+      plainText = aiData.plainText;
+      embedding = aiData.embedding as number[];
+
+      updateData.plainText = plainText;
+      updateData.embedding = embedding;
+    }
+
+    //  update Project DB
+    const project = await Project.findByIdAndUpdate(id, updateData, {
       new: true,
     });
 
+    if (!project) {
+      return NextResponse.json(
+        { success: false, message: "Project not found" },
+        { status: 404 }
+      );
+    }
+
+    //  sync Document (vector DB)
+    if (updates.content) {
+      await Document.findOneAndUpdate(
+        {
+          "metadata.projectId": project._id,
+          type: "project",
+        },
+        {
+          content: project.content,
+          plainText,
+          embedding,
+          isActive: project.isActive,
+          metadata: {
+            projectId: project._id,
+          },
+        }
+      );
+    }
+
+    // cache clear
     await redis.del(CACHE_KEYS.PROJECT_ALL);
-    await redis.del(CACHE_KEYS.PROJECT_ACTIVE); 
+    await redis.del(CACHE_KEYS.PROJECT_ACTIVE);
     await redis.del(CACHE_KEYS.PROJECT_BY_ID(id));
 
     return NextResponse.json({
@@ -29,6 +76,7 @@ export async function PUT(req: NextRequest) {
       message: "Project updated successfully",
       data: project,
     });
+
   } catch (error: any) {
     return NextResponse.json(
       {

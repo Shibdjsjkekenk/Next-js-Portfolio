@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Project from "@/models/Project";
+import Document from "@/models/Document"; 
 import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
+import { prepareAIFields } from "@/lib/ai/embeddingHelper"; 
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,17 +20,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 1. Generate AI fields (HTML → plainText + embedding)
+    const { plainText, embedding } = await prepareAIFields(content);
+
     const lastProject = await Project.findOne().sort({ order: -1 });
 
+    // 2. Save in Project DB
     const project = await Project.create({
       content,
       projectImage,
       projectLink,
+      plainText,
+      embedding,
       order: lastProject ? lastProject.order + 1 : 0,
       isActive: isActive ?? true,
     });
 
-    // invalidate list cache
+    // 3. Save in Document (VECTOR DB)
+    await Document.create({
+      type: "project",
+      content,
+      plainText,
+      embedding,
+      metadata: {
+        projectId: project._id,
+      },
+      isActive: isActive ?? true,
+    });
+
+    // cache clear
     await redis.del(CACHE_KEYS.PROJECT_ALL);
 
     return NextResponse.json({
@@ -36,6 +56,7 @@ export async function POST(req: NextRequest) {
       message: "Project created successfully",
       data: project,
     });
+
   } catch (error: any) {
     return NextResponse.json(
       {

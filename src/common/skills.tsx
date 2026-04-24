@@ -5,6 +5,7 @@ import {
   FaJsSquare,
   FaReact,
   FaNodeJs,
+  FaRobot
 } from "react-icons/fa";
 
 import {
@@ -17,7 +18,13 @@ import {
   SiRedis,
   SiSocketdotio,
   SiWebrtc,
+  SiOpenai,
+  SiNginx,
+  SiGithubactions,
+  SiChainlink
 } from "react-icons/si";
+
+import { FaAws, FaDatabase } from "react-icons/fa";
 
 import { MdLocationOn } from "react-icons/md";
 
@@ -31,12 +38,18 @@ export const skills = [
   { title: "React JS", icon: <FaReact className="text-cyan-400" /> },
   { title: "Next JS", icon: <SiNextdotjs /> },
   { title: "Redux", icon: <SiRedux className="text-purple-500" /> },
-  { title: "GSAP", icon: "GSAP" },
+  { title: "GSAP", icon: <span className="text-2xl font-bold text-green-500">GSAP</span> },
   { title: "Node JS", icon: <FaNodeJs className="text-green-600" /> },
   { title: "Express JS", icon: <SiExpress /> },
   { title: "MongoDB", icon: <SiMongodb className="text-green-500" /> },
   { title: "Redis", icon: <SiRedis className="text-red-500" /> },
   { title: "Geolocation", icon: <MdLocationOn className="text-red-600" /> },
   { title: "Socket.IO", icon: <SiSocketdotio /> },
-  { title: "Web RTC", icon: <SiWebrtc className="text-indigo-500" /> },
+  { title: "Gen AI", icon: <SiOpenai className="text-green-500" /> },
+  { title: "AI Agent", icon: <FaRobot className="text-gray-700" /> },
+  { title: "RAG", icon: <FaDatabase className="text-indigo-500" /> },
+  { title: "LangChain", icon: <SiChainlink className="text-green-600" /> },
+  { title: "AWS", icon: <FaAws className="text-orange-500" /> },
+  { title: "NGINX", icon: <SiNginx className="text-green-600" /> },
+  { title: "CI/CD", icon: <SiGithubactions className="text-blue-500" /> },
 ];

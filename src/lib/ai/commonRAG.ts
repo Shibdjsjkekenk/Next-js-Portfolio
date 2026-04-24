@@ -8,7 +8,7 @@ export async function getRAGContext(
   type?: string // optional: "timeline" | "banner" | "project"
 ) {
   try {
-    // 🔥 1. Question → embedding
+    //  1. Question → embedding
     const queryVectorRaw = await client.featureExtraction({
       model: "sentence-transformers/all-MiniLM-L6-v2",
       inputs: question,
@@ -20,7 +20,7 @@ export async function getRAGContext(
 
     if (!embedding.length) return "";
 
-    // 🔥 2. Build pipeline
+    //  2. Build pipeline
     const pipeline: any[] = [
       {
         $vectorSearch: {
@@ -28,45 +28,44 @@ export async function getRAGContext(
           path: "embedding",
           queryVector: embedding,
           numCandidates: 50,
-          limit: 8, // thoda zyada for better mix
+          limit: 50, // thoda zyada for better mix
         },
       },
     ];
 
-    // 🔥 optional filter by type
+    // optional filter by type
     if (type) {
       pipeline[0].$vectorSearch.filter = { type };
     }
 
-    // 🔥 3. project fields
+    //  3. project fields
     pipeline.push({
       $project: {
         plainText: 1,
         type: 1,
         isActive: 1,
+        metadata: 1,
         score: { $meta: "vectorSearchScore" },
-      },
+      }
     });
 
     const results = await Document.aggregate(pipeline);
 
     if (!results.length) return "";
 
-    // 🔥 4. Smart filtering
+    //  4. Smart filtering
     const maxScore = results[0].score;
-    const threshold = maxScore * 0.6;
+    const threshold = maxScore * 0.4;
 
     let filtered = results.filter(
-      (item) =>
-        item.score >= threshold &&
-        item.isActive !== false
-    );
+      (item) => item.isActive !== false
+    ); //  score ignore for now
 
     if (!filtered.length) {
       filtered = results;
     }
 
-    // 🔥 5. Group by type (better structure)
+    //  5. Group by type (better structure)
     const grouped: Record<string, string[]> = {};
 
     filtered.forEach((item) => {
@@ -76,7 +75,7 @@ export async function getRAGContext(
       grouped[item.type].push(item.plainText);
     });
 
-    // 🔥 6. Convert to structured text
+    //  6. Convert to structured text
     let context = "";
 
     Object.entries(grouped).forEach(([type, texts]) => {
@@ -85,7 +84,16 @@ export async function getRAGContext(
       context += "\n";
     });
 
-    return context.trim();
+    const projectIds =
+      filtered
+        .filter((item) => item.type === "project")
+        .map((item) => item.metadata?.projectId)
+        .filter(Boolean);
+
+    return {
+      text: context.trim(),
+      projectIds,
+    };
 
   } catch (error) {
     console.error("Common RAG Error:", error);

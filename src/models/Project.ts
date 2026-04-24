@@ -18,6 +18,14 @@ const ProjectSchema = new mongoose.Schema(
       required: true,
     },
 
+    plainText: {
+      type: String,
+    },
+
+    embedding: {
+      type: [Number],
+    },
+
     order: {
       type: Number,
       default: 0,
