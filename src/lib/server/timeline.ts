@@ -1,10 +1,10 @@
 import { connectDB } from "@/lib/db";
 import Timeline from "@/models/Timeline";
-import redis from "@/lib/redis";
-import { CACHE_KEYS } from "@/lib/cacheKeys";
-import { CACHE_TTL } from "@/lib/cacheTTL";
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function getActiveTimelines() {
+  noStore(); //  MOST IMPORTANT (disable Next.js cache)
+
   try {
     await connectDB();
 
@@ -12,20 +12,8 @@ export async function getActiveTimelines() {
       .sort({ order: 1, createdAt: -1 })
       .lean();
 
-    if (!timelines.length) {
-      await redis.del(CACHE_KEYS.TIMELINE_ALL);
-      return [];
-    }
+    return timelines || [];
 
-    // 🔥 ALWAYS update cache (not only read)
-    await redis.set(
-      CACHE_KEYS.TIMELINE_ALL,
-      JSON.stringify(timelines),
-      "EX",
-      CACHE_TTL.MEDIUM,
-    );
-
-    return timelines;
   } catch (e) {
     console.error("Timeline fetch failed", e);
     return [];
