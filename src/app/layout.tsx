@@ -6,6 +6,8 @@ import { ToastContainer } from "react-toastify";
 import ReduxProvider from "@/store/ReduxProvider";
 import CurrentUser from "@/components/admin-view/CurrentUser";
 import SmoothScroll from "@/common/SmoothScroll";
+import "react-vertical-timeline-component/style.min.css";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

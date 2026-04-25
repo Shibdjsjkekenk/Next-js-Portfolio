@@ -5,29 +5,31 @@ import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
 import { CACHE_TTL } from "@/lib/cacheTTL";
 
-// get all
 export async function GET() {
   try {
-    const cached = await redis.get(CACHE_KEYS.TIMELINE_ALL);
-    if (cached) {
-      return NextResponse.json({
-        success: true,
-        source: "redis",
-        data: JSON.parse(cached),
-      });
-    }
-
     await connectDB();
 
     const timelines = await Timeline.find({ isActive: true })
       .sort({ order: 1 })
       .lean();
 
+    // 🔥 IMPORTANT: DB empty → cache clear
+    if (!timelines.length) {
+      await redis.del(CACHE_KEYS.TIMELINE_ALL);
+
+      return NextResponse.json({
+        success: true,
+        source: "db-empty",
+        data: [],
+      });
+    }
+
+    // 🔥 cache update
     await redis.set(
       CACHE_KEYS.TIMELINE_ALL,
       JSON.stringify(timelines),
       "EX",
-      CACHE_TTL.MEDIUM
+      CACHE_TTL.MEDIUM,
     );
 
     return NextResponse.json({
@@ -38,8 +40,7 @@ export async function GET() {
   } catch (error: any) {
     return NextResponse.json(
       { success: false, message: "Fetch failed", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

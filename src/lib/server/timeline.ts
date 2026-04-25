@@ -6,22 +6,18 @@ import { CACHE_TTL } from "@/lib/cacheTTL";
 
 export async function getActiveTimelines() {
   try {
-    //  Redis first
-    const cached = await redis.get(CACHE_KEYS.TIMELINE_ALL);
-    if (cached) {
-      return JSON.parse(cached);
-    }
-
-    //  DB
     await connectDB();
 
     const timelines = await Timeline.find({ isActive: true })
       .sort({ order: 1, createdAt: -1 })
-      .lean(); // IMPORTANT (JSON-safe)
+      .lean();
 
-    if (!timelines.length) return [];
+    if (!timelines.length) {
+      await redis.del(CACHE_KEYS.TIMELINE_ALL);
+      return [];
+    }
 
-    //  cache
+    // 🔥 ALWAYS update cache (not only read)
     await redis.set(
       CACHE_KEYS.TIMELINE_ALL,
       JSON.stringify(timelines),
