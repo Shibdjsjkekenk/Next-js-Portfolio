@@ -5,6 +5,7 @@ import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
 import { CACHE_TTL } from "@/lib/cacheTTL";
 
+// get all
 export async function GET() {
   try {
     const cached = await redis.get(CACHE_KEYS.TIMELINE_ALL);
