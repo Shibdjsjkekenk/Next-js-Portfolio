@@ -13,6 +13,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import AIProjectCards from "../client-view/AIProjectCards";
 
 export default function AdminAiModal({ open, onClose }: any) {
   const [command, setCommand] = useState("");
@@ -27,13 +28,66 @@ export default function AdminAiModal({ open, onClose }: any) {
 
   if (!open) return null;
 
-  const modules = [
-    { name: "All Users", icon: <Users size={18} />, command: "Fetch and show all users with details in list format", color: "text-indigo-500", bg: "bg-indigo-50" },
-    { name: "Banner", icon: <Image size={18} />, command: "Show current banner data and ask what to update", color: "text-violet-500", bg: "bg-violet-50" },
-    { name: "About Us", icon: <Info size={18} />, command: "Fetch complete About Us content and display it. Then ask what needs to be updated", color: "text-purple-500", bg: "bg-purple-50" },
-    { name: "Timeline", icon: <Clock size={18} />, command: "Fetch full timeline data and show all entries clearly", color: "text-fuchsia-500", bg: "bg-fuchsia-50" },
-    { name: "Projects", icon: <Folder size={18} />, command: "Fetch all projects with title, description and status", color: "text-pink-500", bg: "bg-pink-50" },
-    { name: "Contact Data", icon: <Phone size={18} />, command: "Fetch all contact details and display them properly", color: "text-indigo-500", bg: "bg-indigo-50" },
+  if (!open) return null;
+
+  type ModuleItem = {
+    name: string;
+    module: string;
+    icon: any;
+    command: string;
+    color: string;
+    bg: string;
+  };
+
+  const modules: ModuleItem[] = [
+    {
+      name: "All Users",
+      module: "users",
+      icon: <Users size={18} />,
+      command: "Fetch and show all users with details in list format",
+      color: "text-indigo-500",
+      bg: "bg-indigo-50"
+    },
+    {
+      name: "Banner",
+      module: "banner",
+      icon: <Image size={18} />,
+      command: "Show current banner data and ask what to update",
+      color: "text-violet-500",
+      bg: "bg-violet-50"
+    },
+    {
+      name: "About Us",
+      module: "about",
+      icon: <Info size={18} />,
+      command: "Fetch complete About Us content and display it. Then ask what needs to be updated",
+      color: "text-purple-500",
+      bg: "bg-purple-50"
+    },
+    {
+      name: "Timeline",
+      module: "timeline",
+      icon: <Clock size={18} />,
+      command: "Fetch full timeline data and show all entries clearly",
+      color: "text-fuchsia-500",
+      bg: "bg-fuchsia-50"
+    },
+    {
+      name: "Projects",
+      module: "project",
+      icon: <Folder size={18} />,
+      command: "Fetch all projects with title, description and status",
+      color: "text-pink-500",
+      bg: "bg-pink-50",
+    },
+    {
+      name: "Contact Data",
+      module: "contact",
+      icon: <Phone size={18} />,
+      command: "Fetch all contact details and display them properly",
+      color: "text-indigo-500",
+      bg: "bg-indigo-50"
+    },
   ];
 
   const runAI = async (customCommand?: string, moduleName?: string) => {
@@ -51,7 +105,16 @@ export default function AdminAiModal({ open, onClose }: any) {
       });
       const data = await res.json();
       const clean = data.answer.replace("Final Answer:", "").trim();
-      setMessages((prev) => [...prev, { type: "ai", text: clean }]);
+      const cards = data.cards || [];
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "ai",
+          text: data.answer || clean,
+          cards: data.cards || [],
+        },
+      ]);
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -133,8 +196,8 @@ export default function AdminAiModal({ open, onClose }: any) {
                   <div
                     key={index}
                     onClick={() => {
-                      setActiveModule(item.name);
-                      runAI(item.command, item.name);
+                      setActiveModule(item.module);
+                      runAI(item.command, item.module);
                     }}
                     className="flex items-center gap-3 bg-white border border-black/[0.07] rounded-2xl p-4 cursor-pointer hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(99,60,180,0.12)] hover:border-indigo-200 transition-all duration-200"
                   >
@@ -172,7 +235,24 @@ export default function AdminAiModal({ open, onClose }: any) {
                       : "bg-white text-indigo-950 border border-black/[0.07] rounded-[18px_18px_18px_4px] shadow-sm"
                       }`}
                   >
-                    {msg.text}
+                    <div>
+
+                      <div>
+                        {/* ALWAYS SHOW TEXT */}
+                        {msg.text}
+
+                        {/* SHOW CARDS ONLY FOR PROJECT */}
+                        {msg.cards?.length > 0 && (
+                          <div className="mt-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                              {msg.cards.map((card: any, i: number) => (
+                                <AIProjectCards key={i} cards={[card]} />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

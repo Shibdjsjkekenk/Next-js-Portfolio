@@ -16,6 +16,8 @@
     "@huggingface/inference": "^4.13.15",
     "@langchain/core": "^1.1.38",
     "@langchain/groq": "^1.1.5",
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/hands": "^0.4.1675469240",
     "@reduxjs/toolkit": "^2.11.2",
     "@studio-freight/lenis": "^1.0.42",
     "@tailwindcss/postcss": "^4.1.18",

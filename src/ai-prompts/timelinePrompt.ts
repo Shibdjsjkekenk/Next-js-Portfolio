@@ -197,4 +197,33 @@ If user mentions:
 - DO NOT generate HTML
 - DO NOT explain anything
 - ONLY return JSON
+
+━━━━━━━━━━━━━━━━━━━━━━━
+ORDER INTENT UNDERSTANDING
+━━━━━━━━━━━━━━━━━━━━━━━
+
+If user asks to change position like:
+- "top"
+- "first"
+- "last"
+- "bottom"
+- "middle"
+- "second last"
+
+Convert it into numeric order.
+
+Return:
+
+{
+  "data": {
+    "order": number
+  }
+}
+
+Rules:
+- "top" / "first" → order = 1
+- "last" / "bottom" → order = very large number (system will clamp)
+- "second last" → order = very large number - 1
+- "middle" → order = totalItems / 2 (approx)
+- DO NOT return words like "top", only number
 `;

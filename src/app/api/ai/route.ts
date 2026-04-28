@@ -2,14 +2,18 @@ import { connectDB } from "@/lib/db";
 import { ai } from "@/lib/ai/genai";
 import { createTimeline, updateTimeline, deleteTimeline, handleRead, } from "@/ai-agent/timelineService";
 import { createBanner, getBanner, updateBanner, deleteBanner, } from "@/ai-agent/bannerService";
+import { createProject, updateProject, deleteProject, handleProjectRead, } from "@/ai-agent/projectService";
 import { bannerPrompt } from "@/ai-prompts/bannerPrompt";
 import { timelinePrompt } from "@/ai-prompts/timelinePrompt";
+import { projectPrompt } from "@/ai-prompts/projectPrompt";
 import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
+import Project from "@/models/Project";
 
 const promptMap: any = {
   banner: bannerPrompt,
   timeline: timelinePrompt,
+  project: projectPrompt,
 };
 
 const cleanHTMLForAI = (html: string) => {
@@ -122,9 +126,10 @@ export async function POST(req: Request) {
       });
     }
 
+    // Banner
     const { action, category, data, fields, target } = parsed;
 
-    if (module === "Banner") {
+    if (module.toLowerCase() === "banner") {
       let result = "";
 
       if (action === "create") {
@@ -146,6 +151,47 @@ export async function POST(req: Request) {
       return Response.json({ answer: result });
     }
 
+    // Project
+    // Project
+    if (module.toLowerCase() === "project") {
+      let result = "";
+
+      if (action === "create") {
+        result = await createProject(
+          data.content,
+          data.projectLink,
+          data.projectImage
+        );
+      }
+
+      else if (action === "read") {
+        const projects = await Project.find().sort({ order: 1 });
+
+        return Response.json({
+          answer: "Here are your projects:",
+          cards: projects.map((p) => ({
+            title: p.plainText?.slice(0, 40),
+            description: p.plainText,
+            image: p.projectImage,
+            link: p.projectLink,
+            isActive: p.isActive,
+          })),
+        });
+      }
+      else if (action === "update") {
+        result = await updateProject(question, data);
+      }
+
+      else if (action === "delete") {
+        result = await deleteProject(data.id);
+      }
+
+      await redis.del(CACHE_KEYS.PROJECT_ALL);
+
+      return Response.json({ answer: result });
+    }
+
+    // Timeline
     // CREATE
     if (action === "create") {
       if (!category || !data) {

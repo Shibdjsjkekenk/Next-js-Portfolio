@@ -67,7 +67,7 @@ export const handleRead = async (question: string) => {
     .join("\n");
 };
 
-//  UPDATE
+// update
 export const updateTimeline = async (question: string, data: any) => {
   const cleanCat = data?.category?.toLowerCase()?.trim();
 
@@ -89,16 +89,82 @@ export const updateTimeline = async (question: string, data: any) => {
     changes.push("Active: false → true");
   }
 
-  // order
-  const orderMatch = question.match(/order\s*(\d+)/i);
-  if (orderMatch) {
-    updateData.order = Number(orderMatch[1]);
-    changes.push(`Order → ${orderMatch[1]}`);
+  // 🔥 ORDER LOGIC (AI + NUMBER + POSITION)
+  let newOrder: number | null = null;
+
+  const totalItems = await Timeline.countDocuments();
+
+  // 🔥 1. AI POSITION BASED (BEST)
+  if (data?.position) {
+    if (data.position === "top" || data.position === "first") {
+      newOrder = 0;
+    }
+
+    if (data.position === "last" || data.position === "bottom") {
+      newOrder = totalItems - 1;
+    }
+
+    if (data.position === "second_last") {
+      newOrder = totalItems - 2;
+    }
+
+    if (data.position === "middle") {
+      newOrder = Math.floor(totalItems / 2);
+    }
   }
 
+  // 🔥 2. AI DIRECT ORDER
+  if (data?.order !== undefined) {
+    newOrder = Number(data.order) - 1; // convert 1-based → 0-based
+  }
 
-  // TAG UPDATE (FROM timelinePrompt AI)
-if (data?.tagUpdate) {
+  // 🔥 3. FALLBACK (QUESTION PARSING)
+  if (newOrder === null) {
+    const match1 = question.match(/order\s*(\d+)/i);
+    const match2 = question.match(/(\d+)(st|nd|rd|th)/i);
+    const match3 = question.match(/(\d+)(?!.*\d)/);
+
+    if (match1) newOrder = Number(match1[1]) - 1;
+    else if (match2) newOrder = Number(match2[1]) - 1;
+    else if (match3) newOrder = Number(match3[1]) - 1;
+  }
+
+  // 🔥 APPLY ORDER UPDATE
+  if (newOrder !== null) {
+    const oldOrder = existing.order;
+
+    // clamp
+    if (newOrder >= totalItems) newOrder = totalItems - 1;
+    if (newOrder < 0) newOrder = 0;
+
+    if (newOrder !== oldOrder) {
+      if (newOrder < oldOrder) {
+        // move up
+        await Timeline.updateMany(
+          {
+            order: { $gte: newOrder, $lt: oldOrder },
+            _id: { $ne: existing._id },
+          },
+          { $inc: { order: 1 } }
+        );
+      } else {
+        // move down
+        await Timeline.updateMany(
+          {
+            order: { $gt: oldOrder, $lte: newOrder },
+            _id: { $ne: existing._id },
+          },
+          { $inc: { order: -1 } }
+        );
+      }
+
+      updateData.order = newOrder;
+      changes.push(`Order: ${oldOrder} → ${newOrder}`);
+    }
+  }
+
+  // TAG UPDATE
+  if (data?.tagUpdate) {
     const { oldTag, newTag } = data.tagUpdate;
 
     if (!oldTag || !newTag) {
