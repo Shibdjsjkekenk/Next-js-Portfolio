@@ -7,7 +7,7 @@ import ReduxProvider from "@/store/ReduxProvider";
 import CurrentUser from "@/components/admin-view/CurrentUser";
 import SmoothScroll from "@/common/SmoothScroll";
 import "react-vertical-timeline-component/style.min.css";
-
+import ServiceWorker from "@/components/client-view/ServiceWorker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +21,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Hello, I am Shubhanshu Tiwari",
-  description: "Crafting Seamless Software Experiences with 3+ years of professional expertise in modern Software development and Web Development.",
+  description:
+    "Crafting Seamless Software Experiences with 3+ years of professional expertise in modern Software development and Web Development.",
 };
 
 export default function RootLayout({
@@ -50,6 +51,7 @@ export default function RootLayout({
 
         {/* Redux + Current User Init */}
         <ReduxProvider>
+          <ServiceWorker />
           <SmoothScroll>
             <CurrentUser />
             {children}

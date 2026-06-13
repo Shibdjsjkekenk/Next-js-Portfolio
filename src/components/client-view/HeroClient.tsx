@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 
 import type { Banner } from "@/store/bannerSlice";
+import { getDB } from "@/lib/indexeddb";
 
 type Props = {
   banner: Banner | null;
@@ -21,6 +22,7 @@ type Props = {
 const HeroClient: React.FC<Props> = ({ banner }) => {
   const [typewriterKey, setTypewriterKey] = useState<number>(0);
   const [mounted, setMounted] = useState(false);
+  const [cachedBanner, setCachedBanner] = useState<Banner | null>(null);
 
   const socialRef = useRef<HTMLDivElement>(null);
 
@@ -31,12 +33,56 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
   }, []);
 
   useEffect(() => {
+    const loadBanner = async () => {
+      if (banner) return;
+
+      try {
+        const db = await getDB();
+        if (!db) return;
+
+        const cached = await db.get("hero", "active-banner");
+
+        if (cached) {
+          setCachedBanner(cached);
+
+          // console.log("✅ Banner loaded from IndexedDB");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadBanner();
+  }, [banner]);
+
+  useEffect(() => {
+    const saveBanner = async () => {
+      if (!banner) return;
+
+      try {
+        const db = await getDB();
+        if (!db) return;
+
+        await db.put("hero", banner, "active-banner");
+
+        // console.log("✅ Banner saved to IndexedDB");
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    saveBanner();
+  }, [banner]);
+
+  useEffect(() => {
     if (banner) {
       setTypewriterKey((prev) => prev + 1);
     }
   }, [banner]);
 
-  if (!banner) {
+  const displayBanner = banner || cachedBanner;
+
+  if (!displayBanner) {
     return (
       <div className="text-center py-10 text-gray-500 font-medium">
         No active banner found.
@@ -45,8 +91,8 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
   }
 
   /* ================= HELPERS ================= */
-  const splitTitle = banner.title
-    ? banner.title.split(" ")
+  const splitTitle = displayBanner.title
+    ? displayBanner.title.split(" ")
     : ["I", "am", "Shubhanshu", "Tiwari"];
 
   const iamPart = splitTitle.slice(0, 2).join(" ");
@@ -63,13 +109,13 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
       const start = offset;
       if (start > lastIndex) {
         elements.push(
-          <span key={lastIndex}>{text.slice(lastIndex, start)}</span>
+          <span key={lastIndex}>{text.slice(lastIndex, start)}</span>,
         );
       }
       elements.push(
         <span key={start} className="text-red-700 font-semibold">
           {match}
-        </span>
+        </span>,
       );
       lastIndex = start + match.length;
       return match;
@@ -83,7 +129,8 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
   };
 
   const typewriterText =
-    banner.italicTitle ?? "Turning ideas into impactful digital solutions.";
+    displayBanner.italicTitle ??
+    "Turning ideas into impactful digital solutions.";
 
   const containerVariants: Variants = {
     hidden: {},
@@ -128,7 +175,6 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
           animate="show"
         >
           <div className="flex flex-col gap-5 my-10">
-
             {/* HELLO */}
             <motion.div variants={itemVariants}>
               <div
@@ -147,7 +193,6 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
                   Hello,
                 </span>
               </div>
-
             </motion.div>
 
             {/* NAME */}
@@ -164,7 +209,7 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
               variants={itemVariants}
               className="text-[18px] lg:text-[21px] font-medium text-gray-700"
             >
-              {renderParagraph(banner.paragraph)}
+              {renderParagraph(displayBanner.paragraph)}
             </motion.h4>
 
             {/* TYPEWRITER */}
@@ -225,10 +270,8 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
                 </a>
               ))}
             </motion.div>
-
           </div>
         </motion.div>
-
 
         {/* RIGHT */}
         <div
@@ -237,7 +280,7 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
         >
           <div className="bounce-custom">
             <img
-              src={banner.image}
+              src={displayBanner.image}
               alt="Dynamic Banner"
               className="rounded-md md:ml-[20px] w-full"
             />
