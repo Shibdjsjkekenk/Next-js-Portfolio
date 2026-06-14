@@ -20,6 +20,8 @@ import {
 } from "@dnd-kit/sortable";
 
 import { CSS } from "@dnd-kit/utilities";
+import { useEffect } from "react";
+import { getDB } from "@/lib/indexeddb";
 
 /* ================= TYPES ================= */
 type About = {
@@ -44,6 +46,8 @@ function SortableItem({
     transition,
   };
 
+  
+
   return (
     <div
       ref={setNodeRef}
@@ -59,7 +63,40 @@ function SortableItem({
 
 /* ================= MAIN ================= */
 export default function AboutSection({ about }: { about: About | null }) {
-  if (!about) return null;
+
+  const [offlineAbout, setOfflineAbout] = useState<About | null>(about);
+
+  useEffect(() => {
+    const saveAbout = async () => {
+      if (!about) return;
+
+      const db = await getDB();
+      if (!db) return;
+
+      await db.put("about", about, "about-data");
+    };
+
+    saveAbout();
+  }, [about]);
+
+  useEffect(() => {
+    const loadAbout = async () => {
+      if (navigator.onLine) return;
+
+      const db = await getDB();
+      if (!db) return;
+
+      const cached = await db.get("about", "about-data");
+
+      if (cached) {
+        setOfflineAbout(cached);
+      }
+    };
+
+    loadAbout();
+  }, []);
+
+ if (!offlineAbout) return null;
 
   /* ORDER STATE (image <-> content) */
   const [order, setOrder] = useState<string[]>(["image", "content"]);
@@ -99,9 +136,9 @@ export default function AboutSection({ about }: { about: About | null }) {
               item === "image" ? (
                 <SortableItem key="image" id="image">
                   <div className="flex justify-center">
-                    {about.image && (
+                    {offlineAbout.image && (
                       <img
-                        src={about.image}
+                        src={offlineAbout.image}
                         alt="About"
                         className="w-[550px] object-contain"
                       />
@@ -122,15 +159,15 @@ export default function AboutSection({ about }: { about: About | null }) {
                     <div
                       className="tiptap-editor"
                       dangerouslySetInnerHTML={{
-                        __html: about.content || "",
+                        __html: offlineAbout.content || "",
                       }}
                     />
 
                     {/* DOWNLOAD CV */}
-                    {about.resume && (
+                    {offlineAbout.resume && (
                       <div className="mt-6">
                         <a
-                          href={about.resume}
+                          href={offlineAbout.resume}
                           target="_blank"
                           rel="noopener noreferrer"
                           download="resume.pdf"

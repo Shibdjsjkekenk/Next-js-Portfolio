@@ -16,6 +16,9 @@ import {
   FaCode,
 } from "react-icons/fa";
 
+import { useEffect, useState } from "react";
+import { getDB } from "@/lib/indexeddb";
+
 type Timeline = {
   _id: string;
   category: string;
@@ -52,19 +55,46 @@ const colorMap: Record<string, string> = {
   deployment: "#a855f7",
 };
 
-const normalize = (v: string) =>
-  v.toLowerCase().replace(/\s+/g, "");
+const normalize = (v: string) => v.toLowerCase().replace(/\s+/g, "");
 
-export default function TimelineSection({
-  list,
-}: {
-  list: Timeline[];
-}) {
+export default function TimelineSection({ list }: { list: Timeline[] }) {
+  const [offlineTimeline, setOfflineTimeline] = useState<Timeline[]>(list);
+
+  useEffect(() => {
+    const saveTimeline = async () => {
+      if (!list?.length) return;
+
+      const db = await getDB();
+      if (!db) return;
+
+      await db.put("timeline", list, "timeline-data");
+    };
+
+    saveTimeline();
+  }, [list]);
+
+  useEffect(() => {
+    const loadTimeline = async () => {
+      if (navigator.onLine) return;
+
+      const db = await getDB();
+      if (!db) return;
+
+      const cached = await db.get("timeline", "timeline-data");
+
+      if (cached) {
+        setOfflineTimeline(cached);
+      }
+    };
+
+    loadTimeline();
+  }, []);
+
   return (
     <section className="pt-25">
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-10 xl:px-16">
         <VerticalTimeline lineColor="#d1d5db">
-          {list.map((item) => {
+          {offlineTimeline.map((item) => {
             const key = normalize(item.category);
             const icon = iconMap[key] ?? <FaStream />;
             const bg = colorMap[key] ?? "#6A38C2";
