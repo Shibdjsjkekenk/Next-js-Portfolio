@@ -7,7 +7,7 @@ import ReduxProvider from "@/store/ReduxProvider";
 import CurrentUser from "@/components/admin-view/CurrentUser";
 import SmoothScroll from "@/common/SmoothScroll";
 import "react-vertical-timeline-component/style.min.css";
-import ServiceWorker from "@/components/client-view/ServiceWorker";
+// import ServiceWorker from "@/components/client-view/ServiceWorker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,7 +51,7 @@ export default function RootLayout({
 
         {/* Redux + Current User Init */}
         <ReduxProvider>
-          <ServiceWorker />
+          {/* <ServiceWorker /> */}
           <SmoothScroll>
             <CurrentUser />
             {children}
