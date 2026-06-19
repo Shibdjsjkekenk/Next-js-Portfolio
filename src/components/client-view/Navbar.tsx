@@ -11,6 +11,7 @@ import {
   FaLinkedinIn,
   FaGlobe,
 } from "react-icons/fa";
+import { FiLogIn } from "react-icons/fi";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -69,12 +70,13 @@ const Navbar = () => {
 
           {/* RIGHT - BUTTON */}
           <div className="ml-auto hidden md:block">
-            <a
-              href="tel:+918779597022"
-              className="px-5 py-2 rounded-full bg-[#6A38C2] text-white font-medium"
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-[18px] font-medium transition-transform transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-[#6A38C2] disabled:pointer-events-none disabled:opacity-50 text-white px-4 py-2 rounded-full bg-[#6A38C2] w-full max-w-[150px] shadow-[0px_4px_8px_rgba(0,0,0,0.3),inset_0px_-2px_4px_rgba(255,255,255,0.3)] hover:shadow-[0px_6px_12px_rgba(0,0,0,0.4),inset_0px_-4px_6px_rgba(255,255,255,0.4)] h-[40px]"
             >
-              Enquiry Now
-            </a>
+              <FiLogIn size={18} />
+              Login
+            </Link>
           </div>
 
           {/* MOBILE TOGGLE */}
@@ -114,7 +116,7 @@ const Navbar = () => {
                 hidden: {},
                 show: { transition: { staggerChildren: 0.2 } },
               }}
-              className="flex flex-col items-end gap-10 w-full pr-15 mb-0"
+              className="flex flex-col items-end gap-10 w-full pr-8 mb-0"
             >
               {[
                 { name: "Home", href: "/" },
@@ -140,12 +142,29 @@ const Navbar = () => {
               ))}
             </motion.div>
 
-            {/* ✅ SOCIAL ICONS (BOTTOM) */}
+            {/* MOBILE LOGIN BUTTON */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="absolute bottom-28 right-8 flex justify-end"
+            >
+              <Link
+                href="/login"
+                onClick={() => setIsOpen(false)}
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-[18px] font-medium transition-transform transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-[#6A38C2] disabled:pointer-events-none disabled:opacity-50 text-white px-5 py-2 rounded-full bg-[#6A38C2] shadow-[0px_4px_8px_rgba(0,0,0,0.3),inset_0px_-2px_4px_rgba(255,255,255,0.3)] hover:shadow-[0px_6px_12px_rgba(0,0,0,0.4),inset_0px_-4px_6px_rgba(255,255,255,0.4)] h-[44px]"
+              >
+                <FiLogIn size={18} />
+                Login
+              </Link>
+            </motion.div>
+
+            {/* SOCIAL ICONS (BOTTOM) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="absolute bottom-10 left-0 w-full flex justify-center gap-5"
+              className="absolute bottom-10 right-8 flex justify-end gap-5"
             >
               {[
                 {

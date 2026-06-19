@@ -98,11 +98,13 @@ const texts = [
 const OneProject = () => {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const itemsRef = useRef<(HTMLHeadingElement | null)[]>([]);
+
   useEffect(() => {
     if (!sectionRef.current) return;
 
+    let tl: gsap.core.Timeline;
+
     const ctx = gsap.context(() => {
-      // Initial state
       itemsRef.current.forEach((el, i) => {
         gsap.set(el, {
           opacity: i === 0 ? 1 : 0,
@@ -113,24 +115,28 @@ const OneProject = () => {
         });
       });
 
-      const scrollLength = texts.length * window.innerHeight * 1.6;
+      const scrollLength =
+        texts.length *
+        (sectionRef.current?.offsetHeight || window.innerHeight) *
+        1.6;
 
-      const tl = gsap.timeline({
+      tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
           end: `+=${scrollLength}`,
           scrub: 0.9,
           pin: true,
+          pinReparent: true,
           pinSpacing: true,
           anticipatePin: 1,
+          invalidateOnRefresh: true,
         },
       });
 
       itemsRef.current.forEach((el, i) => {
         const next = itemsRef.current[i + 1];
 
-        // Current text zoom
         tl.to(el, {
           scale: 4.5,
           opacity: 1,
@@ -139,7 +145,6 @@ const OneProject = () => {
           duration: 1,
         });
 
-        // Next text enters immediately
         if (next) {
           tl.to(
             next,
@@ -151,11 +156,10 @@ const OneProject = () => {
               ease: "none",
               duration: 1,
             },
-            "<",
+            "<"
           );
         }
 
-        // Current text exit
         tl.to(
           el,
           {
@@ -165,27 +169,39 @@ const OneProject = () => {
             ease: "none",
             duration: 1,
           },
-          "<+=0.2",
+          "<+=0.2"
         );
       });
     }, sectionRef);
 
-    return () => ctx.revert();
+    return () => {
+      if (tl) {
+        tl.scrollTrigger?.kill(true);
+        tl.kill();
+      }
+
+      ctx.revert();
+
+      requestAnimationFrame(() => {
+        ScrollTrigger.refresh();
+      });
+    };
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative h-screen w-full overflow-hidden z-20"
-    >
-      <div className="absolute inset-0 flex items-center justify-center perspective-[1200px]">
-        {texts.map((text, i) => (
-          <h1
-            key={i}
-            ref={(el) => {
-              if (el) itemsRef.current[i] = el;
-            }}
-            className="
+    <section className="relative min-h-[250vh] w-full">
+      <div
+        ref={sectionRef}
+        className="sticky top-0 h-screen overflow-hidden z-20"
+      >
+        <div className="absolute inset-0 flex items-center justify-center perspective-[1200px]">
+          {texts.map((text, i) => (
+            <h1
+              key={i}
+              ref={(el) => {
+                if (el) itemsRef.current[i] = el;
+              }}
+              className="
               absolute
               text-center
               text-black
@@ -197,12 +213,13 @@ const OneProject = () => {
               will-change-transform
               pointer-events-none
             "
-          >
-            {text}
-          </h1>
-        ))}
+            >
+              {text}
+            </h1>
+          ))}
       </div>
-    </section>
+    </div>
+</section>
   );
 };
 

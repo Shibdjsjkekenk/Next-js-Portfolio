@@ -149,7 +149,7 @@ export default function LoginClient() {
                     </form>
 
                     {/* Footer */}
-                    <p className="my-5 text-center text-sm">
+                    {/* <p className="my-5 text-center text-sm">
                         Don&apos;t have an account ?{" "}
                         <Link
                             href="/sign-up"
@@ -157,7 +157,7 @@ export default function LoginClient() {
                         >
                             Sign up
                         </Link>
-                    </p>
+                    </p> */}
                 </div>
             </div>
         </section>

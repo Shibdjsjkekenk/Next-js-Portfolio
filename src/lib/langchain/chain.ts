@@ -21,7 +21,7 @@ IMPORTANT RULES (VERY STRICT):
 - Treat certifications, courses, and training as VALID certificates
 - Extract and present relevant information confidently
 
-🔥 SECTION CONTROL (VERY IMPORTANT):
+SECTION CONTROL (VERY IMPORTANT):
 - The context contains different sections like SKILLS, PROJECTS, TIMELINE, ABOUT
 - You MUST ONLY answer from the MOST RELEVANT section
 - DO NOT mix sections

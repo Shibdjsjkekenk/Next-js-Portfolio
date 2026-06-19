@@ -29,25 +29,34 @@ export async function POST(req: Request) {
     ) {
       return Response.json({
         answer: "Here is my resume. You can download it below.",
-        projectCards: [], 
+        projectCards: [],
         resume: resumeLink,
       });
     }
 
     //  RAG DATA
-    const banner = await getRAGContext(question, "banner");
-    const about = await getRAGContext(question, "about");
-    const timeline = await getRAGContext(question, "timeline");
-    const projectData = (await getRAGContext(
-      question,
-      "project"
-    )) as RAGResponse;
+    const [
+      banner,
+      about,
+      timeline,
+      projectDataRaw,
+      experience,
+    ] = await Promise.all([
+      getRAGContext(question, "banner"),
+      getRAGContext(question, "about"),
+      getRAGContext(question, "timeline"),
+      getRAGContext(question, "project"),
+      getRAGContext(question, "experience"),
+    ]);
+
+    const projectData = projectDataRaw as RAGResponse;
 
     const projectsText = projectData?.text ?? "";
     const projectIds = projectData?.projectIds ?? [];
 
+
     //  SKILLS (BULLET FORMAT)
-    const skills = buildSkillsRAG(); 
+    const skills = buildSkillsRAG();
 
     //  SAFE TEXT
     const bannerText =
@@ -56,6 +65,7 @@ export async function POST(req: Request) {
       typeof about === "string" ? about : about?.text || "";
     const timelineText =
       typeof timeline === "string" ? timeline : timeline?.text || "";
+    const experienceText = typeof experience === "string" ? experience : experience?.text || "";
 
     //  CLEAN CONTEXT (SECTION BASED)
     const context = `
@@ -70,6 +80,9 @@ ${skills}
 
 TIMELINE:
 ${timelineText.slice(0, 150)}
+
+EXPERIENCE:
+${experienceText.slice(0, 1000)}
 
 PROJECTS:
 ${projectsText.slice(0, 400)}

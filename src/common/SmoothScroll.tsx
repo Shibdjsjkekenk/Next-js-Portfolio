@@ -12,7 +12,7 @@ export default function SmoothScroll({
   const pathname = usePathname();
 
   useEffect(() => {
-    // ❌ Admin panel ke liye smooth scroll band
+    //  Admin panel ke liye smooth scroll band
     if (pathname.startsWith("/admin")) return;
 
     const lenis = new Lenis({

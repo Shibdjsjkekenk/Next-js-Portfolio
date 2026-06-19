@@ -69,7 +69,7 @@ const Footer = () => {
           <div className="pt-3">
             <h2 className="text-lg font-bold text-[#EEDCB2]">Address</h2>
             <ul className="mt-4 space-y-2 text-sm text-white">
-              <li>Mahada, Ram mandir - (west), Mumbai</li>
+              <li>Mumbai, Maharashtra.</li>
               <li>+91–8779597022</li>
               <li>tiwarishubhanshu7@gmail.com</li>
             </ul>
