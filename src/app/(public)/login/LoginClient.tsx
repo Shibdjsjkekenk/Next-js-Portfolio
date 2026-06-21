@@ -19,6 +19,8 @@ export default function LoginClient() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [isLocked, setIsLocked] = useState(false);
+    const [countdown, setCountdown] = useState(0);
 
     useEffect(() => {
         const reason = searchParams.get("reason");
@@ -34,9 +36,24 @@ export default function LoginClient() {
         }
     }, [searchParams]);
 
+    useEffect(() => {
+        if (countdown <= 0) {
+            setIsLocked(false);
+            setError("");
+            return;
+        }
+        const timer = setInterval(() => {
+            setCountdown((prev) => prev - 1);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [countdown]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setIsLocked(false);
+        setCountdown(0);
         setLoading(true);
 
         try {
@@ -55,9 +72,25 @@ export default function LoginClient() {
                     role === ROLE.ADMIN ? "/admin-panel/all-users" : "/";
             }
         } catch (err: any) {
-            setError(
-                err.response?.data?.message || "Login failed. Please try again."
-            );
+            const message =
+                err.response?.data?.message ||
+                "Login failed. Please try again.";
+
+            if (err.response?.status === 429) {
+                setError("Account temporarily locked");
+                setIsLocked(true);
+
+                const match = message.match(/(\d+)/);
+
+                if (match) {
+                    setCountdown(Number(match[1]));
+                } else {
+                    setCountdown(60);
+                }
+            } else {
+                setError(message);
+            }
+
         } finally {
             setLoading(false);
         }
@@ -133,18 +166,27 @@ export default function LoginClient() {
 
                         {/* Error */}
                         {error && (
-                            <p className="text-red-600 text-sm text-center">{error}</p>
+                            <div className="text-center">
+                                <p className="text-red-600 text-sm">
+                                    {error}
+                                </p>
+                            </div>
                         )}
-
                         {/* Button */}
                         <div className="text-center">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="text-[18px] p-2 inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-transform transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-[#6A38C2] disabled:pointer-events-none disabled:opacity-50 text-white px-4 py-2 rounded-full bg-[#6A38C2] w-full max-w-[150px] shadow-[0px_4px_8px_rgba(0,0,0,0.3),inset_0px_-2px_4px_rgba(255,255,255,0.3)] hover:shadow-[0px_6px_12px_rgba(0,0,0,0.4),inset_0px_-4px_6px_rgba(255,255,255,0.4)] h-[40px]"
-                            >
-                                {loading ? "Logging in..." : "Login"}
-                            </button>
+                            {isLocked ? (
+                                <p className="text-red-600 font-semibold text-lg">
+                                    Try again in {countdown}s
+                                </p>
+                            ) : (
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="text-[18px] p-2 inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-transform transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-[#6A38C2] disabled:pointer-events-none disabled:opacity-50 text-white px-4 py-2 rounded-full bg-[#6A38C2] w-full max-w-[150px] shadow-[0px_4px_8px_rgba(0,0,0,0.3),inset_0px_-2px_4px_rgba(255,255,255,0.3)] hover:shadow-[0px_6px_12px_rgba(0,0,0,0.4),inset_0px_-4px_6px_rgba(255,255,255,0.4)] h-[40px]"
+                                >
+                                    {loading ? "Logging in..." : "Login"}
+                                </button>
+                            )}
                         </div>
                     </form>
 

@@ -4,7 +4,9 @@ import os from "os";
 import axios from "axios";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
+import LoginAttempt from "@/models/LoginAttempt";
 import { signToken } from "@/lib/jwt";
+
 
 export async function POST(req: Request) {
   try {
@@ -19,22 +21,6 @@ export async function POST(req: Request) {
       );
     }
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
-      return NextResponse.json(
-        { message: "Invalid password" },
-        { status: 401 }
-      );
-    }
-
     /* ================= GET REAL IP ================= */
     const forwarded = req.headers.get("x-forwarded-for");
     let ip = forwarded?.split(",")[0] || "127.0.0.1";
@@ -43,6 +29,140 @@ export async function POST(req: Request) {
       ip = ip.split("::ffff:").pop() || ip;
     }
 
+    const normalizedEmail = email.toLowerCase();
+
+    /* ================= LOGIN ATTEMPT ================= */
+    let loginAttempt = await LoginAttempt.findOne({
+      ip,
+      email: normalizedEmail,
+    });
+
+    if (
+      loginAttempt?.lockUntil &&
+      loginAttempt.lockUntil > new Date()
+    ) {
+      const remainingSeconds = Math.ceil(
+        (loginAttempt.lockUntil.getTime() - Date.now()) / 1000
+      );
+
+      return NextResponse.json(
+        {
+          message: `Too many failed attempts. Try again after ${remainingSeconds} seconds.`,
+        },
+        {
+          status: 429,
+        }
+      );
+    }
+
+    /* ================= USER ================= */
+    const user = await User.findOne({
+      email: normalizedEmail,
+    });
+
+    if (!user) {
+
+      if (!loginAttempt) {
+        loginAttempt = await LoginAttempt.create({
+          ip,
+          email: normalizedEmail,
+          attempts: 1,
+        });
+
+      } else {
+        loginAttempt.attempts += 1;
+
+        if (loginAttempt.attempts >= 3) {
+          loginAttempt.lockUntil = new Date(
+            Date.now() + 60 * 1000
+          );
+
+          await loginAttempt.save();
+
+          return NextResponse.json(
+            {
+              message:
+                "Too many failed attempts. Locked for 1 minute.",
+            },
+            {
+              status: 429,
+            }
+          );
+        }
+
+        await loginAttempt.save();
+      }
+
+      return NextResponse.json(
+        {
+          message: "Invalid email or password",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
+    const match = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    if (!match) {
+
+      if (!loginAttempt) {
+        loginAttempt = await LoginAttempt.create({
+          ip,
+          email: normalizedEmail,
+          attempts: 1,
+        });
+      } else {
+        loginAttempt.attempts += 1;
+        if (loginAttempt.attempts >= 3) {
+          loginAttempt.lockUntil = new Date(
+            Date.now() + 60 * 1000
+          );
+
+          await loginAttempt.save();
+
+          return NextResponse.json(
+            {
+              message:
+                "Too many failed attempts. Locked for 1 minute.",
+            },
+            {
+              status: 429,
+            }
+          );
+        }
+
+        await loginAttempt.save();
+      }
+
+      const remainingAttempts =
+        3 - loginAttempt.attempts;
+
+      return NextResponse.json(
+        {
+          message:
+            remainingAttempts > 0
+              ? `Invalid password. ${remainingAttempts} attempts remaining.`
+              : "Too many failed attempts. Locked for 1 minute.",
+        },
+        {
+          status:
+            remainingAttempts > 0
+              ? 401
+              : 429,
+        }
+      );
+    }
+
+    if (loginAttempt) {
+      await LoginAttempt.deleteOne({
+        _id: loginAttempt._id,
+      });
+    }
     const isLocal =
       ip === "127.0.0.1" ||
       ip === "::1" ||
