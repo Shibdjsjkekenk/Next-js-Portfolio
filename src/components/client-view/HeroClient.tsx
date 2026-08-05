@@ -278,16 +278,13 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
           className="w-full md:w-1/2 flex items-center justify-center"
           style={{ backgroundImage: "url('/assets/no-bg.webp')" }}
         >
-          <div className="bounce-custom relative w-full aspect-square">
-            <Image
-              src={displayBanner.image || "/assets/no-bg.webp"}
-              alt="Dynamic Banner"
-              fill
-              priority
-              sizes="(max-width:768px)100vw,50vw"
-              className="rounded-md md:ml-[20px] object-contain"
-            />
-          </div>
+        <div className="bounce-custom">
+  <img
+    src={displayBanner.image || "/assets/no-bg.webp"}
+    alt="Dynamic Banner"
+    className="rounded-md md:ml-[20px] w-full"
+  />
+</div>
         </div>
 
       </div>
