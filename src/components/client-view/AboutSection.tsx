@@ -137,16 +137,15 @@ export default function AboutSection({ about }: { about: About | null }) {
                 <SortableItem key="image" id="image">
                   <div className="flex justify-center">
                     {offlineAbout.image && (
-                      <div className="relative w-full max-w-[550px] aspect-square">
-                        <Image
-                          src={offlineAbout.image || "/assets/no-bg.webp"}
-                          alt="About"
-                          fill
-                          sizes="(max-width:768px)100vw,550px"
-                          loading="lazy"
-                          className="object-contain"
-                        />
-                      </div>
+                      <div className="flex justify-center">
+                    {offlineAbout.image && (
+                      <img
+                        src={offlineAbout.image}
+                        alt="About"
+                        className="w-[550px] object-contain"
+                      />
+                    )}
+                  </div>
                     )}
                   </div>
                 </SortableItem>
