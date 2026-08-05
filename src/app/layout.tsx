@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
@@ -8,22 +7,19 @@ import CurrentUser from "@/components/admin-view/CurrentUser";
 import SmoothScroll from "@/common/SmoothScroll";
 import "react-vertical-timeline-component/style.min.css";
 import ServiceWorker from "@/components/client-view/ServiceWorker";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { DM_Sans } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "Hello, I am Shubhanshu Tiwari",
   description:
     "Crafting Seamless Software Experiences with 3+ years of professional expertise in modern Software development and Web Development.",
 };
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
+});
 
 export default function RootLayout({
   children,
@@ -33,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen w-full relative bg-white overflow-x-hidden`}
+   className={`${dmSans.className} min-h-screen w-full relative bg-white overflow-x-hidden`}
       >
         {/* PatternCraft / Funsel Background */}
         <div

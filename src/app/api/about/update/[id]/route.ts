@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import AboutUs from "@/models/AboutUs";
-import Document from "@/models/Document"; // 🔥 NEW
+import Document from "@/models/Document";
 import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
 import { revalidatePath } from "next/cache";
-import { prepareAIFields } from "@/lib/ai/embeddingHelper"; // 🔥 NEW
+import { prepareAIFields } from "@/lib/ai/embeddingHelper";
+import cloudinary from "@/lib/cloudinary";
 
 export async function PUT(
   req: NextRequest,
@@ -17,12 +18,83 @@ export async function PUT(
     const { id } = await context.params;
     const body = await req.json();
 
+    // Find Existing About
+
+    const existingAbout = await AboutUs.findById(id);
+
+    if (!existingAbout) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "About Us not found",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
     let updateData: any = { ...body };
+
+    // Upload new image if changed
+
+    if (
+      body.image &&
+      body.image.startsWith("data:image")
+    ) {
+      // Delete old Cloudinary image
+      if (existingAbout.publicId) {
+        await cloudinary.uploader.destroy(
+          existingAbout.publicId
+        );
+      }
+
+      // Upload new image
+      const uploaded = await cloudinary.uploader.upload(
+        body.image,
+        {
+          folder: "Personal-Portfolio",
+        }
+      );
+
+      updateData.image = uploaded.secure_url;
+      updateData.publicId = uploaded.public_id;
+    }
+
+    // Upload new resume if changed
+
+    if (
+      body.resume &&
+      body.resume.startsWith("data:")
+    ) {
+      // Delete old resume
+      if (existingAbout.resumePublicId) {
+        await cloudinary.uploader.destroy(
+          existingAbout.resumePublicId,
+          {
+            resource_type: "auto",
+          }
+        );
+      }
+
+      // Upload new resume
+      const uploadedResume =
+        await cloudinary.uploader.upload(body.resume, {
+          folder: "Personal-Portfolio",
+          resource_type: "auto",
+          public_id: "shubhanshu-tiwari-resume",
+          overwrite: true,
+        });
+
+      updateData.resume = uploadedResume.secure_url;
+      updateData.resumePublicId =
+        uploadedResume.public_id;
+    }
 
     let plainText = "";
     let embedding: number[] = [];
 
-    // 🔥 regenerate only if content changed
+    //  regenerate only if content changed
     if (body.content) {
       const aiData = await prepareAIFields(body.content);
 
@@ -33,7 +105,7 @@ export async function PUT(
       updateData.embedding = embedding;
     }
 
-    // ✅ update AboutUs collection
+    // update AboutUs collection
     const about = await AboutUs.findByIdAndUpdate(id, updateData, {
       new: true,
     });
@@ -45,7 +117,7 @@ export async function PUT(
       );
     }
 
-    // 🔥 IMPORTANT: sync Document collection
+    // IMPORTANT: sync Document collection
     if (body.content) {
       await Document.findOneAndUpdate(
         {

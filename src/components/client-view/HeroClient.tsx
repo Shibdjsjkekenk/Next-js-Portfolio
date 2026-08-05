@@ -11,7 +11,7 @@ import {
   FaLinkedinIn,
   FaGlobe,
 } from "react-icons/fa";
-
+import Image from "next/image";
 import type { Banner } from "@/store/bannerSlice";
 import { getDB } from "@/lib/indexeddb";
 
@@ -278,14 +278,18 @@ const HeroClient: React.FC<Props> = ({ banner }) => {
           className="w-full md:w-1/2 flex items-center justify-center"
           style={{ backgroundImage: "url('/assets/no-bg.webp')" }}
         >
-          <div className="bounce-custom">
-            <img
-              src={displayBanner.image}
+          <div className="bounce-custom relative w-full aspect-square">
+            <Image
+              src={displayBanner.image || "/assets/no-bg.webp"}
               alt="Dynamic Banner"
-              className="rounded-md md:ml-[20px] w-full"
+              fill
+              priority
+              sizes="(max-width:768px)100vw,50vw"
+              className="rounded-md md:ml-[20px] object-contain"
             />
           </div>
         </div>
+
       </div>
     </div>
   );

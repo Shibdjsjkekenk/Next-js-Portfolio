@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Project from "@/models/Project";
-import Document from "@/models/Document"; 
+import Document from "@/models/Document";
 import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
-import { prepareAIFields } from "@/lib/ai/embeddingHelper"; 
+import { prepareAIFields } from "@/lib/ai/embeddingHelper";
+import cloudinary from "@/lib/cloudinary";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,6 +13,20 @@ export async function POST(req: NextRequest) {
 
     const { content, projectImage, projectLink, order, isActive } =
       await req.json();
+
+    // Upload Project Image
+
+    let imageUrl = "";
+    let publicId = "";
+
+    if (projectImage) {
+      const uploaded = await cloudinary.uploader.upload(projectImage, {
+        folder: "Personal-Portfolio",
+      });
+
+      imageUrl = uploaded.secure_url;
+      publicId = uploaded.public_id;
+    }
 
     if (!content || !projectImage || !projectLink) {
       return NextResponse.json(
@@ -28,7 +43,8 @@ export async function POST(req: NextRequest) {
     // 2. Save in Project DB
     const project = await Project.create({
       content,
-      projectImage,
+      projectImage: imageUrl,
+      publicId,
       projectLink,
       plainText,
       embedding,

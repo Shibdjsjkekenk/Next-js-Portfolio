@@ -20,6 +20,7 @@ type Banner = {
   paragraph: string;
   italicTitle?: string;
   image?: string;
+  publicId?: string;
   isActive: boolean;
 };
 

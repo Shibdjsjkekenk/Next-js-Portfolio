@@ -5,14 +5,16 @@ import CategoryCarousel from "@/components/client-view/CategoryCarousel";
 import SkillSection from "@/components/client-view/SkillSection";
 import Projects from "@/components/server/projects";
 import MyExpertise from "@/components/client-view/MyExpertise";
-import OneProject from "@/components/client-view/OneProject";
+// import OneProject from "@/components/client-view/OneProject";
+import Counter from "@/components/client-view/Counter"
 
 
 export default function Home() {
   return (
     <>
       <Hero />
-      <OneProject/>
+      {/* <OneProject/> */}
+      <Counter/>
       <About />
       <Timeline />
       <CategoryCarousel />

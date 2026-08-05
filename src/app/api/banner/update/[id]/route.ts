@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Banner from "@/models/Banner";
-import Document from "@/models/Document"; 
+import Document from "@/models/Document";
 import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
 import { revalidatePath } from "next/cache";
-import { prepareAIFields } from "@/lib/ai/embeddingHelper"; 
+import { prepareAIFields } from "@/lib/ai/embeddingHelper";
+import cloudinary from "@/lib/cloudinary";
 
 export async function PUT(
   req: NextRequest,
@@ -17,7 +18,44 @@ export async function PUT(
     const { id } = await context.params;
     const body = await req.json();
 
+    const existingBanner = await Banner.findById(id);
+
+    if (!existingBanner) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Banner not found",
+        },
+        { status: 404 }
+      );
+    }
+
     let updateData: any = { ...body };
+
+    // Upload new image if changed
+
+    if (
+      body.image &&
+      body.image.startsWith("data:image")
+    ) {
+      // Delete old image
+      if (existingBanner.publicId) {
+        await cloudinary.uploader.destroy(
+          existingBanner.publicId
+        );
+      }
+
+      // Upload new image
+      const uploaded = await cloudinary.uploader.upload(
+        body.image,
+        {
+          folder: "Personal-Portfolio",
+        }
+      );
+
+      updateData.image = uploaded.secure_url;
+      updateData.publicId = uploaded.public_id;
+    }
 
     let plainText = "";
     let embedding: number[] = [];

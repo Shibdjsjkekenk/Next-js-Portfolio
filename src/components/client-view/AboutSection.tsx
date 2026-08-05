@@ -18,7 +18,7 @@ import {
   horizontalListSortingStrategy,
   useSortable,
 } from "@dnd-kit/sortable";
-
+import Image from "next/image";
 import { CSS } from "@dnd-kit/utilities";
 import { useEffect } from "react";
 import { getDB } from "@/lib/indexeddb";
@@ -46,7 +46,7 @@ function SortableItem({
     transition,
   };
 
-  
+
 
   return (
     <div
@@ -96,7 +96,7 @@ export default function AboutSection({ about }: { about: About | null }) {
     loadAbout();
   }, []);
 
- if (!offlineAbout) return null;
+  if (!offlineAbout) return null;
 
   /* ORDER STATE (image <-> content) */
   const [order, setOrder] = useState<string[]>(["image", "content"]);
@@ -137,11 +137,16 @@ export default function AboutSection({ about }: { about: About | null }) {
                 <SortableItem key="image" id="image">
                   <div className="flex justify-center">
                     {offlineAbout.image && (
-                      <img
-                        src={offlineAbout.image}
-                        alt="About"
-                        className="w-[550px] object-contain"
-                      />
+                      <div className="relative w-full max-w-[550px] aspect-square">
+                        <Image
+                          src={offlineAbout.image || "/assets/no-bg.webp"}
+                          alt="About"
+                          fill
+                          sizes="(max-width:768px)100vw,550px"
+                          loading="lazy"
+                          className="object-contain"
+                        />
+                      </div>
                     )}
                   </div>
                 </SortableItem>
@@ -170,7 +175,7 @@ export default function AboutSection({ about }: { about: About | null }) {
                           href={offlineAbout.resume}
                           target="_blank"
                           rel="noopener noreferrer"
-                          download="resume.pdf"
+                          download="Shubhanshu-Tiwari-Resume.pdf"
                           className="
                             group inline-flex items-center gap-4
                             text-white font-semibold text-lg

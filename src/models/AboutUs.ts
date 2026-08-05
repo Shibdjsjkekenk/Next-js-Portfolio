@@ -12,7 +12,17 @@ const AboutUsSchema = new mongoose.Schema(
       default: "",
     },
 
+    publicId: {
+      type: String,
+      default: "",
+    },
+
     resume: {
+      type: String,
+      default: "",
+    },
+
+    resumePublicId: {
       type: String,
       default: "",
     },

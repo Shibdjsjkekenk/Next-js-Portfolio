@@ -1,16 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Project from "@/models/Project";
-import Document from "@/models/Document"; 
+import Document from "@/models/Document";
 import redis from "@/lib/redis";
 import { CACHE_KEYS } from "@/lib/cacheKeys";
 import { prepareAIFields } from "@/lib/ai/embeddingHelper";
+import cloudinary from "@/lib/cloudinary";
 
 export async function PUT(req: NextRequest) {
   try {
     await connectDB();
 
     const { id, ...updates } = await req.json();
+
+    // Find Existing Project
+
+    const existingProject = await Project.findById(id);
+
+    if (!existingProject) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Project not found",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
 
     if (!id) {
       return NextResponse.json(
@@ -20,6 +37,31 @@ export async function PUT(req: NextRequest) {
     }
 
     let updateData: any = { ...updates };
+
+    // Upload new project image
+
+    if (
+      updates.projectImage &&
+      updates.projectImage.startsWith("data:image")
+    ) {
+      // Delete old Cloudinary image
+      if (existingProject.publicId) {
+        await cloudinary.uploader.destroy(
+          existingProject.publicId
+        );
+      }
+
+      // Upload new image
+      const uploaded = await cloudinary.uploader.upload(
+        updates.projectImage,
+        {
+          folder: "Personal-Portfolio",
+        }
+      );
+
+      updateData.projectImage = uploaded.secure_url;
+      updateData.publicId = uploaded.public_id;
+    }
 
     let plainText = "";
     let embedding: number[] = [];

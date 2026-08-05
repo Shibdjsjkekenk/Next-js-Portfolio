@@ -18,6 +18,11 @@ const ProjectSchema = new mongoose.Schema(
       required: true,
     },
 
+    publicId: {
+      type: String,
+      default: "",
+    },
+
     plainText: {
       type: String,
     },

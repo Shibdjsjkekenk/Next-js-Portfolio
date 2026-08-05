@@ -3,38 +3,64 @@ import { connectDB } from "@/lib/db";
 import Banner from "@/models/Banner";
 import Document from "@/models/Document";
 import { prepareAIFields } from "@/lib/ai/embeddingHelper";
+import cloudinary from "@/lib/cloudinary";
 
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
 
-    const { title, paragraph, italicTitle, image, isActive } = await req.json();
+    const { title, paragraph, italicTitle, image, isActive } =
+      await req.json();
 
     if (!title || !paragraph) {
       return NextResponse.json(
-        { success: false, message: "Title and Paragraph are required" },
+        {
+          success: false,
+          message: "Title and Paragraph are required",
+        },
         { status: 400 }
       );
     }
 
-    //  1. Combine text for AI
-    const combinedText = `${title} ${paragraph} ${italicTitle || ""}`.trim();
+    // Upload Image to Cloudinary
 
-    //  2. Generate plainText + embedding
-    const { plainText, embedding } = await prepareAIFields(combinedText);
+    let imageUrl = "";
+    let publicId = "";
 
-    //  3. Save in Banner collection
+    if (image) {
+      const uploaded = await cloudinary.uploader.upload(image, {
+        folder: "Personal-Portfolio",
+      });
+
+      imageUrl = uploaded.secure_url;
+      publicId = uploaded.public_id;
+    }
+
+    // AI Embedding
+
+    const combinedText = `${title} ${paragraph} ${
+      italicTitle || ""
+    }`.trim();
+
+    const { plainText, embedding } =
+      await prepareAIFields(combinedText);
+
+    // Save Banner
+
     const banner = await Banner.create({
       title,
       paragraph,
       italicTitle: italicTitle || "",
-      image,
+      image: imageUrl,      // Cloudinary URL
+      publicId,             // Cloudinary Public ID
       plainText,
       embedding,
-      isActive: isActive !== undefined ? isActive : true,
+      isActive:
+        isActive !== undefined ? isActive : true,
     });
 
-    //  4. Save in Document collection (VECTOR DB)
+    // Save Document
+
     await Document.create({
       type: "banner",
       content: combinedText,
@@ -43,7 +69,8 @@ export async function POST(req: NextRequest) {
       metadata: {
         bannerId: banner._id,
       },
-      isActive: isActive !== undefined ? isActive : true,
+      isActive:
+        isActive !== undefined ? isActive : true,
     });
 
     return NextResponse.json(
@@ -52,9 +79,10 @@ export async function POST(req: NextRequest) {
         message: "Banner created successfully",
         data: banner,
       },
-      { status: 201 }
+      {
+        status: 201,
+      }
     );
-
   } catch (error: any) {
     return NextResponse.json(
       {
@@ -62,7 +90,9 @@ export async function POST(req: NextRequest) {
         message: "Error creating Banner",
         error: error.message,
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }

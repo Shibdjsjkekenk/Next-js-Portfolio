@@ -23,6 +23,11 @@ const bannerSchema = new mongoose.Schema(
       type: String,
     },
 
+    publicId: {
+      type: String,
+      default: "",
+    },
+
     plainText: {
       type: String,
     },
