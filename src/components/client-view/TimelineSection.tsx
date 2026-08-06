@@ -91,7 +91,7 @@ export default function TimelineSection({ list }: { list: Timeline[] }) {
   }, []);
 
   return (
-    <section className="pt-25">
+    <section className="pt-10">
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-10 xl:px-16">
         <VerticalTimeline lineColor="#d1d5db">
           {offlineTimeline.map((item) => {

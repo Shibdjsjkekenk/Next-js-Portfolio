@@ -257,8 +257,12 @@ export default function HeroStats() {
 
 .hs-stat-suffix {
   color: var(--lime);
+  text-shadow:
+    1px 0 #514c4b,
+   -1px 0 #514c4b,
+    0 1px #514c4b,
+    0 -1px #514c4b;
 }
-
 .hs-stat-label {
   margin-top: 12px;
   font-size: 12px;
@@ -323,7 +327,7 @@ gap:30px;
 
 /* Section */
 .hs-root{
-    padding:50px 0;
+    padding:29px 0;
 }
 
 /* Top Layout */
@@ -339,7 +343,7 @@ gap:30px;
 .hs-eyebrow{
     writing-mode:horizontal-tb;
     transform:none !important;
-    font-size:12px;
+    font-size:25px;
     letter-spacing:.3em;
     text-align:center;
 }
@@ -353,7 +357,7 @@ gap:30px;
 /* Heading */
 .hs-headline{
     font-size:24px;
-    line-height:32px;
+    line-height:37px;
     text-align:center;
 }
 
@@ -373,7 +377,7 @@ gap:30px;
 .hs-stats-row{
     display:grid;
     grid-template-columns:repeat(2,minmax(0,1fr));
-        gap: 17px 18px;
+               gap: 34px 20px;
         margin-top: 21px;
         padding-top: 21px;
 }
