@@ -105,7 +105,7 @@ export const updateTimelineTool = new DynamicTool({
     try {
       // 1. AI ko dobara call karein structured data nikalne ke liye (Jaise aapne POST route mein kiya tha)
       const completion = await ai.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
+        model: "openai/gpt-oss-120b",
         messages: [
           {
             role: "system",
@@ -212,7 +212,7 @@ export const getAllTimelineTool = new DynamicTool({
       const categories = timelines.map((t, i) => `${i + 1}. ${t.category}`).join(", ");
 
       const indexCompletion = await ai.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
+        model: "openai/gpt-oss-120b",
         messages: [
           {
             role: "system",
