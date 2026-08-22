@@ -47,13 +47,14 @@ export default function AboutViewModal({ about, onClose }: Props) {
             {about.resume && (
               <div className="mt-4">
                 <a
-                  href={about.resume}
-                  target="_blank"
-                  className="inline-flex items-center gap-2 text-red-600 text-sm font-medium"
-                >
-                  <FaFilePdf />
-                  View PDF
-                </a>
+  href={about.resume}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-flex items-center gap-1 text-red-600 hover:underline"
+>
+  <FaFilePdf />
+  View PDF
+</a>
               </div>
             )}
           </div>

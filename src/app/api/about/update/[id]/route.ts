@@ -30,7 +30,7 @@ export async function PUT(
         },
         {
           status: 404,
-        }
+        },
       );
     }
 
@@ -38,57 +38,46 @@ export async function PUT(
 
     // Upload new image if changed
 
-    if (
-      body.image &&
-      body.image.startsWith("data:image")
-    ) {
+    if (body.image && body.image.startsWith("data:image")) {
       // Delete old Cloudinary image
       if (existingAbout.publicId) {
-        await cloudinary.uploader.destroy(
-          existingAbout.publicId
-        );
+        await cloudinary.uploader.destroy(existingAbout.publicId);
       }
 
       // Upload new image
-      const uploaded = await cloudinary.uploader.upload(
-        body.image,
-        {
-          folder: "Personal-Portfolio",
-        }
-      );
+      const uploaded = await cloudinary.uploader.upload(body.image, {
+        folder: "Personal-Portfolio",
+      });
 
       updateData.image = uploaded.secure_url;
       updateData.publicId = uploaded.public_id;
     }
 
     // Upload new resume if changed
+    if (body.resume && body.resume.startsWith("data:")) {
+      try {
+        // Delete old PDF from Cloudinary
+        if (existingAbout.resumePublicId) {
+          await cloudinary.uploader.destroy(existingAbout.resumePublicId, {
+            resource_type: "raw",
+          });
+        }
 
-    if (
-      body.resume &&
-      body.resume.startsWith("data:")
-    ) {
-      // Delete old resume
-      if (existingAbout.resumePublicId) {
-        await cloudinary.uploader.destroy(
-          existingAbout.resumePublicId,
-          {
-            resource_type: "auto",
-          }
-        );
-      }
-
-      // Upload new resume
-      const uploadedResume =
-        await cloudinary.uploader.upload(body.resume, {
+        const uploadedResume = await cloudinary.uploader.upload(body.resume, {
           folder: "Personal-Portfolio",
-          resource_type: "auto",
+          resource_type: "raw",
           public_id: "shubhanshu-tiwari-resume",
+          format: "pdf",
           overwrite: true,
         });
 
-      updateData.resume = uploadedResume.secure_url;
-      updateData.resumePublicId =
-        uploadedResume.public_id;
+        // Secure URL hi save karo
+        updateData.resume = uploadedResume.secure_url;
+        updateData.resumePublicId = uploadedResume.public_id;
+      } catch (err) {
+        console.error("PDF Upload Error:", err);
+        throw err;
+      }
     }
 
     let plainText = "";
@@ -132,7 +121,7 @@ export async function PUT(
           metadata: {
             aboutId: about._id,
           },
-        }
+        },
       );
     }
 
