@@ -41,18 +41,45 @@ const CategoryCarousel: React.FC = () => {
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-2xl font-bold">
-          Expert in Tech <span className="text-[#6A38C2]">Domain....</span>
+        <div>
+          <span
+            className="
+            uppercase
+            tracking-[6px]
+            text-neutral-500
+            text-sm
+            font-semibold hidden lg:block
+          "
+          >
+            [ . com ]
+          </span>
+        </div>
+        <h1 className="mt-5 text-[28px] tracking-[-1px] leading-[34px] sm:text-7xl sm:tracking-[-3px] lg:text-[80px] lg:leading-[100px] xl:text-[100px] font-black text-black">
+          Expert in Tech{" "}
+          <br className="hidden lg:block" />
+
+          <span className="text-[#6A38C2] text-[28px] sm:text-7xl lg:text-[60px] xl:text-[80px]
+    text-lime-300
+    [-webkit-text-stroke:0.5px_#514c4b]
+    lg:[-webkit-text-stroke:0.5px_#514c4b]
+  ">
+            Domain....
+          </span>
         </h1>
 
-        <p className="mt-2 text-gray-700">
-          Expert in the Tech Domain, crafting seamless web solutions with advanced
-          <br />
-          technical expertise, delivering innovation and excellence.
+        <p className="mt-2 text-[18px] leading-[28px] text-gray-700 sm:text-[18px] sm:leading-[26px] lg:text-[31px] lg:leading-[42px]">
+          Bringing expertise, creativity, and precision together to build impactful
+          digital
+          <br className="hidden lg:block" />
+          experiences committed to delivering scalable, modern, and user-centric solutions.
         </p>
       </MotionDiv>
 
-      <div className="relative max-w-3xl mx-auto mt-8">
+      <div className="max-w-5xl mx-auto my-3 lg:my-8">
+        <div className="h-[1px] w-full bg-[#00000061] rounded-full"></div>
+      </div>
+
+      <div className="relative max-w-3xl mx-auto mt-6">
         <div className="bg-[#EEF0FF] rounded-full px-4 py-2 md:px-7 md:py-4 flex items-center gap-2 md:gap-4 shadow-sm">
 
           {/* LEFT ARROW */}
