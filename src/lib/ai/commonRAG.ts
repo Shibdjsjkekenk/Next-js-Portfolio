@@ -1,102 +1,132 @@
-import { InferenceClient } from "@huggingface/inference";
 import Document from "@/models/Document";
 
-const client = new InferenceClient(process.env.HUGGINGFACE_API_KEY);
+const EMBEDDING_DIMENSIONS = 384;
 
+/**
+ * Browser-generated embeddings are passed to this server function.
+ * The server does not download or initialize an embedding model.
+ */
+function validateEmbedding(embedding: number[]): void {
+  if (!Array.isArray(embedding)) {
+    throw new Error("Query embedding is required");
+  }
+
+  if (embedding.length !== EMBEDDING_DIMENSIONS) {
+    throw new Error(
+      `Invalid query embedding dimensions: ${embedding.length}`
+    );
+  }
+
+  if (!embedding.every((value) => Number.isFinite(value))) {
+    throw new Error("Query embedding contains invalid values");
+  }
+}
+
+/**
+ * Search MongoDB Atlas Vector Search and build the RAG context.
+ *
+ * @param question Original user question (used for validation/logging only).
+ * @param embedding 384-dimensional embedding generated in the browser.
+ * @param type Optional document type filter: banner, about, timeline,
+ *             project, experience, etc.
+ */
 export async function getRAGContext(
   question: string,
-  type?: string // optional: "timeline" | "banner" | "project"
-) {
+  embedding: number[],
+  type?: string
+): Promise<{ text: string; projectIds: string[] }> {
   try {
-    //  1. Question → embedding
-    const queryVectorRaw = await client.featureExtraction({
-      model: "sentence-transformers/all-MiniLM-L6-v2",
-      inputs: question,
-    });
+    if (typeof question !== "string" || !question.trim()) {
+      throw new Error("Question cannot be empty");
+    }
 
-    const embedding: number[] = Array.isArray(queryVectorRaw)
-      ? (queryVectorRaw as any).flat().map((v: any) => Number(v))
-      : [];
+    validateEmbedding(embedding);
 
-    if (!embedding.length) return "";
+    const vectorSearch: Record<string, any> = {
+      index: "vector_index",
+      path: "embedding",
+      queryVector: embedding,
+      numCandidates: 50,
+      limit: 50,
+    };
 
-    //  2. Build pipeline
-    const pipeline: any[] = [
+    // Keep the document-type filter in Atlas Vector Search.
+    if (type) {
+      vectorSearch.filter = { type };
+    }
+
+    const aggregationPipeline = [
       {
-        $vectorSearch: {
-          index: "vector_index",
-          path: "embedding",
-          queryVector: embedding,
-          numCandidates: 50,
-          limit: 50, // thoda zyada for better mix
+        $vectorSearch: vectorSearch,
+      },
+      {
+        $project: {
+          plainText: 1,
+          type: 1,
+          isActive: 1,
+          metadata: 1,
+          score: {
+            $meta: "vectorSearchScore",
+          },
         },
       },
     ];
 
-    // optional filter by type
-    if (type) {
-      pipeline[0].$vectorSearch.filter = { type };
+    const results = await Document.aggregate(
+  aggregationPipeline as any[]
+);
+
+    if (!results.length) {
+      return { text: "", projectIds: [] };
     }
 
-    //  3. project fields
-    pipeline.push({
-      $project: {
-        plainText: 1,
-        type: 1,
-        isActive: 1,
-        metadata: 1,
-        score: { $meta: "vectorSearchScore" },
-      }
-    });
+    // Preserve the existing behavior: only explicitly active documents
+    // are included in the generated context.
+    const activeResults = results.filter(
+      (item: any) => item.isActive === true
+    );
 
-    const results = await Document.aggregate(pipeline);
-
-    if (!results.length) return "";
-
-    //  4. Smart filtering
-    const maxScore = results[0].score;
-    const threshold = maxScore * 0.4;
-
-    let filtered = results.filter(
-      (item) => item.isActive !== false
-    ); //  score ignore for now
-
-    if (!filtered.length) {
-      filtered = results;
+    if (!activeResults.length) {
+      return { text: "", projectIds: [] };
     }
 
-    //  5. Group by type (better structure)
     const grouped: Record<string, string[]> = {};
 
-    filtered.forEach((item) => {
+    for (const item of activeResults) {
+      if (!item.type || !item.plainText) continue;
+
       if (!grouped[item.type]) {
         grouped[item.type] = [];
       }
+
       grouped[item.type].push(item.plainText);
-    });
+    }
 
-    //  6. Convert to structured text
-    let context = "";
+    const context = Object.entries(grouped)
+      .map(([docType, texts]) => {
+        return `${docType.toUpperCase()}:\n${texts.join("\n")}`;
+      })
+      .join("\n\n");
 
-    Object.entries(grouped).forEach(([type, texts]) => {
-      context += `\n${type.toUpperCase()}:\n`;
-      context += texts.join("\n");
-      context += "\n";
-    });
-
-    const projectIds =
-      filtered
-        .filter((item) => item.type === "project")
-        .map((item) => item.metadata?.projectId)
-        .filter(Boolean);
+    const projectIds = activeResults
+      .filter((item: any) => item.type === "project")
+      .map((item: any) => item.metadata?.projectId)
+      .filter(Boolean)
+      .map((id: any) => id.toString());
 
     return {
       text: context.trim(),
-      projectIds,
+      projectIds: [...new Set(projectIds)],
     };
-
   } catch (error) {
-    console.error("Common RAG Error:", error);
-    return "";
+    console.error(
+      `RAG Vector Search Error [${type || "all"}]:`,
+      error
+    );
+
+    return {
+      text: "",
+      projectIds: [],
+    };
   }
 }

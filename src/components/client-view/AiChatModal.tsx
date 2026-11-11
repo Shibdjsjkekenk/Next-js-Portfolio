@@ -2,6 +2,7 @@
 
 import { Bot, X, Send, Mic, MoreVertical, RotateCcw } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { pipeline } from "@huggingface/transformers";
 import AIProjectCards from "@/components/client-view/AIProjectCards";
 import SiriWaveChat from "@/components/client-view/SiriWaveChat";
 
@@ -39,6 +40,48 @@ function getTime() {
   });
 }
 
+
+// Embeddings are generated in the visitor's browser.
+// This downloads the pretrained model files to the browser; it does NOT call
+// the Hugging Face Inference API.
+const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
+let embeddingModelPromise: Promise<any> | null = null;
+
+async function getLocalEmbeddingModel() {
+  if (!embeddingModelPromise) {
+    embeddingModelPromise = pipeline(
+      "feature-extraction",
+      EMBEDDING_MODEL,
+      { dtype: "q8" }
+    ).catch((error) => {
+      // Allow a later attempt if model initialization fails.
+      embeddingModelPromise = null;
+      throw error;
+    });
+  }
+
+  return embeddingModelPromise;
+}
+
+async function generateLocalEmbedding(question: string): Promise<number[]> {
+  const model = await getLocalEmbeddingModel();
+  const output = await model(question, {
+    pooling: "mean",
+    normalize: true,
+  });
+
+  const embedding = Array.from(output.data) as number[];
+
+  if (
+    embedding.length !== 384 ||
+    !embedding.every((value) => Number.isFinite(value))
+  ) {
+    throw new Error("The embedding model returned an invalid vector.");
+  }
+
+  return embedding;
+}
+
 export default function AiChatModal({ open, onClose }: Props) {
   const greeting = getGreeting();
 
@@ -61,6 +104,7 @@ Feel free to ask anything — I'm here to help `;
   const [messages, setMessages] = useState<Msg[]>(initialMessages);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [modelLoading, setModelLoading] = useState(false);
   const [introRemoved, setIntroRemoved] = useState(false);
   const [listening, setListening] = useState(false);
   const [refreshSpin, setRefreshSpin] = useState(false);
@@ -72,21 +116,59 @@ Feel free to ask anything — I'm here to help `;
   }, [messages]);
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    if (!open) return;
+
+    // Lock both the document and body so the page behind the chat
+    // cannot scroll (including layouts where the root element scrolls).
+    const scrollY = window.scrollY;
+
+    const previousBodyStyles = {
+      position: document.body.style.position,
+      top: document.body.style.top,
+      left: document.body.style.left,
+      right: document.body.style.right,
+      width: document.body.style.width,
+      overflow: document.body.style.overflow,
+    };
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.position = previousBodyStyles.position;
+      document.body.style.top = previousBodyStyles.top;
+      document.body.style.left = previousBodyStyles.left;
+      document.body.style.right = previousBodyStyles.right;
+      document.body.style.width = previousBodyStyles.width;
+      document.body.style.overflow = previousBodyStyles.overflow;
+
+      // Restore the exact page position after closing the chat.
+      window.scrollTo(0, scrollY);
+    };
   }, [open]);
 
   const speak = (text: string) => {
-    speechSynthesis.cancel();
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = "en-IN";
-    speechSynthesis.speak(utter);
+    window.speechSynthesis.speak(utter);
   };
 
   // ── Refresh: reset chat state, modal stays open ──
   const handleRefresh = () => {
     setRefreshSpin(true);
     setTimeout(() => setRefreshSpin(false), 600);
-    speechSynthesis.cancel();
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
     setMessages([{ role: "ai", text: introMessage, time: getTime() }]);
     setInput("");
     setLoading(false);
@@ -95,50 +177,88 @@ Feel free to ask anything — I'm here to help `;
   };
 
   const sendMessage = async (textOverride?: string, isVoice = false) => {
-    const userText = textOverride || input;
-    if (!userText.trim() || loading) return;
+    const userText = (textOverride ?? input).trim();
+
+    if (!userText || loading) return;
 
     setInput("");
 
     setMessages((prev) => {
       let updated = [...prev];
+
       if (!introRemoved) {
-        updated = updated.filter((m) => m.text !== introMessage);
+        updated = updated.filter((message) => message.text !== introMessage);
         setIntroRemoved(true);
       }
-      return [...updated, { role: "user", text: userText, time: getTime() }];
+
+      return [
+        ...updated,
+        { role: "user", text: userText, time: getTime() },
+      ];
     });
 
     setLoading(true);
+    setModelLoading(true);
 
     try {
+      // Generate the semantic-search vector in the browser, not on the server.
+      const embedding = await generateLocalEmbedding(userText);
+      setModelLoading(false);
+
       const res = await fetch("/api/chat", {
         method: "POST",
-        body: JSON.stringify({ question: userText }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: userText,
+          embedding,
+        }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
-      if (isVoice) speak(data.answer);
+      if (!res.ok) {
+        throw new Error(data?.error || data?.answer || "Chat request failed.");
+      }
+
+      const answer =
+        typeof data?.answer === "string" && data.answer.trim()
+          ? data.answer
+          : "I couldn't generate a response. Please try again.";
+
+      if (isVoice && typeof window !== "undefined" && "speechSynthesis" in window) {
+        speak(answer);
+      }
 
       setMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          text: data.answer,
-          cards: data.projectCards || [],
-          resume: data.resume || "",
+          text: answer,
+          cards: Array.isArray(data?.projectCards) ? data.projectCards : [],
+          resume: typeof data?.resume === "string" ? data.resume : "",
           time: getTime(),
         },
       ]);
-    } catch {
+    } catch (error) {
+      console.error("AI chat error:", error);
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
       setMessages((prev) => [
         ...prev,
-        { role: "ai", text: "⚠️ Something went wrong.", time: getTime() },
+        {
+          role: "ai",
+          text: `⚠️ ${errorMessage}. Please try again.`,
+          time: getTime(),
+        },
       ]);
+    } finally {
+      setModelLoading(false);
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const startVoice = () => {
@@ -220,6 +340,7 @@ Feel free to ask anything — I'm here to help `;
           border-right: 8px solid transparent;
         }
         .wa-tick { color: rgba(255,255,255,0.9); font-size: 11px; }
+        .wa-scrollbar { min-height: 0; scrollbar-gutter: stable; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
         .wa-scrollbar::-webkit-scrollbar { width: 5px; }
         .wa-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .wa-scrollbar::-webkit-scrollbar-thumb {
@@ -278,16 +399,20 @@ Feel free to ask anything — I'm here to help `;
         .spin-once { animation: spin-once 0.6s ease-out; }
       `}</style>
 
-      {/* MOBILE BACKDROP */}
+      {/* FULL-PAGE BACKDROP: blocks interaction with the page behind the chat */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-40 md:hidden"
+        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] md:bg-transparent md:backdrop-blur-0"
+        data-lenis-prevent
+        data-lenis-prevent-wheel
+        data-lenis-prevent-touch
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* CHAT BOX */}
-      <div className="fixed z-50 bottom-20 right-4 w-[370px] max-w-[95vw] md:bottom-24 md:right-5 max-md:left-4 max-md:right-4 max-md:w-auto wa-appear">
+      <div className="fixed z-50 bottom-20 right-4 w-[370px] max-w-[95vw] md:bottom-24 md:right-5 max-md:left-4 max-md:right-4 max-md:w-auto wa-appear" data-lenis-prevent data-lenis-prevent-wheel data-lenis-prevent-touch>
         <div
-          className="rounded-2xl overflow-hidden flex flex-col"
+          className="rounded-2xl overflow-hidden flex flex-col min-h-0"
           style={{
             boxShadow: "0 8px 40px rgba(99,60,180,0.25), 0 2px 8px rgba(0,0,0,0.10)",
             height: "75vh",
@@ -299,7 +424,7 @@ Feel free to ask anything — I'm here to help `;
             style={{
               background: "linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #a21caf 100%)",
             }}
-            className="flex items-center gap-3 px-3 py-2.5"
+            className="flex items-center gap-3 px-3 py-2.5 shrink-0"
           >
             {/* Avatar */}
             <div
@@ -332,7 +457,7 @@ Feel free to ask anything — I'm here to help `;
                 color: "rgba(255,255,255,0.78)", fontSize: 11.5,
                 fontFamily: "'Segoe UI', sans-serif",
               }}>
-                {loading ? "typing..." : "online"}
+                {modelLoading ? "Loading AI model..." : loading ? "Thinking..." : "online"}
               </div>
             </div>
 
@@ -385,7 +510,7 @@ Feel free to ask anything — I'm here to help `;
           </div>
 
           {/* ── DATE CHIP ── */}
-          <div className="wa-chat-bg flex justify-center pt-3">
+          <div className="wa-chat-bg flex justify-center pt-3 shrink-0">
             <span style={{
               background: "rgba(237,233,248,0.95)", color: "#6d28d9",
               fontSize: 11, fontFamily: "'Segoe UI', sans-serif",
@@ -399,7 +524,7 @@ Feel free to ask anything — I'm here to help `;
           </div>
 
           {/* ── MESSAGES BODY ── */}
-          <div className="wa-chat-bg wa-scrollbar flex-1 overflow-y-auto px-3 py-2 space-y-1">
+          <div className="wa-chat-bg wa-scrollbar flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 space-y-1" data-lenis-prevent data-lenis-prevent-wheel data-lenis-prevent-touch>
             {messages.map((m, i) => (
               <div
                 key={i}
@@ -469,11 +594,12 @@ Feel free to ask anything — I'm here to help `;
           {/* ── INPUT BAR ── mic LEFT | input CENTER | send RIGHT ── */}
           <div
             style={{ background: "#f3f0fc", padding: "8px 10px" }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 shrink-0"
           >
             {/* LEFT: Mic */}
             <button
               onClick={startVoice}
+              disabled={loading}
               className={`wa-icon-btn wa-mic-btn ${listening ? "active wa-mic-pulse" : ""}`}
               title="Voice input"
             >
@@ -493,7 +619,7 @@ Feel free to ask anything — I'm here to help `;
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={listening ? "🎤 Listening..." : "Ask about projects, skills..."}
+                placeholder={listening ? "🎤 Listening..." : modelLoading ? "Loading AI model..." : "Ask about projects, skills..."}
                 style={{
                   flex: 1, border: "none", outline: "none",
                   background: "transparent",
@@ -512,6 +638,7 @@ Feel free to ask anything — I'm here to help `;
             {/* RIGHT: Send */}
             <button
               onClick={() => sendMessage()}
+              disabled={loading || !input.trim()}
               className="wa-icon-btn wa-send-btn"
               title="Send message"
             >
