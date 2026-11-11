@@ -25,6 +25,11 @@ interface Msg {
   time?: string;
 }
 
+interface ConversationTurn {
+  role: "user" | "assistant";
+  content: string;
+}
+
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return "Good morning";
@@ -181,6 +186,20 @@ Feel free to ask anything — I'm here to help `;
 
     if (!userText || loading) return;
 
+    // Capture previous messages before adding the current question.
+    // Exclude the welcome message and send only recent conversation turns.
+    const conversationHistory: ConversationTurn[] = messages
+      .filter(
+        (message) =>
+          message.text !== introMessage &&
+          (message.role === "user" || message.role === "ai")
+      )
+      .slice(-10)
+      .map((message) => ({
+        role: message.role === "ai" ? "assistant" : "user",
+        content: message.text,
+      }));
+
     setInput("");
 
     setMessages((prev) => {
@@ -201,7 +220,7 @@ Feel free to ask anything — I'm here to help `;
     setModelLoading(true);
 
     try {
-      // Generate the semantic-search vector in the browser, not on the server.
+      // Generate the semantic-search vector in the visitor's browser.
       const embedding = await generateLocalEmbedding(userText);
       setModelLoading(false);
 
@@ -213,6 +232,7 @@ Feel free to ask anything — I'm here to help `;
         body: JSON.stringify({
           question: userText,
           embedding,
+          history: conversationHistory,
         }),
       });
 
@@ -227,7 +247,11 @@ Feel free to ask anything — I'm here to help `;
           ? data.answer
           : "I couldn't generate a response. Please try again.";
 
-      if (isVoice && typeof window !== "undefined" && "speechSynthesis" in window) {
+      if (
+        isVoice &&
+        typeof window !== "undefined" &&
+        "speechSynthesis" in window
+      ) {
         speak(answer);
       }
 

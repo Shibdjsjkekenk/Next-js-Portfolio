@@ -11,15 +11,23 @@ export const runtime = "nodejs";
 const EMBEDDING_DIMENSIONS = 384;
 const MAX_QUESTION_LENGTH = 1000;
 const MAX_CONTEXT_LENGTH = 5000;
+const MAX_HISTORY_MESSAGES = 10;
+const MAX_HISTORY_CONTENT_LENGTH = 2000;
 
 type RAGResponse = {
   text: string;
   projectIds: string[];
 };
 
+type ConversationTurn = {
+  role: "user" | "assistant";
+  content: string;
+};
+
 type ChatRequestBody = {
   question?: unknown;
   embedding?: unknown;
+  history?: unknown;
 };
 
 function isValidEmbedding(value: unknown): value is number[] {
@@ -32,9 +40,31 @@ function isValidEmbedding(value: unknown): value is number[] {
   );
 }
 
+function sanitizeHistory(value: unknown): ConversationTurn[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .slice(-MAX_HISTORY_MESSAGES)
+    .filter(
+      (item): item is Record<string, unknown> =>
+        !!item && typeof item === "object" && !Array.isArray(item)
+    )
+    .filter(
+      (item) =>
+        (item.role === "user" || item.role === "assistant") &&
+        typeof item.content === "string" &&
+        item.content.trim().length > 0
+    )
+    .map((item) => ({
+      role: item.role as "user" | "assistant",
+      content: (item.content as string)
+        .trim()
+        .slice(0, MAX_HISTORY_CONTENT_LENGTH),
+    }));
+}
+
 export async function POST(req: Request) {
   try {
-    // 1. Parse and validate the incoming request.
     let body: ChatRequestBody;
 
     try {
@@ -61,27 +91,37 @@ export async function POST(req: Request) {
 
     const cleanQuestion = question.trim();
     const normalizedQuestion = cleanQuestion.toLowerCase();
+    const history = sanitizeHistory(body.history);
 
-    // Resume requests do not need vector search or an embedding.
     await connectDB();
 
-    // 2. Direct resume request.
+    // Resume URL is read from the database. No embedding is needed for this
+    // direct database lookup.
     if (/\b(resume|cv|download)\b/i.test(normalizedQuestion)) {
-      const aboutData = await AboutUs.findOne({
-        isActive: true,
-      })
+      const aboutData = await AboutUs.findOne({ isActive: true })
         .select("resume")
         .lean();
 
+      const resume = aboutData?.resume || "";
+
+      // Let the LLM phrase the response using the database result.
+      const resumeContext = resume
+        ? `ABOUT:\nA resume/CV is available in the portfolio database.`
+        : `ABOUT:\nNo resume/CV link is available in the portfolio database.`;
+
+      const answer = await runAIChain(
+        resumeContext,
+        cleanQuestion,
+        history
+      );
+
       return Response.json({
-        answer: "Here is my resume. You can download it below.",
+        answer,
         projectCards: [],
-        resume: aboutData?.resume || "",
+        resume,
       });
     }
 
-    // 3. Accept the embedding generated in the browser.
-    // No Hugging Face Inference API or server-side model is used here.
     if (!isValidEmbedding(body.embedding)) {
       return Response.json(
         {
@@ -94,7 +134,6 @@ export async function POST(req: Request) {
 
     const queryEmbedding = body.embedding;
 
-    // 4. Reuse the same browser-generated embedding for all RAG searches.
     const [
       banner,
       about,
@@ -113,25 +152,19 @@ export async function POST(req: Request) {
     const projectsText = projectData?.text || "";
     const projectIds = projectData?.projectIds || [];
 
-    // 5. Skills context.
     const skills = await buildSkillsRAG();
 
-    // 6. Extract safe text from each RAG response.
     const bannerText =
       typeof banner === "string" ? banner : banner?.text || "";
-
     const aboutText =
       typeof about === "string" ? about : about?.text || "";
-
     const timelineText =
       typeof timeline === "string" ? timeline : timeline?.text || "";
-
     const experienceText =
       typeof experience === "string"
         ? experience
         : experience?.text || "";
 
-    // 7. Build bounded context for the LLM.
     const context = `
 PROFILE:
 ${bannerText.slice(0, 300)}
@@ -140,7 +173,7 @@ ABOUT:
 ${aboutText.slice(0, 500)}
 
 SKILLS:
-${skills || "No skills information available."}
+${skills || ""}
 
 TIMELINE:
 ${timelineText.slice(0, 500)}
@@ -154,10 +187,12 @@ ${projectsText.slice(0, 1500)}
 
     const safeContext = context.slice(0, MAX_CONTEXT_LENGTH);
 
-    // 8. Generate the answer using the configured Groq chain.
-    const answer = await runAIChain(safeContext, cleanQuestion);
+    const answer = await runAIChain(
+      safeContext,
+      cleanQuestion,
+      history
+    );
 
-    // 9. Fetch project cards only for project-related questions.
     let projectCards: {
       title: string;
       image: string;
@@ -181,7 +216,6 @@ ${projectsText.slice(0, 1500)}
       }));
     }
 
-    // 10. Return the response in the shape expected by AiChatModal.
     return Response.json({
       answer,
       projectCards,
