@@ -1,10 +1,17 @@
 import type { NextConfig } from "next";
 
 const nativeFiles = [
-  "./node_modules/onnxruntime-node/**/*",
+  // Hugging Face Transformers ka Sharp
   "./node_modules/@huggingface/transformers/node_modules/sharp/**/*",
+
+  // Nested Linux Sharp binaries
   "./node_modules/@huggingface/transformers/node_modules/@img/sharp-linux-x64/**/*",
   "./node_modules/@huggingface/transformers/node_modules/@img/sharp-libvips-linux-x64/**/*",
+
+  // Root Linux Sharp binaries
+  "./node_modules/sharp/**/*",
+  "./node_modules/@img/sharp-linux-x64/**/*",
+  "./node_modules/@img/sharp-libvips-linux-x64/**/*",
 ];
 
 const nextConfig: NextConfig = {
@@ -17,8 +24,7 @@ const nextConfig: NextConfig = {
   ],
 
   outputFileTracingIncludes: {
-    "/api/about/update/[id]": nativeFiles,
-    "/api/about/create": nativeFiles,
+    "/api/about/**": nativeFiles,
   },
 };
 
