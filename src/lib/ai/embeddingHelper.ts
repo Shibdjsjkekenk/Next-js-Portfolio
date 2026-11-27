@@ -1,8 +1,14 @@
-
 import { pipeline, env } from "@huggingface/transformers";
+import { mkdir } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const MODEL_ID = "Xenova/all-MiniLM-L6-v2";
 const EMBEDDING_DIMENSIONS = 384;
+
+// Vercel: writable temporary directory
+// Local: OS temporary directory
+const CACHE_DIR = join(tmpdir(), "portfolio-hf-cache");
 
 type EmbeddingModel = (
   text: string,
@@ -14,19 +20,23 @@ type EmbeddingModel = (
 
 let modelPromise: Promise<EmbeddingModel> | null = null;
 
-// Allow model download from Hugging Face Hub.
-// No Inference Provider API credits required.
+// IMPORTANT: pipeline load hone se pehle configure karo
 env.allowRemoteModels = true;
+env.cacheDir = CACHE_DIR;
+env.useFSCache = true;
+env.useBrowserCache = false;
 
 async function getEmbeddingModel(): Promise<EmbeddingModel> {
   if (!modelPromise) {
-    modelPromise = pipeline(
-      "feature-extraction",
-      MODEL_ID,
-      { dtype: "q8" },
-    ) as Promise<EmbeddingModel>;
+    modelPromise = (async () => {
+      await mkdir(CACHE_DIR, { recursive: true });
 
-    modelPromise = modelPromise.catch((error) => {
+      return pipeline(
+        "feature-extraction",
+        MODEL_ID,
+        { dtype: "q8" },
+      ) as Promise<EmbeddingModel>;
+    })().catch((error) => {
       modelPromise = null;
       console.error("Embedding model loading failed:", error);
       throw error;
@@ -36,7 +46,6 @@ async function getEmbeddingModel(): Promise<EmbeddingModel> {
   return modelPromise;
 }
 
-// HTML → clean text
 function cleanHTML(html: string): string {
   return html
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
@@ -91,13 +100,16 @@ export async function prepareAIFields(content: string) {
       plainText,
       embedding,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unknown error";
+
     console.error("Local embedding error:", error);
 
     throw new Error(
-      `Local embedding generation failed: ${
-        error?.message || "Unknown error"
-      }`,
+      `Local embedding generation failed: ${message}`,
     );
   }
 }
