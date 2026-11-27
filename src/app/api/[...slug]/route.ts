@@ -53,6 +53,51 @@ async function gateway(req: NextRequest, ctx: Context) {
       return handleAdmin(req, segments);
     }
 
+    case "auth": {
+      const { handleAuth } = await import(
+        "@/lib/api/auth/router"
+      );
+      return handleAuth(req, segments);
+    }
+
+    case "ai": {
+      if (segments.length !== 0) {
+        return NextResponse.json(
+          { success: false, message: "AI API route not found" },
+          { status: 404 }
+        );
+      }
+
+      if (req.method !== "POST") {
+        return NextResponse.json(
+          { success: false, message: "Method not allowed" },
+          { status: 405 }
+        );
+      }
+
+      const { POST } = await import("@/lib/api/ai/route");
+      return POST(req);
+    }
+
+    case "chat": {
+      if (segments.length !== 0) {
+        return NextResponse.json(
+          { success: false, message: "Chat API route not found" },
+          { status: 404 }
+        );
+      }
+
+      if (req.method !== "POST") {
+        return NextResponse.json(
+          { success: false, message: "Method not allowed" },
+          { status: 405 }
+        );
+      }
+
+      const { POST } = await import("@/lib/api/chat/route");
+      return POST(req);
+    }
+
     default:
       return NextResponse.json(
         { success: false, message: "API route not found" },
