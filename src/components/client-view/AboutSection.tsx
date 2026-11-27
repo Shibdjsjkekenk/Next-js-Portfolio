@@ -156,9 +156,18 @@ export default function AboutSection({
   return (
     <section
       id="about-us"
-      className="relative overflow-hidden  py-10"
+      className="relative overflow-hidden py-10"
+      style={{
+        background: `
+      linear-gradient(
+        to bottom,
+        #e5defa 0%,
+        #eee9fb 55%,
+        #ffffff 100%
+      )
+    `,
+      }}
     >
-
       {/* ================= Container ================= */}
 
       <div className="relative max-w-7xl mx-auto px-4 md:px-10 lg:px-14">
@@ -196,15 +205,15 @@ export default function AboutSection({
             Building Smart Digital
             <br />
 
-           <span
-  className="
+            <span
+              className="
     text-lime-300
     [-webkit-text-stroke:0.5px_#514c4b]
     lg:[-webkit-text-stroke:0.5px_#514c4b]
   "
->
-  Experiences.
-</span>
+            >
+              Experiences.
+            </span>
           </h2>
 
         </div>
@@ -244,17 +253,17 @@ export default function AboutSection({
 
                       <div className="">
 
-                       <span
-                            className="
+                        <span
+                          className="
             uppercase
             tracking-[6px]
             text-neutral-500
             text-sm
             font-semibold
           "
-                          >
-                            [ WHO I AM ]
-                          </span>
+                        >
+                          [ WHO I AM ]
+                        </span>
 
                         <div
                           className="
