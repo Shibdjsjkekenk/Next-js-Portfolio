@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
   ],
 
   outputFileTracingIncludes: {
-    "/api/about/**": nativeFiles,
+    "/api/about/[...slug]": nativeFiles,
     "/api/banner/**": nativeFiles,
     "/api/timeline/**": nativeFiles,
     "/api/project/**": nativeFiles,
