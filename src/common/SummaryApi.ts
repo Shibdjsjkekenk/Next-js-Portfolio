@@ -1,0 +1,205 @@
+const SummaryApi = {
+  signUP: {
+    url: "/api/auth/signup",
+    method: "post",
+  },
+
+  signIn: {
+    url: "/api/auth/login",
+    method: "post",
+  },
+
+  current_user: {
+    url: "/api/auth/me",
+    method: "get",
+  },
+
+  all_users: {
+    url: "/api/admin/all-users",
+    method: "get",
+  },
+
+  update_user_role: {
+    url: "/api/admin/update-user",
+    method: "put",
+  },
+
+  delete_user: {
+    url: "/api/admin/delete-user",
+    method: "delete",
+  },
+
+  // About us
+  create_banner: {
+    url: "/api/banner/create",
+    method: "post",
+  },
+
+  get_all_banners: {
+    url: "/api/banner/get-all",
+    method: "get",
+  },
+
+  get_banner_by_id: (id: string) => ({
+    url: `/api/banner/get/${id}`,
+    method: "get",
+  }),
+
+  update_banner: (id: string) => ({
+    url: `/api/banner/update/${id}`,
+    method: "put",
+  }),
+
+  delete_banner: (id: string) => ({
+    url: `/api/banner/delete/${id}`,
+    method: "delete",
+  }),
+
+  update_banner_status: (id: string) => ({
+    url: `/api/banner/update-status/${id}`,
+    method: "patch",
+  }),
+
+  // About us
+  create_about: {
+    url: "/api/about/create",
+    method: "post",
+  },
+
+  get_all_about: {
+    url: "/api/about/get-all",
+    method: "get",
+  },
+
+  get_about_by_id: (id: string) => ({
+    url: `/api/about/get/${id}`,
+    method: "get",
+  }),
+
+  update_about: (id: string) => ({
+    url: `/api/about/update/${id}`,
+    method: "put",
+  }),
+
+  update_about_status: (id: string) => ({
+    url: `/api/about/update-status/${id}`,
+    method: "patch",
+  }),
+
+  delete_about: (id: string) => ({
+    url: `/api/about/delete/${id}`,
+    method: "delete",
+  }),
+
+  // Timeline
+  create_timeline: {
+    url: "/api/timeline/create",
+    method: "post",
+  },
+
+  get_all_timeline: {
+    url: "/api/timeline/get-all",
+    method: "get",
+  },
+
+  get_timeline_by_id: (id: string) => ({
+    url: `/api/timeline/get/${id}`,
+    method: "get",
+  }),
+
+  get_timeline_by_category: (category: string) => ({
+    url: `/api/timeline/get-by-category/${category}`,
+    method: "get",
+  }),
+
+  update_timeline_order: {
+    url: "/api/timeline/update-order",
+    method: "put",
+  },
+
+  update_timeline: (id: string) => ({
+    url: `/api/timeline/update/${id}`,
+    method: "put",
+  }),
+
+  update_timeline_status: (id: string) => ({
+    url: `/api/timeline/update-status/${id}`,
+    method: "patch",
+  }),
+
+  delete_timeline: (id: string) => ({
+    url: `/api/timeline/delete/${id}`,
+    method: "delete",
+  }),
+
+
+  // Projects
+  create_project: {
+    url: "/api/project/create",
+    method: "post",
+  },
+
+  get_all_projects: {
+    url: "/api/project/get-all",
+    method: "get",
+  },
+
+  get_project_by_id: (id: string) => ({
+    url: `/api/project/get?id=${id}`,
+    method: "get",
+  }),
+
+  update_project_order: {
+    url: "/api/project/update-order",
+    method: "put",
+  },
+
+  update_project: {
+    url: "/api/project/update",
+    method: "put",
+  },
+
+  update_project_status: (id: string) => ({
+    url: `/api/project/update-status/${id}`,
+    method: "PATCH",
+  }),
+
+  delete_project: {
+    url: "/api/project/delete",
+    method: "delete",
+  },
+
+
+  // Experience
+  create_experience: {
+    url: "/api/experience/create",
+    method: "post",
+  },
+
+  get_all_experience: {
+    url: "/api/experience/get-all",
+    method: "get",
+  },
+
+  get_experience_by_id: (id: string) => ({
+    url: `/api/experience/get/${id}`,
+    method: "get",
+  }),
+
+  update_experience: (id: string) => ({
+    url: `/api/experience/update/${id}`,
+    method: "put",
+  }),
+
+  update_experience_status: (id: string) => ({
+    url: `/api/experience/update-status/${id}`,
+    method: "patch",
+  }),
+
+  delete_experience: (id: string) => ({
+    url: `/api/experience/delete/${id}`,
+    method: "delete",
+  }),
+};
+
+export default SummaryApi;

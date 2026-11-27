@@ -1,0 +1,66 @@
+
+import { NextRequest, NextResponse } from "next/server";
+import { connectDB } from "@/lib/db";
+import Banner from "@/models/Banner";
+import redis from "@/lib/redis";
+import { CACHE_KEYS } from "@/lib/cacheKeys";
+import { CACHE_TTL } from "@/lib/cacheTTL";
+
+export const runtime = "nodejs";
+
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await context.params;
+    const CACHE_KEY = CACHE_KEYS.BANNER_BY_ID(id);
+
+    try {
+      const cachedBanner = await redis.get(CACHE_KEY);
+
+      if (cachedBanner) {
+        return NextResponse.json({
+          success: true,
+          source: "redis",
+          data: JSON.parse(cachedBanner),
+        });
+      }
+    } catch {}
+
+    await connectDB();
+
+    const banner = await Banner.findById(id).lean();
+
+    if (!banner) {
+      return NextResponse.json(
+        { success: false, message: "Banner not found" },
+        { status: 404 },
+      );
+    }
+
+    try {
+      await redis.set(
+        CACHE_KEY,
+        JSON.stringify(banner),
+        "EX",
+        CACHE_TTL.SHORT,
+      );
+    } catch {}
+
+    return NextResponse.json({
+      success: true,
+      source: "db",
+      data: banner,
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Error fetching Banner",
+        error: error.message || "Internal server error",
+      },
+      { status: 500 },
+    );
+  }
+}
