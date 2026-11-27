@@ -12,11 +12,46 @@ async function gateway(req: NextRequest, ctx: Context) {
 
   switch (module) {
     case "about": {
-      const { handleAbout } = await import("@/lib/api/about/router");
+      const { handleAbout } = await import(
+        "@/lib/api/about/router"
+      );
       return handleAbout(req, segments);
     }
 
-    // Baad mein Project, Banner, Timeline yahan add honge.
+    case "banner": {
+      const { handleBanner } = await import(
+        "@/lib/api/banner/router"
+      );
+      return handleBanner(req, segments);
+    }
+
+    case "project": {
+      const { handleProject } = await import(
+        "@/lib/api/project/router"
+      );
+      return handleProject(req, segments);
+    }
+
+    case "experience": {
+      const { handleExperience } = await import(
+        "@/lib/api/experience/router"
+      );
+      return handleExperience(req, segments);
+    }
+
+    case "timeline": {
+      const { handleTimeline } = await import(
+        "@/lib/api/timeline/router"
+      );
+      return handleTimeline(req, segments);
+    }
+
+    case "admin": {
+      const { handleAdmin } = await import(
+        "@/lib/api/admin/router"
+      );
+      return handleAdmin(req, segments);
+    }
 
     default:
       return NextResponse.json(
