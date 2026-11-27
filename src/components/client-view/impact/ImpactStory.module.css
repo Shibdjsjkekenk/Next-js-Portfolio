@@ -118,7 +118,7 @@
     height: 100vh;
     height: 100dvh;
     overflow: hidden;
-    background: #e5defa !important;
+  background: transparent !important;
     -webkit-mask-image: none;
     mask-image: none;
   }
