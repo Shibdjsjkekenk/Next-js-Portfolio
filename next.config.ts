@@ -1,20 +1,24 @@
 import type { NextConfig } from "next";
 
 const nativeFiles = [
-  // Hugging Face ka Sharp package
-  "./node_modules/@huggingface/transformers/node_modules/sharp/**/*",
+  // ONNX Runtime: JavaScript entry point + Linux x64
+  "./node_modules/onnxruntime-node/package.json",
+  "./node_modules/onnxruntime-node/dist/**/*",
+  "./node_modules/onnxruntime-node/bin/napi-v*/linux/x64/**/*",
 
-  // Nested Linux Sharp binaries
+  // ONNX common
+  "./node_modules/onnxruntime-common/package.json",
+  "./node_modules/onnxruntime-common/dist/**/*",
+
+  // Hugging Face Sharp
+  "./node_modules/@huggingface/transformers/node_modules/sharp/**/*",
   "./node_modules/@huggingface/transformers/node_modules/@img/sharp-linux-x64/**/*",
   "./node_modules/@huggingface/transformers/node_modules/@img/sharp-libvips-linux-x64/**/*",
 
-  // Root Linux Sharp binaries
+  // Root Sharp
   "./node_modules/sharp/**/*",
   "./node_modules/@img/sharp-linux-x64/**/*",
   "./node_modules/@img/sharp-libvips-linux-x64/**/*",
-
-  // ONNX runtime: sirf Linux x64 native files
-  "./node_modules/onnxruntime-node/bin/napi-v*/linux/x64/**/*",
 ];
 
 const nextConfig: NextConfig = {
